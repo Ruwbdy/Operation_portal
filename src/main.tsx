@@ -1,4 +1,3 @@
-
 const g = (typeof globalThis !== 'undefined' ? globalThis : window) as any;
 g.process = g.process || { env: {} };
 
