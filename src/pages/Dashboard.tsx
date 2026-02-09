@@ -231,7 +231,7 @@ export default function Dashboard() {
                 Load Capacity Distribution
               </h2>
               <div className="h-48 w-full">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" >
                   <BarChart data={stats}>
                     <CartesianGrid strokeDasharray="1 1" vertical={false} stroke="#f0f0f0" />
                     <XAxis

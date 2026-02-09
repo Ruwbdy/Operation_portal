@@ -4,12 +4,8 @@ import {
   TowerControl as Tower, 
   History, 
   User,
-  CreditCard,
-  Package,
   Layers,
-  Server,
-  FileText,
-  Building2
+  LogOut
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -61,7 +57,18 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     return location.pathname.startsWith(path);
   };
 
+  const handleLogout = () => {
+    // Clear authentication
+    localStorage.removeItem('mtn_in_auth');
+    localStorage.removeItem('mtn_in_user');
+    
+    // Navigate to login
+    navigate('/login');
+  };
+
   if (!isOpen) return null;
+
+  const username = localStorage.getItem('mtn_in_user') || 'Osazuwa';
 
   return (
     <aside className="bg-black flex flex-col h-screen sticky top-0 z-50 transition-all duration-500 ease-in-out w-72">
@@ -126,9 +133,20 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         ))}
       </nav>
 
-      <div className="p-8 border-t border-white/5 mt-auto text-center">
+      {/* Logout Button */}
+      <div className="p-6 border-t border-white/5">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center space-x-2 px-5 py-4 text-[10px] font-black rounded-xl transition-all bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white group"
+        >
+          <LogOut size={16} className="group-hover:scale-110 transition-transform" />
+          <span className="tracking-widest uppercase leading-none">Logout</span>
+        </button>
+      </div>
+
+      <div className="p-8 border-t border-white/5 text-center">
         <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest italic">
-          Node Op: Osazuwa
+          Node Op: {username}
         </span>
       </div>
     </aside>

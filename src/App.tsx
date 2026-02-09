@@ -1,8 +1,10 @@
 import React, { Component, ReactNode, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import ProtectedRoute from './components/common/ProtectedRoute';
 
 // Lazy load pages for better performance
+const Login = lazy(() => import('./pages/Login'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const ChargingProfile = lazy(() => import('./pages/UserSupport/ChargingProfile'));
 const BalanceAndCDR = lazy(() => import('./pages/UserSupport/BalanceAndCDR'));
@@ -57,21 +59,56 @@ export default function App() {
     <AppErrorBoundary>
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
-          {/* Dashboard */}
-          <Route path="/" element={<Dashboard />} />
+          {/* Public Route - Login */}
+          <Route path="/login" element={<Login />} />
+          
+          {/* Protected Routes */}
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
           
           {/* User Support Routes */}
-          <Route path="/user-support/charging-profile" element={<ChargingProfile />} />
-          <Route path="/user-support/balance-cdr" element={<BalanceAndCDR />} />
-          <Route path="/user-support/data-bundle" element={<DataBundle />} />
+          <Route path="/user-support/charging-profile" element={
+            <ProtectedRoute>
+              <ChargingProfile />
+            </ProtectedRoute>
+          } />
+          <Route path="/user-support/balance-cdr" element={
+            <ProtectedRoute>
+              <BalanceAndCDR />
+            </ProtectedRoute>
+          } />
+          <Route path="/user-support/data-bundle" element={
+            <ProtectedRoute>
+              <DataBundle />
+            </ProtectedRoute>
+          } />
           
           {/* IN Support Routes */}
-          <Route path="/in-support/dclm" element={<DCLM />} />
-          <Route path="/in-support/service-desk" element={<ServiceDesk />} />
-          <Route path="/in-support/dsa" element={<DSA />} />
-          <Route path="/in-support/enterprise" element={<EnterpriseBusiness />} />
+          <Route path="/in-support/dclm" element={
+            <ProtectedRoute>
+              <DCLM />
+            </ProtectedRoute>
+          } />
+          <Route path="/in-support/service-desk" element={
+            <ProtectedRoute>
+              <ServiceDesk />
+            </ProtectedRoute>
+          } />
+          <Route path="/in-support/dsa" element={
+            <ProtectedRoute>
+              <DSA />
+            </ProtectedRoute>
+          } />
+          <Route path="/in-support/enterprise" element={
+            <ProtectedRoute>
+              <EnterpriseBusiness />
+            </ProtectedRoute>
+          } />
           
-          {/* Fallback */}
+          {/* Fallback - Redirect to login or dashboard based on auth */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
