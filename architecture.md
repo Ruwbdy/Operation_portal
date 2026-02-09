@@ -56,10 +56,6 @@ mtn-in-operational-portal/
 │   │   │   └── enterprise/
 │   │   │       ├── CUGAttachmentJobs.tsx
 │   │   │       └── OfferAttachmentJobs.tsx
-│   │   ├── replay/
-│   │   │   ├── XMLInput.tsx
-│   │   │   ├── XMLOutput.tsx
-│   │   │   └── XMLFormatter.tsx
 │   │   └── ui/
 │   │       ├── ProfileCard.tsx
 │   │       ├── DataRow.tsx
