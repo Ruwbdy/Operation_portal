@@ -1,0 +1,241 @@
+import React, { useState, useMemo } from 'react';
+import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { formatCDRDateTime } from '../../../utils/dateFormatter';
+import { formatBytes } from '../../../services/parsers/cdrParser';
+import type { CDRRecord, CDRTabType } from '../../../types/cdr';
+
+interface CDRTableProps {
+  records: CDRRecord[];
+  type: CDRTabType;
+}
+
+type SortDirection = 'asc' | 'desc' | null;
+
+export default function CDRTable({ records, type }: CDRTableProps) {
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+
+  // Filter and sort records
+  const filteredRecords = useMemo(() => {
+    let filtered = records.filter(record => {
+      return Object.keys(filters).every(key => {
+        if (!filters[key]) return true;
+        const value = String(record[key as keyof CDRRecord] || '').toLowerCase();
+        return value.includes(filters[key].toLowerCase());
+      });
+    });
+
+    // Sort if column is selected
+    if (sortColumn && sortDirection) {
+      filtered = [...filtered].sort((a, b) => {
+        const aVal = a[sortColumn as keyof CDRRecord];
+        const bVal = b[sortColumn as keyof CDRRecord];
+        
+        let comparison = 0;
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          comparison = aVal - bVal;
+        } else {
+          comparison = String(aVal).localeCompare(String(bVal));
+        }
+        
+        return sortDirection === 'asc' ? comparison : -comparison;
+      });
+    }
+
+    return filtered;
+  }, [records, filters, sortColumn, sortDirection]);
+
+  const handleFilterChange = (column: string, value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      [column]: value
+    }));
+  };
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(prev => 
+        prev === 'asc' ? 'desc' : prev === 'desc' ? null : 'asc'
+      );
+      if (sortDirection === 'desc') {
+        setSortColumn(null);
+      }
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const formatCurrency = (amount: string) => `₦${parseFloat(amount || '0').toFixed(2)}`;
+
+  // Define columns based on type
+  const getColumns = () => {
+    const baseColumns = [
+      { key: 'event_dt', label: 'Date/Time', sortable: true, filterable: true },
+      { key: 'number_called', label: 'Number Called', sortable: true, filterable: true },
+      { key: 'charged_amount', label: 'Charged', sortable: true, filterable: true },
+      { key: 'balance_before_amt', label: 'Balance Before', sortable: true, filterable: true },
+      { key: 'balance_after_amt', label: 'Balance After', sortable: true, filterable: true }
+    ];
+
+    if (type === 'voice') {
+      return [
+        ...baseColumns.slice(0, 2),
+        { key: 'call_duration_qty', label: 'Duration (s)', sortable: true, filterable: true },
+        ...baseColumns.slice(2),
+        { key: 'country', label: 'Country', sortable: true, filterable: true },
+        { key: 'operator', label: 'Operator', sortable: true, filterable: true }
+      ];
+    }
+
+    if (type === 'data') {
+      return [
+        ...baseColumns.slice(0, 2),
+        ...baseColumns.slice(2),
+        { key: 'bytes_received_qty', label: 'Bytes RX', sortable: true, filterable: false },
+        { key: 'bytes_sent_qty', label: 'Bytes TX', sortable: true, filterable: false },
+        { key: 'country', label: 'Country', sortable: true, filterable: true },
+        { key: 'operator', label: 'Operator', sortable: true, filterable: true }
+      ];
+    }
+
+    if (type === 'sms') {
+      return [
+        ...baseColumns,
+        { key: 'country', label: 'Country', sortable: true, filterable: true },
+        { key: 'operator', label: 'Operator', sortable: true, filterable: true }
+      ];
+    }
+
+    // Default columns for credit, daAdjustment, other
+    return [...baseColumns];
+  };
+
+  const columns = getColumns();
+
+  const renderCellValue = (record: CDRRecord, column: string) => {
+    const value = record[column as keyof CDRRecord];
+
+    if (column === 'event_dt') {
+      return formatCDRDateTime(Number(value));
+    }
+
+    if (column.includes('amount') || column.includes('balance')) {
+      return formatCurrency(String(value));
+    }
+
+    if (column === 'bytes_received_qty' || column === 'bytes_sent_qty') {
+      return formatBytes(Number(value));
+    }
+
+    if (column === 'call_duration_qty') {
+      const seconds = parseInt(String(value) || '0');
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      return `${minutes}m ${remainingSeconds}s`;
+    }
+
+    return String(value || '-');
+  };
+
+  return (
+    <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden">
+      <div className="p-8 border-b border-gray-100 flex justify-between items-center">
+        <div>
+          <h3 className="text-sm font-black text-black uppercase tracking-wide">
+            Transaction Records
+          </h3>
+          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mt-1">
+            {filteredRecords.length} of {records.length} records shown
+          </p>
+        </div>
+        {Object.values(filters).some(f => f) && (
+          <button
+            onClick={() => setFilters({})}
+            className="text-xs font-black text-red-600 uppercase tracking-wider hover:text-red-700 transition-colors"
+          >
+            Clear Filters
+          </button>
+        )}
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-50">
+              {columns.map((col) => (
+                <th key={col.key} className="px-6 py-4 text-left">
+                  <div className="flex flex-col space-y-2">
+                    <button
+                      onClick={() => col.sortable && handleSort(col.key)}
+                      className={`flex items-center space-x-2 ${
+                        col.sortable ? 'cursor-pointer hover:text-[#FFCC00]' : ''
+                      } transition-colors`}
+                    >
+                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">
+                        {col.label}
+                      </span>
+                      {col.sortable && sortColumn === col.key && (
+                        sortDirection === 'asc' ? (
+                          <ChevronUp size={12} className="text-[#FFCC00]" />
+                        ) : sortDirection === 'desc' ? (
+                          <ChevronDown size={12} className="text-[#FFCC00]" />
+                        ) : null
+                      )}
+                    </button>
+                    {col.filterable && (
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={filters[col.key] || ''}
+                          onChange={(e) => handleFilterChange(col.key, e.target.value)}
+                          placeholder="Filter..."
+                          className="w-full px-2 py-1 text-[10px] bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#FFCC00] placeholder:text-gray-300"
+                        />
+                        <Filter size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
+                      </div>
+                    )}
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {filteredRecords.map((record, index) => (
+              <tr key={index} className="hover:bg-gray-50 transition-colors">
+                {columns.map((col) => (
+                  <td key={col.key} className="px-6 py-4">
+                    <span className={`text-xs font-bold ${
+                      col.key === 'charged_amount' ? 'text-red-600' :
+                      col.key === 'balance_after_amt' ? 'text-green-600' :
+                      col.key === 'event_dt' ? 'text-blue-600' :
+                      'text-gray-700'
+                    }`}>
+                      {renderCellValue(record, col.key)}
+                    </span>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {filteredRecords.length === 0 && (
+          <div className="text-center py-16">
+            <Filter size={48} className="mx-auto mb-4 text-gray-300" />
+            <p className="text-sm font-black text-gray-400 uppercase tracking-wider">
+              No Records Match Filters
+            </p>
+            <button
+              onClick={() => setFilters({})}
+              className="mt-4 text-xs font-black text-blue-600 uppercase tracking-wider hover:text-blue-700 transition-colors"
+            >
+              Clear All Filters
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
