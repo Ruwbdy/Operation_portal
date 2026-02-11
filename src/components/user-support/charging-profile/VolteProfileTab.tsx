@@ -3,7 +3,7 @@ import { Radio, PhoneCall, Power, Trash2 } from 'lucide-react';
 import ProfileCard from '../../ui/ProfileCard';
 import DataRow from '../../ui/DataRow';
 import { activateVoLTE, deactivateVoLTE, deleteVoLTE } from '../../../services/api';
-import type { VoLTEProfile } from '../../../types/subscriber';
+import type { VoLTEProfile } from '../../../services/data_interface';
 
 interface VoLTEProfileTabProps {
   profile: VoLTEProfile;

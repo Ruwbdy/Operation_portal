@@ -3,7 +3,7 @@ import { Phone, MapPin, Shield, PhoneForwarded, PhoneIncoming, PhoneOff, AlertCi
 import ProfileCard from '../../ui/ProfileCard';
 import DataRow from '../../ui/DataRow';
 import { resetCallProfile } from '../../../services/api';
-import type { VoiceProfile } from '../../../types/subscriber';
+import type { VoiceProfile } from '../../../services/data_interface';
 
 interface VoiceProfileTabProps {
   profile: VoiceProfile;

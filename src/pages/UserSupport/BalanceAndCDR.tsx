@@ -9,8 +9,8 @@ import CDRSummary from '../../components/user-support/balance-cdr/CDRSummary';
 import { validateMSISDN, validateDateRange } from '../../utils/validators';
 import { parseCDRRecords } from '../../services/cdrParser';
 import { fetchDataProfile } from '../../services/api';
-import type { Balances } from '../../types/subscriber';
-import type { CDRTabType, CategorizedCDR, CDRSummary as CDRSummaryType } from '../../types/cdr';
+import type { Balances } from '../../services/data_interface';
+import type { CDRTabType, CategorizedCDR, CDRSummary as CDRSummaryType } from '../../services/api_definitions';
 
 export default function BalanceAndCDR() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);

@@ -1,7 +1,7 @@
 // Data Transformers for API Responses
 // Converts backend API response structures to frontend TypeScript interfaces
 
-import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Balances, DedicatedAccount } from '../types/subscriber';
+import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Balances, DedicatedAccount, CDRRecord } from './data_interface';
 
 /**
  * Transform HLR profile from API response to VoiceProfile interface
@@ -34,12 +34,12 @@ export function transformHLRToVoiceProfile(hlrData: any): VoiceProfile | null {
       cfnry: data.cfnry || { provisionState: 0, ts10: { activationState: 0 }, ts60: { activationState: 0 }, bs20: { activationState: 0 }, bs30: { activationState: 0 } },
       caw: data.caw || { provisionState: 0, ts10: { activationState: 0 }, ts60: { activationState: 0 }, bs20: { activationState: 0 }, bs30: { activationState: 0 } },
       dcf: data.dcf || {
-                          provisionState: 1,
-                          ts10: { activationState: 1, fnum: '234612', noReplyTime: 15 },
-                          ts60: { activationState: 1, fnum: '234612', noReplyTime: 15 },
-                          bs20: { activationState: 1, fnum: '234612', noReplyTime: 15 },
-                          bs30: { activationState: 1, fnum: '234612', noReplyTime: 15 }
-                        }
+        provisionState: 1,
+        ts10: { activationState: 1, fnum: '234612', noReplyTime: 15 },
+        ts60: { activationState: 1, fnum: '234612', noReplyTime: 15 },
+        bs20: { activationState: 1, fnum: '234612', noReplyTime: 15 },
+        bs30: { activationState: 1, fnum: '234612', noReplyTime: 15 }
+      }
     },
     locationData: {
       vlrAddress: data.locationData?.vlrAddress || 'UNKNOWN',
@@ -92,7 +92,7 @@ export function transformHSSToBrowsingProfile(hssData: any, hlrData: any): Brows
 /**
  * Transform VoLTE profile from complex nested structure to simplified interface
  */
-export function transformToVoLTEProfile(volteData: any, msisdn: string): VoLTEProfile | null {
+export function transformVoLTEProfile(volteData: any, msisdn: string): VoLTEProfile | null {
   if (!volteData?.moAttributes?.getResponseSubscription) {
     return null;
   }
@@ -133,7 +133,7 @@ export function transformToVoLTEProfile(volteData: any, msisdn: string): VoLTEPr
 /**
  * Transform offers from account details
  */
-export function transformOffers(accountData: any): Offer[] {
+export function transformAccountDetailToOffers(accountData: any): Offer[] {
   const offers = accountData?.moAttributes?.getAccountDetailResponse?.accountDetails?.offerInformation;
   
   if (!Array.isArray(offers)) {
@@ -151,7 +151,7 @@ export function transformOffers(accountData: any): Offer[] {
 /**
  * Transform balances from account details
  */
-export function transformBalances(accountData: any): Balances | null {
+export function transformAccountDetailToBalances(accountData: any): Balances | null {
   const accDetails = accountData?.moAttributes?.getAccountDetailResponse;
   
   if (!accDetails) {
@@ -176,6 +176,37 @@ export function transformBalances(accountData: any): Balances | null {
       dedicatedAccountUnitType: da.dedicatedAccountUnitType || undefined
     }))
   };
+}
+
+/**
+ * Transform raw CDR API response to CDRRecord array
+ */
+export function transformCDRToCDRRecords(cdrData: any): CDRRecord[] {
+  if (!Array.isArray(cdrData)) {
+    return [];
+  }
+
+  return cdrData.map((record: any) => ({
+    record_type: record.record_type || '',
+    number_called: record.number_called || '',
+    event_dt: record.event_dt || 0,
+    call_duration_qty: record.call_duration_qty || '0',
+    charged_amount: record.charged_amount || '0',
+    balance_after_amt: record.balance_after_amt || '0',
+    balance_before_amt: record.balance_before_amt || '0',
+    discount_amt: record.discount_amt || '0',
+    da_amount: record.da_amount || '0',
+    da_details: Array.isArray(record.da_details) ? record.da_details.map((da: any) => ({
+      account_id: da.account_id || '',
+      amount_before: da.amount_before || 0,
+      amount_after: da.amount_after || 0,
+      amount_charged: da.amount_charged || 0
+    })) : [],
+    country: record.country || '',
+    operator: record.operator || '',
+    bytes_received_qty: record.bytes_received_qty || 0,
+    bytes_sent_qty: record.bytes_sent_qty || 0
+  }));
 }
 
 /**

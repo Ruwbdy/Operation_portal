@@ -1,7 +1,7 @@
 import React from 'react';
 import { Gift, Calendar, Clock } from 'lucide-react';
 import { formatTelecomDate } from '../../../utils/dateFormatter';
-import type { Offer } from '../../../types/subscriber';
+import type { Offer } from '../../../services/data_interface';
 
 interface OffersTabProps {
   offers: Offer[];

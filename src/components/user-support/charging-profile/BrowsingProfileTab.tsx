@@ -3,7 +3,7 @@ import { Globe, Smartphone, Server, Wifi } from 'lucide-react';
 import ProfileCard from '../../ui/ProfileCard';
 import DataRow from '../../ui/DataRow';
 import { resetAPN } from '../../../services/api';
-import type { BrowsingProfile } from '../../../types/subscriber';
+import type { BrowsingProfile } from '../../../services/data_interface';
 
 interface BrowsingProfileTabProps {
   profile: BrowsingProfile;

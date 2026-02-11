@@ -5,11 +5,11 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Toast from '../../components/common/Toast';
 import VoiceProfileTab from '../../components/user-support/charging-profile/VoiceProfileTab';
 import BrowsingProfileTab from '../../components/user-support/charging-profile/BrowsingProfileTab';
-import VoLTEProfileTab from '../../components/user-support/charging-profile/VoLTEProfileTab';
+import VoLTEProfileTab from '../../components/user-support/charging-profile/VolteProfileTab';
 import OffersTab from '../../components/user-support/charging-profile/OffersTab';
 import { validateMSISDN } from '../../utils/validators';
 import { fetchChargingProfile } from '../../services/api';
-import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer } from '../../types/subscriber';
+import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Diagnostics } from '../../services/data_interface';
 
 type TabType = 'voice' | 'browsing' | 'volte' | 'offers';
 

@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatCDRDateTime } from '../../../utils/dateFormatter';
 import { formatBytes } from '../../../services/cdrParser';
-import type { CDRRecord, CDRTabType } from '../../../types/cdr';
+import type { CDRRecord } from '@/services/data_interface';
+import type { CDRTabType } from '../../../services/api_definitions';
 
 interface CDRTableProps {
   records: CDRRecord[];

@@ -11,12 +11,11 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import Sidebar from '../components/common/Sidebar';
 import Toast from '../components/common/Toast';
-import { MOCK_OPERATION_HISTORY } from '../data/mockData';
-import type { ResolvedIssue, AIAnalysis } from '../types';
+import type { ResolvedIssue, AIAnalysis } from '../services/index';
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [history, setHistory] = useState<ResolvedIssue[]>(MOCK_OPERATION_HISTORY);
+  const [history, setHistory] = useState<ResolvedIssue[]>([]);
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);

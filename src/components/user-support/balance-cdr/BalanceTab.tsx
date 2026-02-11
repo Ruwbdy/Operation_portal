@@ -1,7 +1,7 @@
 import React from 'react';
 import { Wallet, TrendingUp, Calendar } from 'lucide-react';
 import { formatTelecomDate } from '../../../utils/dateFormatter';
-import type { Balances } from '../../../types/subscriber';
+import type { Balances } from '../../../services/data_interface';
 
 interface BalanceTabProps {
   balances: Balances;

@@ -1,63 +1,27 @@
-// API Request/Response Type Definitions
+// API Service - Handles all API calls and data transformation
 import { API_ENDPOINTS } from './endpoints';
 import {
   transformHLRToVoiceProfile,
   transformHSSToBrowsingProfile,
-  transformToVoLTEProfile,
-  transformOffers,
-  transformBalances,
+  transformVoLTEProfile,
+  transformAccountDetailToOffers,
+  transformAccountDetailToBalances,
+  transformCDRToCDRRecords,
   extractDiagnostics
 } from './apiTransformers';
-import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Balances } from '../types/subscriber';
-import type { CDRRecord } from '../types/cdr';
+import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Balances, CDRRecord } from './data_interface';
+import type { 
+  ApiError, 
+  ApiResponse, 
+  ChargingProfileResponse, 
+  DataProfileResponse,
+  BatchJobRequest,
+  BatchJobResponse 
+} from './api_definitions';
+import { AUTH_CREDENTIALS } from './api_definitions';
 
-export interface ApiError {
-  message: string;
-  code?: number;
-  details?: any;
-}
-
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: ApiError;
-}
-
-export const AUTH_CREDENTIALS = {
-  username: 'Osazuwa',
-  password: 'Osazuwa@123456'
-};
-
-export interface BatchJobRequest {
-  jobType: string;
-  files: File[];
-}
-
-export interface BatchJobResponse {
-  jobId: string;
-  status: 'queued' | 'processing' | 'completed' | 'failed';
-  resultUrl?: string;
-  summary?: {
-    total: number;
-    successful: number;
-    failed: number;
-  };
-}
-
-// Charging Profile API Response
-export interface ChargingProfileResponse {
-  voice?: VoiceProfile;
-  browsing?: BrowsingProfile;
-  volte?: VoLTEProfile;
-  offers?: Offer[];
-  diagnostics?: any[];
-}
-
-// Data Profile API Response
-export interface DataProfileResponse {
-  balances?: Balances;
-  cdrRecords?: CDRRecord[];
-}
+// Re-export types for convenience
+export type { ApiError, ApiResponse, BatchJobRequest, BatchJobResponse };
 
 // Helper function to build URL with query parameters
 function buildUrl(baseUrl: string, params: Record<string, string>): string {
@@ -98,8 +62,8 @@ export async function fetchChargingProfile(
     const transformedData: ChargingProfileResponse = {
       voice: transformHLRToVoiceProfile(rawData.hlrProfile),
       browsing: transformHSSToBrowsingProfile(rawData.hssProfile, rawData.hlrProfile),
-      volte: transformToVoLTEProfile(rawData.volteProfile, msisdn),
-      offers: transformOffers(rawData.accountDetails),
+      volte: transformVoLTEProfile(rawData.volteProfile, msisdn),
+      offers: transformAccountDetailToOffers(rawData.accountDetails),
       diagnostics: extractDiagnostics(rawData.diagnostics)
     };
 
@@ -150,10 +114,10 @@ export async function fetchDataProfile(
     const rawData = await response.json();
 
     // Transform balances if present
-    const balances = transformBalances(rawData.accountDetails);
-
-    // Extract CDR records
-    const cdrRecords = rawData.cdrRecords?.records || [];
+    const balances = transformAccountDetailToBalances(rawData.accountDetails);
+    
+    // Transform CDR records using the new transformer
+    const cdrRecords = transformCDRToCDRRecords(rawData.cdrRecords?.records || []);
 
     return {
       success: true,

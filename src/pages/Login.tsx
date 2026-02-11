@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TowerControl as Tower, Lock, User, Eye, EyeOff } from 'lucide-react';
 import Toast from '../components/common/Toast';
-import { AUTH_CREDENTIALS } from '../types/api';
+import { AUTH_CREDENTIALS } from '../services/api_definitions';
 
 export default function Login() {
   const navigate = useNavigate();
