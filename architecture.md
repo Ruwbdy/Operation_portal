@@ -244,7 +244,7 @@ Action Buttons (enabled based on diagnostics):
 User Input (MSISDN + Date Range)
     ↓
 Single API Calls:
-    |- BALANCE_CDR
+    |- GET_DATA_PROFILE
   Backend to processes and return json for:
     ├─ GET_ACCOUNT_DETAILS → MA/DA Balances
     └─ GET_CDR_RECORDS → All CDR types
