@@ -17,7 +17,7 @@ export default function BrowsingProfileTab({ profile, onSuccess, onError }: Brow
     setIsProcessing(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 2000));
-      onSuccess('Browsing profile reset successfully (Phone)');
+      onSuccess('Browsing profile reset successfully (Mobile)');
     } catch (error) {
       onError('Failed to reset browsing profile');
     } finally {
@@ -130,7 +130,7 @@ export default function BrowsingProfileTab({ profile, onSuccess, onError }: Brow
           className="bg-black text-[#FFCC00] p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-900 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-transparent hover:border-[#FFCC00]"
         >
           <Smartphone className="mx-auto mb-3" size={24} />
-          {isProcessing ? 'Processing...' : 'Reset Browsing - Phone'}
+          {isProcessing ? 'Processing...' : 'Reset Browsing - Mobile'}
         </button>
         <button
           onClick={handleResetAPNIoT}

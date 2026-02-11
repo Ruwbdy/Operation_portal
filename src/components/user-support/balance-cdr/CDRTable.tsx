@@ -11,6 +11,14 @@ interface CDRTableProps {
 
 type SortDirection = 'asc' | 'desc' | null;
 
+type Column<T> = {
+  key: string;
+  label: string;
+  sortable?: boolean;
+  filterable?: boolean;
+  accessor?: (record: T) => any;
+};
+
 export default function CDRTable({ records, type }: CDRTableProps) {
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [sortColumn, setSortColumn] = useState<string | null>(null);
@@ -70,13 +78,13 @@ export default function CDRTable({ records, type }: CDRTableProps) {
   const formatCurrency = (amount: string) => `₦${parseFloat(amount || '0').toFixed(2)}`;
 
   // Define columns based on type
-  const getColumns = () => {
+  const getColumns = (): Column<CDRRecord>[] => {
     const baseColumns = [
       { key: 'event_dt', label: 'Date/Time', sortable: true, filterable: true },
       { key: 'number_called', label: 'Number Called', sortable: true, filterable: true },
       { key: 'charged_amount', label: 'Charged', sortable: true, filterable: true },
-      { key: 'balance_before_amt', label: 'Balance Before', sortable: true, filterable: true },
-      { key: 'balance_after_amt', label: 'Balance After', sortable: true, filterable: true }
+      { key: 'balance_before_amt', label: 'MA Bal Before', sortable: true, filterable: true },
+      { key: 'balance_after_amt', label: 'MA Bal After', sortable: true, filterable: true }
     ];
 
     if (type === 'voice') {
@@ -84,6 +92,7 @@ export default function CDRTable({ records, type }: CDRTableProps) {
         ...baseColumns.slice(0, 2),
         { key: 'call_duration_qty', label: 'Duration (s)', sortable: true, filterable: true },
         ...baseColumns.slice(2),
+        { key: 'discount_amt', label: 'Discount Amt', sortable: false, filterable: false },
         { key: 'country', label: 'Country', sortable: true, filterable: true },
         { key: 'operator', label: 'Operator', sortable: true, filterable: true }
       ];
@@ -93,6 +102,10 @@ export default function CDRTable({ records, type }: CDRTableProps) {
       return [
         ...baseColumns.slice(0, 2),
         ...baseColumns.slice(2),
+        { key: 'da_account_id', label: 'DA ID', sortable: true, filterable: true, accessor: (r) => r.da_details?.[0]?.account_id ?? '-'},
+        { key: 'da_amount_before', label: 'DA Amt Before', sortable: true, filterable: true, accessor: (r) => r.da_details?.[0]?.amount_before ?? 0},
+        { key: 'da_amount_after', label: 'DA Amt After', sortable: true, filterable: true, accessor: (r) => r.da_details?.[0]?.amount_after ?? 0},
+        { key: 'da_amount_charged', label: 'DA Amt Chg', sortable: true, filterable: true, accessor: (r) => r.da_details?.[0]?.amount_charged ?? 0},
         { key: 'bytes_received_qty', label: 'Bytes RX', sortable: true, filterable: false },
         { key: 'bytes_sent_qty', label: 'Bytes TX', sortable: true, filterable: false },
         { key: 'country', label: 'Country', sortable: true, filterable: true },
@@ -114,30 +127,39 @@ export default function CDRTable({ records, type }: CDRTableProps) {
 
   const columns = getColumns();
 
-  const renderCellValue = (record: CDRRecord, column: string) => {
-    const value = record[column as keyof CDRRecord];
+  const renderCellValue = (record: CDRRecord, column: Column<CDRRecord>) => {
+    const value = column.accessor
+      ? column.accessor(record)
+      : record[column.key as keyof CDRRecord];
 
-    if (column === 'event_dt') {
+    if (column.key === 'event_dt') {
       return formatCDRDateTime(Number(value));
     }
 
-    if (column.includes('amount') || column.includes('balance')) {
+    if (
+      column.key.includes('amount') ||
+      column.key.includes('balance')
+    ) {
       return formatCurrency(String(value));
     }
 
-    if (column === 'bytes_received_qty' || column === 'bytes_sent_qty') {
+    if (
+      column.key === 'bytes_received_qty' ||
+      column.key === 'bytes_sent_qty'
+    ) {
       return formatBytes(Number(value));
     }
 
-    if (column === 'call_duration_qty') {
+    if (column.key === 'call_duration_qty') {
       const seconds = parseInt(String(value) || '0');
       const minutes = Math.floor(seconds / 60);
       const remainingSeconds = seconds % 60;
       return `${minutes}m ${remainingSeconds}s`;
     }
 
-    return String(value || '-');
+    return String(value ?? '-');
   };
+
 
   return (
     <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden">
@@ -212,7 +234,7 @@ export default function CDRTable({ records, type }: CDRTableProps) {
                       col.key === 'event_dt' ? 'text-blue-600' :
                       'text-gray-700'
                     }`}>
-                      {renderCellValue(record, col.key)}
+                      {renderCellValue(record, col)}
                     </span>
                   </td>
                 ))}

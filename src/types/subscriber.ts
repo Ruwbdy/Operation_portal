@@ -28,9 +28,10 @@ export interface VoiceProfile {
     cfb: ServiceStatus;
     cfnrc: ServiceStatus;
     cfnry: ServiceStatus;
+    caw: ServiceStatus;
     dcf?: ServiceStatus;
   };
-  callWaiting: ServiceStatus;
+  // callWaiting: ServiceStatus;
   locationData: {
     vlrAddress: string;
     mscNumber: string;

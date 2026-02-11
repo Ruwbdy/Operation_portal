@@ -216,23 +216,21 @@ const AUTH_CREDENTIALS = {
 ```
 User Input (MSISDN)
     ↓
-Parallel API Calls:
+Single API Calls:
+    |- GET_CHARGING_PROFILE
+  Backend to processes and return json for:
     ├─ GET_HLR        → Voice + Browsing (partial)
     ├─ GET_HSS        → Browsing (complete)
     ├─ GET_ACCOUNT_DETAILS → Offers
-    └─ GET_VOLTE (conditional)
+    ├─ GET_MTAS       → Volte
+    └─ GET_DIAGNOSTICS
     ↓
-Data Parsers:
-    ├─ hlrParser.ts   → Voice profile data
-    ├─ hssParser.ts   → Browsing EPS data
-    ├─ accountParser.ts → Offers list
-    └─ Merge HLR + HSS for Browsing tab
-    ↓
-Component State Update:
+Get data component and State Update:
     ├─ VoiceProfileTab (renders)
     ├─ BrowsingProfileTab (renders)
     ├─ VoLTEProfileTab (renders)
     └─ OffersTab (renders)
+    └─ Diagnostics
     ↓
 Action Buttons (enabled based on diagnostics):
     ├─ Voice: "Reset Call Profile"
@@ -245,13 +243,15 @@ Action Buttons (enabled based on diagnostics):
 ```
 User Input (MSISDN + Date Range)
     ↓
-Parallel API Calls:
+Single API Calls:
+    |- BALANCE_CDR
+  Backend to processes and return json for:
     ├─ GET_ACCOUNT_DETAILS → MA/DA Balances
     └─ GET_CDR_RECORDS → All CDR types
     ↓
-Data Processing:
-    ├─ accountParser.ts → Extract MA + DA array
-    └─ cdrParser.ts → Categorize records by type
+Get data compoment Processing:
+    ├─ MA + DA array
+    └─ Categorize records by type
     ↓
 Tab Rendering:
     ├─ MA/DA Balances Tab

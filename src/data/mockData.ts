@@ -81,6 +81,13 @@ export const MOCK_VOICE_PROFILE: VoiceProfile = {
       bs20: { activationState: 0 },
       bs30: { activationState: 0 }
     },
+    caw: {
+      provisionState: 1,
+      ts10: { activationState: 1 },
+      ts60: { activationState: 1 },
+      bs20: { activationState: 1 },
+      bs30: { activationState: 1 }
+    },
     dcf: {
       provisionState: 1,
       ts10: { activationState: 1, fnum: '234612', noReplyTime: 15 },
@@ -88,13 +95,6 @@ export const MOCK_VOICE_PROFILE: VoiceProfile = {
       bs20: { activationState: 1, fnum: '234612', noReplyTime: 15 },
       bs30: { activationState: 1, fnum: '234612', noReplyTime: 15 }
     }
-  },
-  callWaiting: {
-    provisionState: 1,
-    ts10: { activationState: 1 },
-    ts60: { activationState: 1 },
-    bs20: { activationState: 1 },
-    bs30: { activationState: 1 }
   },
   locationData: {
     vlrAddress: '4-2348030093800',
@@ -254,6 +254,8 @@ export const MOCK_CDR_RECORDS: CDRRecord[] = [
     bytes_sent_qty: 0
   }
 ];
+
+export const MOCK_DIAGNOSTICS: DIAGNOSTICS[] = []
 
 export const MOCK_OPERATION_HISTORY: ResolvedIssue[] = [
   {

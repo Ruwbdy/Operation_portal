@@ -32,7 +32,7 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { path: '/user-support/charging-profile', label: 'Charging Profile' },
       { path: '/user-support/balance-cdr', label: 'Balance & CDR' },
-      { path: '/user-support/data-bundle', label: 'Data Bundle' }
+      { path: '/user-support/data-bundle', label: 'Bundle Fulfilment' }
     ]
   },
   {

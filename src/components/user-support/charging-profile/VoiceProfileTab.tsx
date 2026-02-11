@@ -73,6 +73,26 @@ export default function VoiceProfileTab({ profile, onSuccess, onError }: VoicePr
         </div>
       )}
 
+      {/* Action Buttons */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+        <button
+          onClick={handleResetCallProfile}
+          disabled={isProcessing}
+          className="bg-black text-[#FFCC00] p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-900 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-transparent hover:border-[#FFCC00]"
+        >
+          <Phone className="mx-auto mb-3" size={24} />
+          {isProcessing ? 'Processing...' : 'Reset Call Profile'}
+        </button>
+        <button
+          onClick={handleResetCSP}
+          disabled={isProcessing}
+          className="bg-white text-black p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-50 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-gray-200 hover:border-[#FFCC00]"
+        >
+          <Shield className="mx-auto mb-3" size={24} />
+          {isProcessing ? 'Processing...' : 'Reset CSP'}
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Identity & Authentication */}
         <ProfileCard
@@ -150,40 +170,16 @@ export default function VoiceProfileTab({ profile, onSuccess, onError }: VoicePr
             label="CFNRY (No Reply)" 
             value={`Prov: ${profile.callForwarding.cfnry.provisionState} | Act: ${profile.callForwarding.cfnry.ts10?.activationState || 0}`} 
           />
+          <DataRow 
+            label="CAW (Call Waiting)" 
+            value={`Prov: ${profile.callForwarding.caw.provisionState} | Act: ${profile.callForwarding.caw.ts10?.activationState || 0}`} 
+          />
           {profile.callForwarding.dcf && (
             <DataRow 
-              label="DCF (Deflect)" 
+              label="DCF (Direct Call Forwarding)" 
               value={`Prov: ${profile.callForwarding.dcf.provisionState} | Act: ${profile.callForwarding.dcf.ts10?.activationState || 0} | Fwd: ${profile.callForwarding.dcf.ts10?.fnum || 'N/A'}`} 
             />
           )}
-        </ProfileCard>
-
-        {/* Call Waiting */}
-        <ProfileCard
-          label="Call Waiting Service"
-          icon={<PhoneIncoming size={20} />}
-          color="bg-cyan-50 text-cyan-600"
-        >
-          <DataRow 
-            label="Provision State" 
-            value={profile.callWaiting.provisionState} 
-          />
-          <DataRow 
-            label="TS10 Activation" 
-            value={profile.callWaiting.ts10?.activationState || 0} 
-          />
-          <DataRow 
-            label="TS60 Activation" 
-            value={profile.callWaiting.ts60?.activationState || 0} 
-          />
-          <DataRow 
-            label="BS20 Activation" 
-            value={profile.callWaiting.bs20?.activationState || 0} 
-          />
-          <DataRow 
-            label="BS30 Activation" 
-            value={profile.callWaiting.bs30?.activationState || 0} 
-          />
         </ProfileCard>
 
         {/* Additional Services */}
@@ -193,31 +189,11 @@ export default function VoiceProfileTab({ profile, onSuccess, onError }: VoicePr
           color="bg-gray-50 text-gray-600"
         >
           <DataRow label="MDEUEE" value={profile.mdeuee} />
-          <DataRow label="TS11" value={profile.ts11} />
-          <DataRow label="TS21" value={profile.ts21} />
-          <DataRow label="TS22" value={profile.ts22} />
+          <DataRow label="TS11 (Allow Incoming Calls)" value={profile.ts11} />
+          <DataRow label="TS21 (Allow Incoming SMS)" value={profile.ts21} />
+          <DataRow label="TS22 (Allow Outgoing SMS)" value={profile.ts22} />
           <DataRow label="TS62" value={profile.ts62} />
         </ProfileCard>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-        <button
-          onClick={handleResetCallProfile}
-          disabled={isProcessing}
-          className="bg-black text-[#FFCC00] p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-900 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-transparent hover:border-[#FFCC00]"
-        >
-          <Phone className="mx-auto mb-3" size={24} />
-          {isProcessing ? 'Processing...' : 'Reset Call Profile'}
-        </button>
-        <button
-          onClick={handleResetCSP}
-          disabled={isProcessing}
-          className="bg-white text-black p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-50 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-gray-200 hover:border-[#FFCC00]"
-        >
-          <Shield className="mx-auto mb-3" size={24} />
-          {isProcessing ? 'Processing...' : 'Reset CSP'}
-        </button>
       </div>
     </div>
   );
