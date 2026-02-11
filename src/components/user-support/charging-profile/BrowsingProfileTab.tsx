@@ -2,24 +2,31 @@ import React, { useState } from 'react';
 import { Globe, Smartphone, Server, Wifi } from 'lucide-react';
 import ProfileCard from '../../ui/ProfileCard';
 import DataRow from '../../ui/DataRow';
+import { resetAPN } from '../../../services/api';
 import type { BrowsingProfile } from '../../../types/subscriber';
 
 interface BrowsingProfileTabProps {
   profile: BrowsingProfile;
+  msisdn: string;
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
 }
 
-export default function BrowsingProfileTab({ profile, onSuccess, onError }: BrowsingProfileTabProps) {
+export default function BrowsingProfileTab({ profile, msisdn, onSuccess, onError }: BrowsingProfileTabProps) {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleResetAPNPhone = async () => {
     setIsProcessing(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const response = await resetAPN(msisdn, false);
+      
+      if (!response.success) {
+        throw new Error(response.error?.message || 'Failed to reset browsing profile');
+      }
+      
       onSuccess('Browsing profile reset successfully (Mobile)');
     } catch (error) {
-      onError('Failed to reset browsing profile');
+      onError(error instanceof Error ? error.message : 'Failed to reset browsing profile');
     } finally {
       setIsProcessing(false);
     }
@@ -28,10 +35,15 @@ export default function BrowsingProfileTab({ profile, onSuccess, onError }: Brow
   const handleResetAPNIoT = async () => {
     setIsProcessing(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const response = await resetAPN(msisdn, true);
+      
+      if (!response.success) {
+        throw new Error(response.error?.message || 'Failed to reset browsing profile');
+      }
+      
       onSuccess('Browsing profile reset successfully (IoT)');
     } catch (error) {
-      onError('Failed to reset browsing profile');
+      onError(error instanceof Error ? error.message : 'Failed to reset browsing profile');
     } finally {
       setIsProcessing(false);
     }

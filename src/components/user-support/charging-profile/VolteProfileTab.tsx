@@ -2,24 +2,31 @@ import React, { useState } from 'react';
 import { Radio, PhoneCall, Power, Trash2 } from 'lucide-react';
 import ProfileCard from '../../ui/ProfileCard';
 import DataRow from '../../ui/DataRow';
+import { activateVoLTE, deactivateVoLTE, deleteVoLTE } from '../../../services/api';
 import type { VoLTEProfile } from '../../../types/subscriber';
 
 interface VoLTEProfileTabProps {
   profile: VoLTEProfile;
+  msisdn: string;
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
 }
 
-export default function VoLTEProfileTab({ profile, onSuccess, onError }: VoLTEProfileTabProps) {
+export default function VoLTEProfileTab({ profile, msisdn, onSuccess, onError }: VoLTEProfileTabProps) {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleActivateVoLTE = async () => {
     setIsProcessing(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const response = await activateVoLTE(msisdn);
+      
+      if (!response.success) {
+        throw new Error(response.error?.message || 'Failed to activate VoLTE');
+      }
+      
       onSuccess('VoLTE activated successfully');
     } catch (error) {
-      onError('Failed to activate VoLTE');
+      onError(error instanceof Error ? error.message : 'Failed to activate VoLTE');
     } finally {
       setIsProcessing(false);
     }
@@ -28,10 +35,15 @@ export default function VoLTEProfileTab({ profile, onSuccess, onError }: VoLTEPr
   const handleDeactivateVoLTE = async () => {
     setIsProcessing(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const response = await deactivateVoLTE(msisdn);
+      
+      if (!response.success) {
+        throw new Error(response.error?.message || 'Failed to deactivate VoLTE');
+      }
+      
       onSuccess('VoLTE deactivated successfully');
     } catch (error) {
-      onError('Failed to deactivate VoLTE');
+      onError(error instanceof Error ? error.message : 'Failed to deactivate VoLTE');
     } finally {
       setIsProcessing(false);
     }
@@ -40,10 +52,15 @@ export default function VoLTEProfileTab({ profile, onSuccess, onError }: VoLTEPr
   const handleDeleteVoLTE = async () => {
     setIsProcessing(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const response = await deleteVoLTE(msisdn);
+      
+      if (!response.success) {
+        throw new Error(response.error?.message || 'Failed to delete VoLTE configuration');
+      }
+      
       onSuccess('VoLTE configuration deleted successfully');
     } catch (error) {
-      onError('Failed to delete VoLTE configuration');
+      onError(error instanceof Error ? error.message : 'Failed to delete VoLTE configuration');
     } finally {
       setIsProcessing(false);
     }

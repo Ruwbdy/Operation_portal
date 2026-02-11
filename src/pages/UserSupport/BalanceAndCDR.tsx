@@ -7,8 +7,8 @@ import BalanceTab from '../../components/user-support/balance-cdr/BalanceTab';
 import CDRTable from '../../components/user-support/balance-cdr/CDRTable';
 import CDRSummary from '../../components/user-support/balance-cdr/CDRSummary';
 import { validateMSISDN, validateDateRange } from '../../utils/validators';
-import { parseCDRRecords } from '../../services/parsers/cdrParser';
-import { MOCK_BALANCES, MOCK_CDR_RECORDS } from '../../data/mockData';
+import { parseCDRRecords } from '../../services/cdrParser';
+import { fetchDataProfile } from '../../services/api';
 import type { Balances } from '../../types/subscriber';
 import type { CDRTabType, CategorizedCDR, CDRSummary as CDRSummaryType } from '../../types/cdr';
 
@@ -45,33 +45,61 @@ export default function BalanceAndCDR() {
     setIsLoading(true);
     
     try {
-      // Simulate API calls - Replace with actual API calls
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Convert dates to YYYYMMDD format for API
+      const formattedStartDate = startDate.replace(/-/g, '');
+      const formattedEndDate = endDate.replace(/-/g, '');
+
+      // Call the consolidated API
+      const response = await fetchDataProfile(msisdn, formattedStartDate, formattedEndDate);
       
-      // Load mock data
-      setBalances(MOCK_BALANCES);
+      if (!response.success || !response.data) {
+        throw new Error(response.error?.message || 'Failed to fetch data profile');
+      }
       
-      // Parse CDR records
-      const mockApiResponse = {
-        APIStatus: {
-          msisdn: msisdn,
-          requestId: 'REQ-' + Date.now(),
-          dateRange: [startDate, endDate],
-          maxRecs: 1000,
-          numRecs: MOCK_CDR_RECORDS.length,
-          statusCode: 200,
-          statusMsg: 'Success'
-        },
-        APIData: MOCK_CDR_RECORDS
-      };
+      // Update balances
+      setBalances(response.data.balances || null);
       
-      const { categorized, summaries: parsedSummaries } = parseCDRRecords(mockApiResponse);
-      setCategorizedCDR(categorized);
-      setSummaries(parsedSummaries);
+      // Parse and categorize CDR records
+      if (response.data.cdrRecords && response.data.cdrRecords.length > 0) {
+        const mockApiResponse = {
+          APIStatus: {
+            msisdn: msisdn,
+            requestId: 'REQ-' + Date.now(),
+            dateRange: [formattedStartDate, formattedEndDate],
+            maxRecs: 1000,
+            numRecs: response.data.cdrRecords.length,
+            statusCode: 200,
+            statusMsg: 'Success'
+          },
+          APIData: response.data.cdrRecords
+        };
+        
+        const { categorized, summaries: parsedSummaries } = parseCDRRecords(mockApiResponse);
+        setCategorizedCDR(categorized);
+        setSummaries(parsedSummaries);
+      } else {
+        // No CDR records found
+        setCategorizedCDR({
+          voice: [],
+          data: [],
+          sms: [],
+          credit: [],
+          daAdjustment: [],
+          other: []
+        });
+        setSummaries({
+          voice: { totalCalls: 0, totalDuration: 0, totalCharged: 0, recordCount: 0 },
+          data: { totalBytes: 0, totalCharged: 0, recordCount: 0 },
+          sms: { totalMessages: 0, totalCharged: 0, recordCount: 0 },
+          credit: { totalAmount: 0, recordCount: 0 },
+          daAdjustment: { totalAmount: 0, recordCount: 0 },
+          other: { recordCount: 0 }
+        });
+      }
       
       setSuccessToast('Data loaded successfully');
     } catch (error) {
-      setErrorToast('Failed to load data');
+      setErrorToast(error instanceof Error ? error.message : 'Failed to load data');
       console.error('Data fetch error:', error);
     } finally {
       setIsLoading(false);

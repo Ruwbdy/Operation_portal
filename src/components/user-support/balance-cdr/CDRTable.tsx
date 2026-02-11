@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatCDRDateTime } from '../../../utils/dateFormatter';
-import { formatBytes } from '../../../services/parsers/cdrParser';
+import { formatBytes } from '../../../services/cdrParser';
 import type { CDRRecord, CDRTabType } from '../../../types/cdr';
 
 interface CDRTableProps {

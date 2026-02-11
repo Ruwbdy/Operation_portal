@@ -26,12 +26,8 @@ mtn-in-operational-portal/
 │   │   │   ├── Sidebar.tsx
 │   │   │   ├── LoadingSpinner.tsx
 │   │   │   ├── Toast.tsx
-│   │   │   └── ErrorBoundary.tsx
-│   │   ├── dashboard/
-│   │   │   ├── StatCard.tsx
-│   │   │   ├── ActivityLog.tsx
-│   │   │   ├── AIAnalysisPanel.tsx
-│   │   │   └── OperationsChart.tsx
+│   │   │   ├── ProtectedRoute.tsx
+│   │   │   ├── PlaceholderPage.tsx
 │   │   ├── user-support/
 │   │   │   ├── charging-profile/
 │   │   │   │   ├── VoiceProfileTab.tsx
@@ -42,7 +38,6 @@ mtn-in-operational-portal/
 │   │   │   │   ├── BalanceTab.tsx
 │   │   │   │   ├── CDRTable.tsx
 │   │   │   │   ├── CDRSummary.tsx
-│   │   │   │   └── ColumnFilter.tsx
 │   │   │   └── data-bundle/
 │   │   │       └── ComingSoon.tsx
 │   │   ├── in-support/
@@ -59,20 +54,12 @@ mtn-in-operational-portal/
 │   │   └── ui/
 │   │       ├── ProfileCard.tsx
 │   │       ├── DataRow.tsx
-│   │       ├── DiagnosticGridItem.tsx
-│   │       ├── AutomationMatrixBlock.tsx
-│   │       └── SidebarTab.tsx
 │   ├── services/
-│   │   ├── api/
-│   │   │   ├── endpoints.ts          # Centralized API endpoint definitions
-│   │   │   ├── soapClient.ts         # SOAP request handlers
-│   │   │   └── restClient.ts         # REST request handlers
-│   │   ├── geminiService.ts          # AI analysis integration
-│   │   └── parsers/
-│   │       ├── hlrParser.ts          # HLR XML response parser
-│   │       ├── hssParser.ts          # HSS XML response parser
-│   │       ├── accountParser.ts      # Account details parser
-│   │       └── cdrParser.ts          # CDR JSON parser
+│   │   ├── endpoints.ts          # Centralized API endpoint definitions
+            api.ts
+            apiTransformer.ts
+            geminiService.ts          # AI analysis integration
+            cdrParser.ts          # CDR JSON parser
 │   ├── utils/
 │   │   ├── xmlFormatter.ts           # Pretty print XML
 │   │   ├── dateFormatter.ts          # SDP timestamp parser
@@ -94,11 +81,6 @@ mtn-in-operational-portal/
 │   │   │   ├── ServiceDesk.tsx
 │   │   │   ├── DSA.tsx
 │   │   │   └── EnterpriseBusiness.tsx
-│   ├── hooks/
-│   │   ├── useApiCall.ts             # Generic API hook with loading/error
-│   │   ├── useSubscriberData.ts      # Fetch HLR+HSS+Account data
-│   │   ├── useCDRRecords.ts          # Fetch and filter CDR
-│   │   └── useJobExecution.ts        # Batch job processing
 │   ├── App.tsx
 │   ├── main.tsx
 │   └── index.css
@@ -107,658 +89,700 @@ mtn-in-operational-portal/
 └── vite.config.ts
 ```
 
----
+# Quick Reference: File Changes
 
-## Navigation Architecture
-
-### Main Menu Structure
+## 📁 File Structure
 
 ```
-Dashboard (/)
-├─ Stats Overview, Recent Activity Log
-User Support (/user-support)
-├─ Charging Profile (/user-support/charging-profile)
-│  ├─ Voice Profile Tab (AI analysis and resolution panel)
-│  ├─ Browsing Profile Tab (AI analysis and resolution panel)
-│  ├─ VoLTE Profile Tab (AI analysis and resolution panel)
-│  └─ Offers Tab (AI analysis and resolution panel)
-├─ Acc Balance and CDR Records (/user-support/balance-cdr)
-│  ├─ MA and DA Balances Tab
-│  ├─ Voice Record Tab
-│  ├─ Data & DA Record Tab
-│  ├─ SMS Record Tab
-│  ├─ Credit & Recharge Record Tab
-│  ├─ DA Adjustment Record Tab
-│  └─ Other Record Tab
-└─ Data Bundle Fulfilment (/user-support/data-bundle)
-   └─ Coming Soon
-
-IN Support (/in-support)
-├─ IN-DCLM (/in-support/dclm)
-│  └─ Batch Jobs (Resolve call Issues, Resolve credit limit issue)
-├─ IN-Service Desk (/in-support/service-desk)
-│  └─ Batch Profile Reset Jobs (Resolve call Issues, Resolve credit limit issue)
-├─ IN-DSA (/in-support/dsa)
-│  └─ Batch Final Response Jobs (Initiate sim reg, Get Sim Reg imsi, Automation Air Delete, Deact PostPaid Hub, Sim Reg Replayer, Bulk Sim Reg End, Swap Initialization, Swap IMSI Grabber, Swap Finalization)
-└─ IN-Enterprise Business (/in-support/enterprise)
-   ├─ Batch CUG ID Attachment Jobs (mapped from current system)
-   └─ Batch Offer Attachment Jobs (mapped from current system)
+src/
+├── services/
+│   ├── api.ts                    ✅ UPDATED - API functions with transformers
+│   ├── apiTransformers.ts        ⭐ NEW - Data transformation utilities
+│   └── endpoints.ts              ✅ UPDATED - API endpoints configuration
+│
+├── pages/user-support/
+│   ├── ChargingProfile.tsx       ✅ UPDATED - Uses fetchChargingProfile()
+│   └── BalanceAndCDR.tsx         ✅ UPDATED - Uses fetchDataProfile()
+│
+└── components/user-support/
+    ├── charging-profile/
+    │   ├── VoiceProfileTab.tsx   ✅ UPDATED - Uses resetCallProfile()
+    │   ├── BrowsingProfileTab.tsx ✅ UPDATED - Uses resetAPN()
+    │   └── VoLTEProfileTab.tsx   ✅ UPDATED - Uses VoLTE actions
+    │
+    └── balance-cdr/
+        ├── BalanceTab.tsx         ✓ No changes needed
+        ├── CDRTable.tsx           ✓ No changes needed
+        └── CDRSummary.tsx         ✓ No changes needed
 ```
 
----
+## 🔄 What Changed
 
-## API Integration Strategy
-
-### Standardized Endpoint Naming
-
+### Before (Mock Data)
 ```typescript
-// services/api/endpoints.ts
+// ChargingProfile.tsx
+import { MOCK_VOICE_PROFILE, MOCK_BROWSING_PROFILE, ... } from '../../data/mockData';
 
-export const API_ENDPOINTS = {
-  // Subscriber Data Retrieval
-  GET_HLR: '/soap/get-hlr',
-  GET_HSS: '/soap/get-hss',
-  GET_ACCOUNT_DETAILS: '/soap/get-account-details',
-  GET_OFFERS: '/soap/get-offers',
-  GET_CDR_RECORDS: '/api/get-cdr-records',
-  
-  // Voice Profile Actions
-  RESET_CALL_PROFILE: '/soap/reset_call_profile',
-  
-  // Browsing Profile Actions
-  RESET_APN_PHONE: '/soap/reset-apn-phone',
-  RESET_APN_IOT: '/soap/reset-apn-iot',
-  
-  // VoLTE Actions
-  ACTIVATE_VOLTE: '/soap/activate-volte',
-  DEACTIVATE_VOLTE: '/soap/deactivate-volte',
-  DELETE_VOLTE: '/soap/delete-volte',
-  
-  // Service Management
-  SET_SERVICE_CLASS: '/soap/set-service-class',
-  ADD_OFFER: '/soap/add-offer',
-  
-  // Data Bundle (Future)
-  GET_CIS_STATUS: '/api/get-cis-status',
-  GET_SCAPV2_STATUS: '/api/get-scapv2-status',
-  GET_SDP_PAM: '/api/get-sdp-pam',
-  
-  // SOAP Transactions
-  SEND_FAILURE_RESPONSE: '/soap/send-failure-response',
-  SEND_SUCCESS_RESPONSE: '/soap/send-success-response',
-  SEND_DSA_RESPONSE: '/soap/send-dsa-response',
-  ACTIVATE_SPKA: '/soap/activate-spka',
-  CREATE_AF_AIR: '/soap/create-af-air',
-  
-  // Batch Jobs (POST with file upload)
-  BATCH_JOB: '/jobs/execute'
+const handleSearch = async () => {
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  setVoiceProfile(MOCK_VOICE_PROFILE);
+  setBrowsingProfile(MOCK_BROWSING_PROFILE);
+  ...
 };
 ```
 
-### Authentication Pattern
-
+### After (Real API)
 ```typescript
-const AUTH_CREDENTIALS = {
-  username: 'Osazuwa',
-  password: 'Osazuwa@123456'
+// ChargingProfile.tsx
+import { fetchChargingProfile } from '../../services/api';
+
+const handleSearch = async () => {
+  const response = await fetchChargingProfile(msisdn);
+  if (!response.success || !response.data) {
+    throw new Error(response.error?.message);
+  }
+  setVoiceProfile(response.data.voice || null);
+  setBrowsingProfile(response.data.browsing || null);
+  ...
 };
-
-// All authenticated requests include:
-// ?username=${username}&password=${password}
 ```
 
----
+## 🔗 API Call Flow
 
-## Data Flow Architecture
-
-### 1. Charging Profile Page Flow
-
+### Charging Profile
 ```
-User Input (MSISDN)
+User enters MSISDN → ChargingProfile.handleSearch()
     ↓
-Single API Calls:
-    |- GET_CHARGING_PROFILE
-  Backend to processes and return json for:
-    ├─ GET_HLR        → Voice + Browsing (partial)
-    ├─ GET_HSS        → Browsing (complete)
-    ├─ GET_ACCOUNT_DETAILS → Offers
-    ├─ GET_MTAS       → Volte
-    └─ GET_DIAGNOSTICS
+api.fetchChargingProfile(msisdn)
     ↓
-Get data component and State Update:
-    ├─ VoiceProfileTab (renders)
-    ├─ BrowsingProfileTab (renders)
-    ├─ VoLTEProfileTab (renders)
-    └─ OffersTab (renders)
-    └─ Diagnostics
+fetch("http://localhost:9041/get-charging-profile?...")
     ↓
-Action Buttons (enabled based on diagnostics):
-    ├─ Voice: "Reset Call Profile"
-    ├─ Browsing: "Reset Browsing - Phone", "Reset Browsing - IOT"
-    └─ VoLTE: "Activate", "Deactivate", "Delete"
-```
-
-### 2. Balance and CDR Page Flow
-
-```
-User Input (MSISDN + Date Range)
+Raw Backend Response (deeply nested)
     ↓
-Single API Calls:
-    |- GET_DATA_PROFILE
-  Backend to processes and return json for:
-    ├─ GET_ACCOUNT_DETAILS → MA/DA Balances
-    └─ GET_CDR_RECORDS → All CDR types
+apiTransformers.transformHLRToVoiceProfile()
+apiTransformers.transformHSSToBrowsingProfile()
+apiTransformers.transformToVoLTEProfile()
+apiTransformers.transformOffers()
     ↓
-Get data compoment Processing:
-    ├─ MA + DA array
-    └─ Categorize records by type
+Clean TypeScript Objects
     ↓
-Tab Rendering:
-    ├─ MA/DA Balances Tab
-    │   ├─ MA Balance (single row)
-    │   └─ DA Balances Table (multiple rows)
-    │
-    ├─ Voice Record Tab
-    │   ├─ Summary (total calls, duration, charged)
-    │   └─ Filtered Table (column filters active)
-    │
-    ├─ Data & DA Record Tab
-    │   ├─ Summary (total, per DA, filtered results)
-    │   └─ Enhanced Table (bytes, DA details)
-    │
-    └─ SMS/Credit/DA Adj/Other Tabs
-        ├─ Summary (aggregated stats)
-        └─ Filtered Tables
-```
-
-### 3. Batch Job Flow (IN Support Pages)
-
-```
-User Selects Job Type
+Component setState()
     ↓
-File Upload Component
-    ├─ CSV validation
-    ├─ Preview first 10 rows
-    └─ File size check
+Tabs render with data
+```
+
+### Balance & CDR
+```
+User enters MSISDN + Dates → BalanceAndCDR.handleSearch()
     ↓
-API Call: POST /jobs/execute
-    ├─ FormData with CSV file(s)
-    └─ Job type identifier
+Date format conversion (YYYY-MM-DD → YYYYMMDD)
     ↓
-Backend Processing
+api.fetchDataProfile(msisdn, startDate, endDate)
     ↓
-Progress Polling (optional)
+fetch("http://localhost:9041/get-data-profile?...")
     ↓
-Result Download
-    ├─ ZIP file with results
-    └─ Summary statistics
+Raw Backend Response
+    ↓
+apiTransformers.transformBalances()
+Extract cdrRecords.records array
+    ↓
+parseCDRRecords() - categorize by type
+    ↓
+Component setState()
+    ↓
+Balance tab + CDR tabs render
 ```
 
----
+## 🎯 Key Transformer Functions
 
-## Component Architecture
+| Function | Input | Output | Purpose |
+|----------|-------|--------|---------|
+| `transformHLRToVoiceProfile()` | `hlrProfile.moAttributes.getResponseSubscription` | `VoiceProfile` | Extract voice data |
+| `transformHSSToBrowsingProfile()` | `hssProfile` + `hlrProfile.gprs` | `BrowsingProfile` | Combine browsing data |
+| `transformToVoLTEProfile()` | `volteProfile.moAttributes.getResponseSubscription` | `VoLTEProfile` | Simplify VoLTE structure |
+| `transformOffers()` | `accountDetails.offerInformation` | `Offer[]` | Extract offer array |
+| `transformBalances()` | `accountDetails` | `Balances` | Extract balances + DAs |
+| `extractDiagnostics()` | `diagnostics` object | Diagnostic array | Flatten diagnostics |
 
-### Core Reusable Components
+## 📊 Response Structure Mapping
 
-#### 1. ProfileCard
-```tsx
-// Displays categorized subscriber data
-<ProfileCard 
-  label="Identity & Auth"
-  icon={<User />}
-  color="bg-blue-50 text-blue-600"
->
-  <DataRow label="MSISDN" value={msisdn} />
-  <DataRow label="IMSI" value={imsi} highlight />
-</ProfileCard>
-```
-
-#### 2. CDRTable
-```tsx
-// Advanced table with column filtering
-<CDRTable 
-  data={records}
-  columns={[
-    { key: 'event_dt', label: 'Date/Time', filterable: true },
-    { key: 'charged_amount', label: 'Charged', filterable: true }
-  ]}
-  onFilter={(filtered) => setFilteredData(filtered)}
-/>
-```
-
-#### 3. DiagnosticGridItem
-```tsx
-// Action tiles for profile operations
-<DiagnosticGridItem
-  label="Reset Call Profile"
-  icon={<Phone />}
-  onClick={() => handleResetCallProfile(msisdn)}
-  disabled={isProcessing}
-/>
-```
-
-#### 4. AutomationMatrixBlock
-```tsx
-// Batch job selection cards
-<AutomationMatrixBlock
-  label="Reset Call Profile"
-  filesNeeded={1}
-  onClick={() => openJobModal('CALL_PROFILE')}
-/>
-```
-
----
-
-## Batch Jobs Distribution (Current → New)
-
-### IN-DCLM Page
-```typescript
-const DCLM_JOBS: JobType[] = [
-  'JOB_INIT_SIM_REG',      // Initiate sim reg
-  'JOB_GET_SIM_REG_IMSI',  // Get Sim Reg imsi
-  'JOB_COMPLETE_SIM_REG'   // Bulk Sim Reg End
-];
-```
-
-### IN-Service Desk Page
-```typescript
-const SERVICE_DESK_JOBS: JobType[] = [
-  'JOB_CALL_PROFILE',       // Reset call Profile
-  'JOB_CREDIT_LIMIT',      // Resolve credit limit issue
-  'JOB_DELETE_AIR',        // Automation Air Delete
-  'JOB_DEACT_POSTPAID'     // Deact PostPaid Hub
-];
-```
-
-### IN-DSA Page
-```typescript
-const DSA_JOBS: JobType[] = [
-  'JOB_REPLAY_SIM_REG'     // Sim Reg Replayer
-];
-```
-
-### IN-Enterprise Business Page
-```typescript
-const ENTERPRISE_JOBS: JobType[] = [
-  'JOB_INIT_SIM_SWAP',     // Swap Initialization
-  'JOB_GET_SWAP_IMSI',     // Swap IMSI Grabber
-  'JOB_COMPLETE_SIM_SWAP'  // Swap Finalization
-];
-```
-
----
-
-## Type Definitions
-
-### Core Types
+### Backend → Frontend
 
 ```typescript
-// types/subscriber.ts
-export interface VoiceProfile {
-  msisdn: string;
-  imsi: string;
-  msisdnState: string;
-  authd: string;
-  oick: string;
-  csp: string;
-  callBlocking: {
-    baic: ServiceStatus;
-    baoc: ServiceStatus;
-    boic: ServiceStatus;
-    bicro: ServiceStatus;
-    boiexh: ServiceStatus;
-  };
-  callForwarding: {
-    cfu: ServiceStatus;
-    cfb: ServiceStatus;
-    cfnrc: ServiceStatus;
-    cfnry: ServiceStatus;
-  };
-  callWaiting: ServiceStatus;
-  locationData: {
-    vlrAddress: string;
-    mscNumber: string;
-    sgsnNumber: string;
-  };
-  smsSpam: string;
+// Backend returns this:
+{
+  hlrProfile: { moAttributes: { getResponseSubscription: {...} } },
+  hssProfile: { moAttributes: { getResponseEPSMultiSC: {...} } },
+  volteProfile: { moAttributes: { getResponseSubscription: {...} } },
+  accountDetails: { moAttributes: { getAccountDetailResponse: {...} } },
+  diagnostics: { browsingDiagnostics: {...}, ... }
 }
 
-export interface BrowsingProfile {
-  gprs: {
-    pdpid: string;
-    apnid: string;
-    pdpty: string;
-  };
-  hss: {
-    epsProfileId: string;
-    epsRoamingAllowed: boolean;
-    epsIndividualDefaultContextId: string;
-    epsUserIpV4Address: string;
-  };
-}
-
-export interface ServiceStatus {
-  provisionState: number;
-  ts10?: { activationState: number };
-  ts20?: { activationState: number };
-  ts60?: { activationState: number };
-  bs20?: { activationState: number };
-  bs30?: { activationState: number };
+// Transformers convert to this:
+{
+  voice: VoiceProfile,      // from hlrProfile
+  browsing: BrowsingProfile, // from hssProfile + hlrProfile.gprs
+  volte: VoLTEProfile,       // from volteProfile
+  offers: Offer[],           // from accountDetails.offerInformation
+  diagnostics: any[]         // from diagnostics (flattened)
 }
 ```
 
-```typescript
-// types/cdr.ts
-export interface CDRRecord {
-  record_type: string;
-  number_called: string;
-  event_dt: number;  // YYYYMMDDHHMMSS
-  call_duration_qty: string;
-  charged_amount: string;
-  balance_after_amt: string;
-  balance_before_amt: string;
-  da_amount: string;
-  da_details: DADetail[];
-  country: string;
-  operator: string;
-  bytes_received_qty: number;
-  bytes_sent_qty: number;
-}
+## 🧪 Testing Commands
 
-export interface DADetail {
-  account_id: string;
-  amount_before: number;
-  amount_after: number;
-  amount_charged: number;
-}
-
-export interface CDRSummary {
-  totalTransactions: number;
-  startingBalance: number;
-  endingBalance: number;
-  totalCharged: number;
-  totalDuration?: number;
-  totalData?: number;
-}
-```
-
----
-
-## Parser Implementation Strategy
-
-### HLR Parser
-```typescript
-// services/parsers/hlrParser.ts
-export function parseHLRResponse(xml: string): VoiceProfile {
-  // Extract from <getResponseSubscription> node
-  // Handle call blocking: baic, baoc, boic, bicro, boiexh
-  // Handle call forwarding: cfu, cfb, cfnrc, cfnry, dcf
-  // Handle call waiting: caw
-  // Extract location data
-  return voiceProfile;
-}
-```
-
-### HSS Parser
-```typescript
-// services/parsers/hssParser.ts
-export function parseHSSResponse(xml: string): HSSData {
-  // Extract from <GetResponseEPSMultiSC> node
-  // Get epsProfileId, epsRoamingAllowed, etc.
-  return hssData;
-}
-```
-
-### CDR Parser
-```typescript
-// services/parsers/cdrParser.ts
-export function parseCDRRecords(json: string): {
-  records: CDRRecord[];
-  categorized: {
-    voice: CDRRecord[];
-    data: CDRRecord[];
-    sms: CDRRecord[];
-    credit: CDRRecord[];
-    daAdjustment: CDRRecord[];
-    other: CDRRecord[];
-  };
-  summary: CDRSummary;
-} {
-  // Parse JSON response
-  // Categorize by record_type
-  // Calculate summaries per category
-  return { records, categorized, summary };
-}
-```
-
----
-
-## Page-Specific Features
-
-### Charging Profile Page
-
-**Input Requirements:**
-- MSISDN (mandatory)
-
-**API Calls:**
-1. `GET_HLR` → Voice + partial Browsing
-2. `GET_HSS` → Complete Browsing EPS data
-3. `GET_ACCOUNT_DETAILS` → Offers
-4. `GET_VOLTE` (if VoLTE tab selected)
-
-**Tabs:**
-1. **Voice Profile**
-   - Display: MSISDN, IMSI, State, Auth, CSP, Call Blocking, Call Forwarding, Call Waiting, Location
-   - Actions: "Resolve Call Issues", "Reset CSP"
-   - Resolution Notes: Auto-generated based on service states
-
-2. **Browsing Profile**
-   - Display: GPRS (PDP ID, APN ID, PDP Type), HSS EPS Profile, Roaming Status, IP Address
-   - Actions: "Reset Browsing - Phone", "Reset Browsing - IOT"
-   - Resolution Notes: APN configuration status
-
-3. **VoLTE Profile**
-   - Display: Activation Status, Anonymous Condition, Unconditional Condition
-   - Actions: "Activate VoLTE", "Deactivate VoLTE", "Delete VoLTE"
-   - Resolution Notes: Service readiness
-
-4. **Offers**
-   - Display: Table (Offer ID, Type, Start Date, Expiry Date)
-   - Resolution Notes: Active vs expired offers
-   - No actions (read-only)
-
-### Balance and CDR Page
-
-**Input Requirements:**
-- MSISDN (mandatory)
-- Date Range (start date, end date)
-
-**API Calls:**
-1. `GET_ACCOUNT_DETAILS` → MA/DA balances
-2. `GET_CDR_RECORDS` → All record types
-
-**Tabs:**
-1. **MA and DA Balances**
-   - Summary: Total MA, Total DA count, Combined balance
-   - MA Balance: Single row (Account Value, Service Class)
-   - DA Balances Table: Columns (DA ID, DA Balance, DA Name, Expiry Date)
-
-2. **Voice Record**
-   - Summary: Total Calls, Total Duration, Total Charged, Avg Call Length
-   - Table: Date/Time, Number Called, Duration, Charged Amount, Balance Before, Balance After, Country, Operator
-   - Column Filters: Under each header
-
-3. **Data & DA Record**
-   - Summary: Total Transactions, Starting Balance, Ending Balance, Total Used (GB), Total Charged
-   - Summary Per DA: Breakdown by DA ID
-   - Summary Based on Filtered Results: Updates dynamically
-   - Table: Date/Time, Number Called, Charged Amount, Balance Before/After, DA ID, DA Description, DA Before (GB), DA After (GB), DA Charged (GB), Bytes RX, Bytes TX, Country, Operator
-
-4. **SMS Record**
-   - Summary: Total SMS, Total Charged
-   - Table: Date/Time, Number Called, Charged Amount, Balance Before, Balance After, Country, Operator
-
-5. **Credit & Recharge Record**
-   - Summary: Total Recharges, Total Amount
-   - Table: Date/Time, Number Called, Charged Amount, Balance Before, Balance After, Country, Operator
-
-6. **DA Adjustment Record**
-   - Summary: Total Adjustments, Net Change
-   - Table: Date/Time, Number Called, Charged Amount, Balance Before, Balance After, Country, Operator
-
-7. **Other Record**
-   - Summary: Total Transactions, Total Charged
-   - Table: Date/Time, Number Called, Charged Amount, Balance Before, Balance After, Country, Operator
-
----
-
-## State Management Strategy
-
-### Dashboard State
-```typescript
-const [operationalHistory, setOperationalHistory] = useState<ResolvedIssue[]>([]);
-const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
-const [isAnalyzing, setIsAnalyzing] = useState(false);
-```
-
-### Charging Profile State
-```typescript
-const [msisdn, setMsisdn] = useState('');
-const [voiceProfile, setVoiceProfile] = useState<VoiceProfile | null>(null);
-const [browsingProfile, setBrowsingProfile] = useState<BrowsingProfile | null>(null);
-const [volteProfile, setVolteProfile] = useState<VoLTEProfile | null>(null);
-const [offers, setOffers] = useState<Offer[]>([]);
-const [activeTab, setActiveTab] = useState<'voice' | 'browsing' | 'volte' | 'offers'>('voice');
-const [isLoading, setIsLoading] = useState(false);
-```
-
-### Balance/CDR State
-```typescript
-const [msisdn, setMsisdn] = useState('');
-const [dateRange, setDateRange] = useState({ start: '', end: '' });
-const [balances, setBalances] = useState<Balances | null>(null);
-const [cdrRecords, setCdrRecords] = useState<CategorizedCDR | null>(null);
-const [activeTab, setActiveTab] = useState<CDRTabType>('balance');
-const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
-```
-
----
-
-## Error Handling & UX
-
-### Toast Notifications
-```typescript
-// Success: Green toast, auto-dismiss in 6s
-setSuccessToast("VoLTE activated successfully");
-
-// Error: Red toast, auto-dismiss in 6s
-setErrorToast("Failed to resolve call issue: Network timeout");
-
-// Processing: Yellow toast with loader
-setProcessingToast("Executing batch job...");
-```
-
-### Loading States
-- Spinner overlay during API calls
-- Skeleton loaders for table rows
-- Disabled buttons during processing
-
-### Validation
-- MSISDN: 13 digits starting with 234
-- Date Range: Start date < End date
-- CSV Files: Max 10MB, valid headers
-
----
-
-## AI Integration (Gemini)
-
-### Location
-Dashboard page - right sidebar panel
-
-### Function
-```typescript
-// services/geminiService.ts
-export async function analyzeOperationalHistory(
-  history: ResolvedIssue[]
-): Promise<{
-  summary: string;
-  suggestions: string[];
-}> {
-  // Send last 10 operations to Gemini
-  // Request JSON response with summary + 3 suggestions
-  // Fallback to manual analysis if API fails
-}
-```
-
-### Trigger
-- Auto-run on dashboard load
-- Manual refresh button
-- Re-run every 10 new operations
-
----
-
----
-
-## Performance Optimization
-
-### API Call Optimization
-- **Parallel Requests**: HLR + HSS + Account Details called simultaneously
-- **Request Caching**: Cache subscriber data for 2 minutes (Do not cache CDR record details)
-- **Debounced Search**: MSISDN input debounced by 500ms
-
-### Rendering Optimization
-- **Virtual Scrolling**: For CDR tables with 1000+ rows
-- **Lazy Tab Loading**: Only fetch VoLTE data when tab is clicked
-- **Memoization**: `useMemo` for CDR summary calculations
-
-### Bundle Size
-- Code splitting by route
-- Lazy load batch job components
-- Tree-shake unused Lucide icons
-
----
-
-## Security Considerations
-
-### Authentication
-- Hardcoded credentials for MVP
-- Future: JWT token-based auth
-- Session timeout: 30 minutes
-
-### API Security
-- HTTPS only in production
-- CORS whitelist backend domain
-- Sanitize XML input before replay
-
-### Data Privacy
-- No MSISDN logging in browser console
-- Clear sensitive data on logout
-- Mask partial IMSI in logs
-
----
-
-## Testing Strategy
-
-### Mockup Data
-- Preload mockup data to populate pages for viewing
-
----
-
-## Deployment Architecture
-
-### Development
-```
-# Rebuild the app
-npm run build
-# Transfer new dist folder to server
-scp -r dist/ user@server:/path/to/app/
-# Serve with Python
-python3 serve_py36.py
-```
-
-
-### Environment Variables
 ```bash
-VITE_API_BASE_URL=http://localhost:8080
-VITE_GEMINI_API_KEY=AIzaSy...
+# 1. Charging Profile
+curl "http://localhost:9041/get-charging-profile?username=Osazuwa&password=Osazuwa@123456&msisdn=2348035890445"
+
+# 2. Data Profile
+curl "http://localhost:9041/get-data-profile?username=Osazuwa&password=Osazuwa@123456&msisdn=2347062026931&startDate=20260210&endDate=20260210"
+
+# 3. Reset Call Profile
+curl "http://localhost:9041/reset-call-profile?username=Osazuwa&password=Osazuwa@123456&msisdn=2347062026930"
+
+# 4. Reset APN (Phone)
+curl "http://localhost:9041/reset-apn?username=Osazuwa&password=Osazuwa@123456&msisdn=2347062026930&isIOT=false"
+
+# 5. Activate VoLTE
+curl "http://localhost:9041/activate-volte?username=Osazuwa&password=Osazuwa@123456&msisdn=2348035890445"
 ```
+
+## ⚠️ Important Notes
+
+1. **All mock data removed** - No fallback to mock data anymore
+2. **CORS must be enabled** on backend for `http://localhost:5173`
+3. **Date format conversion** happens automatically in BalanceAndCDR
+4. **Error handling** shows user-friendly messages via toasts
+5. **Loading states** prevent multiple simultaneous requests
+6. **Null safety** - Transformers handle missing/null data gracefully
+
+## 🐛 Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| CORS error | Configure backend to allow localhost:5173 |
+| Data not showing | Check browser console & Network tab |
+| Wrong data format | Verify transformer paths match actual response |
+| Action buttons fail | Check msisdn prop passed to child components |
+| CDR not loading | Verify date format is YYYYMMDD in request |
+
+## 📦 Files to Deploy
+
+When deploying, ensure these files are included:
+- ✅ `api.ts`
+- ✅ `apiTransformers.ts`
+- ✅ `endpoints.ts`
+- ✅ `ChargingProfile.tsx`
+- ✅ `BalanceAndCDR.tsx`
+- ✅ `VoiceProfileTab.tsx`
+- ✅ `BrowsingProfileTab.tsx`
+- ✅ `VoLTEProfileTab.tsx`
+
+## 🚀 Running the App
+
+```bash
+# Install dependencies (if needed)
+npm install
+
+# Start dev server
+npm run dev
+
+# Open browser to
+http://localhost:5173
+```
+
+
+# API Integration Complete Guide
+
+## ✅ Implementation Status: COMPLETE
+
+All mock data has been removed and the application now fully integrates with your backend API using proper data transformers.
+
+## 📁 Updated Files
+
+### Core Files
+1. **`endpoints.ts`** - Updated API base URL and endpoints
+2. **`api.ts`** - Main API functions with transformer integration
+3. **`apiTransformers.ts`** - NEW! Data transformation utilities
+4. **`ChargingProfile.tsx`** - Integrated charging profile API
+5. **`BalanceAndCDR.tsx`** - Integrated data profile API
+6. **`VoiceProfileTab.tsx`** - Integrated reset call profile action
+7. **`BrowsingProfileTab.tsx`** - Integrated reset APN actions
+8. **`VoLTEProfileTab.tsx`** - Integrated VoLTE actions
+
+---
+
+## 🔄 API Response Structure & Transformers
+
+Your backend returns deeply nested structures that differ from the frontend TypeScript interfaces. We've created transformer functions to bridge this gap.
+
+### GET /get-charging-profile
+
+**Backend Response Structure:**
+```json
+{
+  "hlrProfile": {
+    "moAttributes": {
+      "getResponseSubscription": {
+        "msisdn": "234...",
+        "imsi": "621...",
+        "csp": 44,
+        "baic": { "provisionState": 1, "ts20": {...} },
+        "gprs": { "pdpid": 1, "apnid": 25, ... },
+        ...
+      }
+    }
+  },
+  "hssProfile": {
+    "moAttributes": {
+      "getResponseEPSMultiSC": {
+        "epsProfileId": 10,
+        "epsRoamingAllowed": true,
+        "mmeAddress": "...",
+        ...
+      }
+    }
+  },
+  "volteProfile": {
+    "moAttributes": {
+      "getResponseSubscription": {
+        "publicId": "sip:+234...",
+        "services": {
+          "communicationDiversion": {...},
+          ...
+        }
+      }
+    }
+  },
+  "accountDetails": {
+    "moAttributes": {
+      "getAccountDetailResponse": {
+        "accountDetails": {
+          "offerInformation": [...]
+        },
+        "balanceAndDate": {...}
+      }
+    }
+  },
+  "diagnostics": {
+    "browsingDiagnostics": {...},
+    "voiceDiagnostics": {...},
+    "offerDiagnostics": {...}
+  }
+}
+```
+
+**Transformers Applied:**
+1. `transformHLRToVoiceProfile()` - Extracts voice profile from hlrProfile
+2. `transformHSSToBrowsingProfile()` - Combines HSS and HLR GPRS data
+3. `transformToVoLTEProfile()` - Simplifies complex VoLTE nested structure
+4. `transformOffers()` - Extracts offer array from account details
+5. `extractDiagnostics()` - Flattens diagnostic categories
+
+**Frontend Receives:**
+```typescript
+{
+  voice: VoiceProfile,
+  browsing: BrowsingProfile,
+  volte: VoLTEProfile,
+  offers: Offer[],
+  diagnostics: any[]
+}
+```
+
+---
+
+### GET /get-data-profile
+
+**Backend Response Structure:**
+```json
+{
+  "accountDetails": {
+    "moAttributes": {
+      "getAccountDetailResponse": {
+        "subscriberNumber": "234...",
+        "balanceAndDate": {
+          "serviceClassCurrent": 98,
+          "currency1": "NGN",
+          "accountValue1": 4840
+        },
+        "dedicatedAccountInformation": [...]
+      }
+    }
+  },
+  "cdrRecords": {
+    "msisdn": "234...",
+    "startDate": "20260210",
+    "endDate": "20260210",
+    "totalRecords": 122,
+    "records": [
+      {
+        "record_type": "DATA",
+        "number_called": "INTERNET",
+        "event_dt": 20260210204927,
+        "charged_amount": "27.963000",
+        "da_details": [...],
+        ...
+      }
+    ]
+  }
+}
+```
+
+**Transformers Applied:**
+1. `transformBalances()` - Extracts balances and DA accounts
+2. Direct extraction of `cdrRecords.records` array
+
+**Frontend Receives:**
+```typescript
+{
+  balances: Balances,
+  cdrRecords: CDRRecord[]
+}
+```
+
+---
+
+### Action Endpoint Responses
+
+**GET /reset-call-profile**
+Returns diagnostic object with action results:
+```json
+{
+  "csp": { "action": "No action needed", "passed": true },
+  "dcf": { "action": "No action needed", "passed": true },
+  "ts21": { "action": "No action needed", "passed": true },
+  ...
+}
+```
+
+The API function checks for any failed actions and throws an error if found.
+
+---
+
+## 📦 Transformer Functions Detail
+
+### 1. transformHLRToVoiceProfile()
+**Purpose:** Converts HLR response to VoiceProfile interface
+
+**Key Mappings:**
+- `hlrProfile.moAttributes.getResponseSubscription` → Root data
+- `msisdnstate` → `msisdnState` (capitalization fix)
+- Numeric fields converted to strings (oick, csp)
+- Call blocking/forwarding services mapped directly
+- Location data nested structure preserved
+
+**Edge Cases Handled:**
+- Missing optional fields get defaults
+- Null values for ts20 in call forwarding
+- Missing dcf service
+
+---
+
+### 2. transformHSSToBrowsingProfile()
+**Purpose:** Combines HSS and HLR data for complete browsing profile
+
+**Data Sources:**
+- **GPRS config:** From `hlrProfile.moAttributes.getResponseSubscription.gprs`
+- **HSS config:** From `hssProfile.moAttributes.getResponseEPSMultiSC`
+
+**Key Mappings:**
+- Numeric IDs converted to strings
+- IP address and MME address preserved
+- Roaming flags extracted
+
+---
+
+### 3. transformToVoLTEProfile()
+**Purpose:** Simplifies complex nested VoLTE service structure
+
+**Complexity Handled:**
+- Extracts from `volteProfile.moAttributes.getResponseSubscription.services`
+- Maps communication diversion rules to condition states
+- Converts ruleDeactivated flags to activated/deactivated strings
+- Handles missing rules gracefully
+
+**Rule Mappings:**
+- `cfb` → busyCondition
+- `cfnr` → noAnswerCondition
+- `cfnrc` → notReachableCondition
+- `cfnl` → notRegisteredCondition
+- `cfu2` → unconditionalCondition
+
+---
+
+### 4. transformOffers()
+**Purpose:** Extract and normalize offer array
+
+**Path:** `accountDetails.moAttributes.getAccountDetailResponse.accountDetails.offerInformation`
+
+**Transformations:**
+- String offerID → Number
+- Date strings preserved
+- Invalid data filtered out
+
+---
+
+### 5. transformBalances()
+**Purpose:** Extract balance and DA information
+
+**Paths:**
+- Main balance: `balanceAndDate` or `accountDetails.balanceAndDate`
+- DAs: `dedicatedAccountInformation` array
+
+**Transformations:**
+- Numeric DA IDs → Strings
+- Missing DA fields get undefined
+- Currency defaults to NGN if missing
+
+---
+
+### 6. extractDiagnostics()
+**Purpose:** Flatten diagnostic categories into array
+
+**Categories:**
+- browsingDiagnostics
+- voiceDiagnostics
+- offerDiagnostics
+
+**Output Format:**
+```typescript
+[
+  { category: 'browsing', key: 'apn', message: 'Customer is on commercial APN 25' },
+  { category: 'voice', key: 'volteCustomer', message: 'VoLTE service activated' }
+]
+```
+
+---
+
+## 🔧 Error Handling
+
+### API Level
+All API functions wrap fetch in try-catch and return standardized response:
+```typescript
+{
+  success: boolean,
+  data?: T,
+  error?: { message: string, code: number }
+}
+```
+
+### Transform Level
+Transformers handle missing data gracefully:
+- Return `null` if critical data missing
+- Provide defaults for optional fields
+- Filter out invalid array items
+
+### Component Level
+Components check response.success before using data:
+```typescript
+if (!response.success || !response.data) {
+  throw new Error(response.error?.message || 'Failed to fetch');
+}
+```
+
+---
+
+## 🚀 Testing Guide
+
+### 1. Test Charging Profile
+```bash
+curl "http://localhost:9041/get-charging-profile?username=Osazuwa&password=Osazuwa@123456&msisdn=2348035890445"
+```
+
+**Expected Frontend Behavior:**
+- Voice tab shows MSISDN, IMSI, CSP, call blocking/forwarding states
+- Browsing tab shows GPRS config and HSS location
+- VoLTE tab shows public ID and call diversion conditions
+- Offers tab displays all active offers with dates
+
+### 2. Test Data Profile
+```bash
+curl "http://localhost:9041/get-data-profile?username=Osazuwa&password=Osazuwa@123456&msisdn=2347062026931&startDate=20260210&endDate=20260210"
+```
+
+**Expected Frontend Behavior:**
+- Balance tab shows MA balance and DA accounts table
+- CDR tabs categorize records by type (Voice, Data, SMS, etc.)
+- Each tab shows summary stats and detailed table
+- Data records show bytes transferred
+
+### 3. Test Reset Call Profile
+```bash
+curl "http://localhost:9041/reset-call-profile?username=Osazuwa&password=Osazuwa@123456&msisdn=2347062026930"
+```
+
+**Expected Frontend Behavior:**
+- Success toast if all diagnostics passed
+- Error toast with details if any action failed
+- Loading state during API call
+
+### 4. Test Reset APN
+```bash
+# Phone APN
+curl "http://localhost:9041/reset-apn?username=Osazuwa&password=Osazuwa@123456&msisdn=2347062026930&isIOT=false"
+
+# IoT APN
+curl "http://localhost:9041/reset-apn?username=Osazuwa&password=Osazuwa@123456&msisdn=2347062026930&isIOT=true"
+```
+
+### 5. Test VoLTE Actions
+```bash
+# Activate
+curl "http://localhost:9041/activate-volte?username=Osazuwa&password=Osazuwa@123456&msisdn=2348035890445"
+
+# Deactivate
+curl "http://localhost:9041/deactivate-volte?username=Osazuwa&password=Osazuwa@123456&msisdn=2347062026931"
+
+# Delete
+curl "http://localhost:9041/delete-volte?username=Osazuwa&password=Osazuwa@123456&msisdn=2348035890445"
+```
+
+---
+
+## 🐛 Common Issues & Solutions
+
+### Issue 1: CORS Errors
+**Symptom:** Browser console shows CORS policy errors
+
+**Solution:** Ensure backend allows origin `http://localhost:5173` (or your dev server port)
+```java
+// Spring Boot example
+@CrossOrigin(origins = "http://localhost:5173")
+```
+
+### Issue 2: Null/Undefined Data in UI
+**Symptom:** Components show "undefined" or blank fields
+
+**Root Cause:** Backend response structure doesn't match expected paths
+
+**Debug Steps:**
+1. Check browser Network tab for actual response
+2. Add console.log in transformers to see raw data
+3. Verify path in transformer matches actual structure
+
+### Issue 3: Date Format Mismatch
+**Symptom:** CDR search fails or returns no data
+
+**Root Cause:** Frontend sends YYYY-MM-DD but backend expects YYYYMMDD
+
+**Solution:** Already handled in `BalanceAndCDR.tsx` line 42-43
+```typescript
+const formattedStartDate = startDate.replace(/-/g, '');
+const formattedEndDate = endDate.replace(/-/g, '');
+```
+
+### Issue 4: Action Buttons Don't Work
+**Symptom:** Clicking reset/activate buttons shows error
+
+**Possible Causes:**
+1. msisdn prop not passed to child component
+2. Backend endpoint returning unexpected format
+3. Network error
+
+**Debug Steps:**
+1. Check console for error messages
+2. Verify msisdn prop in React DevTools
+3. Test endpoint directly with curl
+
+---
+
+## 📊 Data Flow Diagram
+
+```
+User Action (Search/Reset/Activate)
+        ↓
+Component Event Handler
+        ↓
+API Function (api.ts)
+        ↓
+HTTP GET Request → Backend
+        ↓
+Raw JSON Response
+        ↓
+Transformer Functions (apiTransformers.ts)
+        ↓
+TypeScript Interface Objects
+        ↓
+Component State Update
+        ↓
+UI Re-render with Data
+```
+
+---
+
+## 🔐 Security Notes
+
+1. **Credentials:** Currently hardcoded in `AUTH_CREDENTIALS`. For production:
+   - Move to environment variables
+   - Implement proper authentication flow
+   - Use token-based auth instead of username/password in URL
+
+2. **HTTPS:** Use HTTPS in production for API calls
+
+3. **Input Validation:** MSISDN validation happens before API calls
+
+---
+
+## 📝 Environment Configuration
+
+Create `.env` file to override defaults:
+```env
+VITE_API_BASE_URL=http://localhost:9041
+VITE_API_USERNAME=Osazuwa
+VITE_API_PASSWORD=Osazuwa@123456
+```
+
+Update `api.ts` to read from env:
+```typescript
+export const AUTH_CREDENTIALS = {
+  username: import.meta.env.VITE_API_USERNAME || 'Osazuwa',
+  password: import.meta.env.VITE_API_PASSWORD || 'Osazuwa@123456'
+};
+```
+
+---
+
+## ✅ Checklist
+
+- [x] Mock data removed from all components
+- [x] API endpoints configured
+- [x] Data transformers created
+- [x] Charging profile API integrated
+- [x] Data profile API integrated
+- [x] Action APIs integrated (reset, activate, deactivate, delete)
+- [x] Error handling implemented
+- [x] Loading states maintained
+- [x] Toast notifications working
+- [ ] **Backend CORS configured** (your responsibility)
+- [ ] **API endpoints tested** (your responsibility)
+- [ ] **Production environment variables** (future task)
+
+---
+
+## 🎯 Next Steps
+
+1. **Start your backend server** on port 9041
+2. **Test each endpoint** using the curl commands above
+3. **Start frontend dev server**: `npm run dev`
+4. **Test in browser**:
+   - Search for a subscriber in Charging Profile
+   - Search for CDR records in Balance & CDR
+   - Try action buttons (Reset, Activate, etc.)
+5. **Monitor browser console** for any errors
+6. **Check Network tab** to see actual API requests/responses
+
+---
+
+## 📞 Support
+
+If you encounter issues:
+1. Check the browser console for errors
+2. Check the Network tab for failed requests
+3. Compare actual API response with expected structure in this document
+4. Verify transformer paths match your actual response structure
+
+The transformers are designed to be flexible and handle missing data, but if your API structure differs significantly, you may need to adjust the paths in `apiTransformers.ts`.
+
+
+

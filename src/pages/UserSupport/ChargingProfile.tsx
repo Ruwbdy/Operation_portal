@@ -8,7 +8,7 @@ import BrowsingProfileTab from '../../components/user-support/charging-profile/B
 import VoLTEProfileTab from '../../components/user-support/charging-profile/VoLTEProfileTab';
 import OffersTab from '../../components/user-support/charging-profile/OffersTab';
 import { validateMSISDN } from '../../utils/validators';
-import { MOCK_VOICE_PROFILE, MOCK_BROWSING_PROFILE, MOCK_VOLTE_PROFILE, MOCK_OFFERS } from '../../data/mockData';
+import { fetchChargingProfile } from '../../services/api';
 import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer } from '../../types/subscriber';
 
 type TabType = 'voice' | 'browsing' | 'volte' | 'offers';
@@ -39,18 +39,22 @@ export default function ChargingProfile() {
     setIsLoading(true);
     
     try {
-      // Simulate API calls - Replace with actual API calls
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Call the consolidated API
+      const response = await fetchChargingProfile(msisdn);
       
-      // Load mock data
-      setVoiceProfile(MOCK_VOICE_PROFILE);
-      setBrowsingProfile(MOCK_BROWSING_PROFILE);
-      setVolteProfile(MOCK_VOLTE_PROFILE);
-      setOffers(MOCK_OFFERS);
+      if (!response.success || !response.data) {
+        throw new Error(response.error?.message || 'Failed to fetch charging profile');
+      }
+      
+      // Update states with response data
+      setVoiceProfile(response.data.voice || null);
+      setBrowsingProfile(response.data.browsing || null);
+      setVolteProfile(response.data.volte || null);
+      setOffers(response.data.offers || []);
       
       setSuccessToast('Profile data loaded successfully');
     } catch (error) {
-      setErrorToast('Failed to load profile data');
+      setErrorToast(error instanceof Error ? error.message : 'Failed to load profile data');
       console.error('Profile fetch error:', error);
     } finally {
       setIsLoading(false);
@@ -191,6 +195,7 @@ export default function ChargingProfile() {
             {activeTab === 'browsing' && browsingProfile && (
               <BrowsingProfileTab 
                 profile={browsingProfile}
+                msisdn={msisdn}
                 onSuccess={(msg) => setSuccessToast(msg)}
                 onError={(msg) => setErrorToast(msg)}
               />
@@ -198,6 +203,7 @@ export default function ChargingProfile() {
             {activeTab === 'volte' && volteProfile && (
               <VoLTEProfileTab 
                 profile={volteProfile}
+                msisdn={msisdn}
                 onSuccess={(msg) => setSuccessToast(msg)}
                 onError={(msg) => setErrorToast(msg)}
               />

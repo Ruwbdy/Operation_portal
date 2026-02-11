@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Phone, MapPin, Shield, PhoneForwarded, PhoneIncoming, PhoneOff, AlertCircle } from 'lucide-react';
 import ProfileCard from '../../ui/ProfileCard';
 import DataRow from '../../ui/DataRow';
+import { resetCallProfile } from '../../../services/api';
 import type { VoiceProfile } from '../../../types/subscriber';
 
 interface VoiceProfileTabProps {
@@ -16,11 +17,15 @@ export default function VoiceProfileTab({ profile, onSuccess, onError }: VoicePr
   const handleResetCallProfile = async () => {
     setIsProcessing(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const response = await resetCallProfile(profile.msisdn);
+      
+      if (!response.success) {
+        throw new Error(response.error?.message || 'Failed to reset call profile');
+      }
+      
       onSuccess('Call profile reset successfully');
     } catch (error) {
-      onError('Failed to reset call profile');
+      onError(error instanceof Error ? error.message : 'Failed to reset call profile');
     } finally {
       setIsProcessing(false);
     }
@@ -62,10 +67,10 @@ export default function VoiceProfileTab({ profile, onSuccess, onError }: VoicePr
               </h3>
               <ul className="space-y-1 text-xs font-bold text-gray-600">
                 {hasCallBlockingIssues && (
-                  <li>• Active call blocking detected on some services</li>
+                  <li>â€¢ Active call blocking detected on some services</li>
                 )}
                 {hasForwardingActive && (
-                  <li>• Call forwarding is currently active</li>
+                  <li>â€¢ Call forwarding is currently active</li>
                 )}
               </ul>
             </div>
