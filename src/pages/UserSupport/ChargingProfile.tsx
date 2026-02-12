@@ -7,8 +7,9 @@ import VoiceProfileTab from '../../components/user-support/charging-profile/Voic
 import BrowsingProfileTab from '../../components/user-support/charging-profile/BrowsingProfileTab';
 import VoLTEProfileTab from '../../components/user-support/charging-profile/VolteProfileTab';
 import OffersTab from '../../components/user-support/charging-profile/OffersTab';
+import DiagnosticsPanel from '../../components/user-support/charging-profile/DiagnosticsPanel';
 import { validateMSISDN } from '../../utils/validators';
-import { fetchChargingProfile } from '../../services/api';
+import { fetchChargingProfile } from '../../services/api_services';
 import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Diagnostics } from '../../services/data_interface';
 
 type TabType = 'voice' | 'browsing' | 'volte' | 'offers';
@@ -24,6 +25,7 @@ export default function ChargingProfile() {
   const [browsingProfile, setBrowsingProfile] = useState<BrowsingProfile | null>(null);
   const [volteProfile, setVolteProfile] = useState<VoLTEProfile | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
+  const [diagnostics, setDiagnostics] = useState<Diagnostics[]>([]); // Add this line
   
   // Toast states
   const [successToast, setSuccessToast] = useState<string | null>(null);
@@ -51,6 +53,7 @@ export default function ChargingProfile() {
       setBrowsingProfile(response.data.browsing || null);
       setVolteProfile(response.data.volte || null);
       setOffers(response.data.offers || []);
+      setDiagnostics(response.data.diagnostics || []);
       
       setSuccessToast('Profile data loaded successfully');
     } catch (error) {
@@ -182,6 +185,9 @@ export default function ChargingProfile() {
           </div>
         )}
 
+        {/* Diagnostics Panel - Add this section */}
+        {hasData && <DiagnosticsPanel diagnostics={diagnostics} />}
+
         {/* Tab Content */}
         {hasData && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -200,7 +206,7 @@ export default function ChargingProfile() {
                 onError={(msg) => setErrorToast(msg)}
               />
             )}
-            {activeTab === 'volte' && volteProfile && (
+            {activeTab === 'volte' && (
               <VoLTEProfileTab 
                 profile={volteProfile}
                 msisdn={msisdn}

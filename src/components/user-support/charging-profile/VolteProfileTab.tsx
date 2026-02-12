@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Radio, PhoneCall, Power, Trash2 } from 'lucide-react';
 import ProfileCard from '../../ui/ProfileCard';
 import DataRow from '../../ui/DataRow';
-import { activateVoLTE, deactivateVoLTE, deleteVoLTE } from '../../../services/api';
+import { activateVoLTE, deactivateVoLTE, deleteVoLTE } from '../../../services/api_services';
 import type { VoLTEProfile } from '../../../services/data_interface';
 
 interface VoLTEProfileTabProps {
-  profile: VoLTEProfile;
+  profile: VoLTEProfile | null;
   msisdn: string;
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
@@ -25,6 +25,7 @@ export default function VoLTEProfileTab({ profile, msisdn, onSuccess, onError }:
       }
       
       onSuccess('VoLTE activated successfully');
+      // You might want to trigger a refresh here to reload the profile
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Failed to activate VoLTE');
     } finally {
@@ -66,8 +67,60 @@ export default function VoLTEProfileTab({ profile, msisdn, onSuccess, onError }:
     }
   };
 
+  if (!profile) {
+    return (
+      <div className="space-y-8">
+        <div className="bg-gradient-to-br from-gray-50 to-purple-50 p-10 rounded-[2rem] border-2 border-dashed border-purple-200 text-center shadow-sm">
+          <Radio className="mx-auto mb-4 text-purple-400" size={40} />
+          <h3 className="text-lg font-black uppercase tracking-wider text-gray-700 mb-3">
+            VoLTE is Not Active
+          </h3>
+          <p className="text-sm text-gray-500 mb-8">
+            This subscriber does not currently have an active VoLTE profile.
+          </p>
+
+          <button
+            onClick={handleActivateVoLTE}
+            disabled={isProcessing}
+            className="bg-black text-[#FFCC00] px-10 py-6 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-transparent hover:border-[#FFCC00]"
+          >
+            <Power className="mx-auto mb-2" size={22} />
+            {isProcessing ? 'Processing...' : 'Activate VoLTE'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
+      {/* Action Buttons */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+        <button
+          onClick={handleActivateVoLTE}
+          disabled={isProcessing}
+          className="bg-black text-[#FFCC00] p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-900 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-transparent hover:border-[#FFCC00]"
+        >
+          <Power className="mx-auto mb-3" size={24} />
+          {isProcessing ? 'Processing...' : 'Activate VoLTE'}
+        </button>
+        <button
+          onClick={handleDeactivateVoLTE}
+          disabled={isProcessing}
+          className="bg-white text-black p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-50 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-gray-200 hover:border-amber-500"
+        >
+          <Power className="mx-auto mb-3" size={24} />
+          {isProcessing ? 'Processing...' : 'Deactivate VoLTE'}
+        </button>
+        <button
+          onClick={handleDeleteVoLTE}
+          disabled={isProcessing}
+          className="bg-red-600 text-white p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-red-700 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-transparent hover:border-red-500"
+        >
+          <Trash2 className="mx-auto mb-3" size={24} />
+          {isProcessing ? 'Processing...' : 'Delete VoLTE'}
+        </button>
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* VoLTE Identity */}
         <ProfileCard
@@ -194,34 +247,6 @@ export default function VoLTEProfileTab({ profile, msisdn, onSuccess, onError }:
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-        <button
-          onClick={handleActivateVoLTE}
-          disabled={isProcessing}
-          className="bg-black text-[#FFCC00] p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-900 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-transparent hover:border-[#FFCC00]"
-        >
-          <Power className="mx-auto mb-3" size={24} />
-          {isProcessing ? 'Processing...' : 'Activate VoLTE'}
-        </button>
-        <button
-          onClick={handleDeactivateVoLTE}
-          disabled={isProcessing}
-          className="bg-white text-black p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-50 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-gray-200 hover:border-amber-500"
-        >
-          <Power className="mx-auto mb-3" size={24} />
-          {isProcessing ? 'Processing...' : 'Deactivate VoLTE'}
-        </button>
-        <button
-          onClick={handleDeleteVoLTE}
-          disabled={isProcessing}
-          className="bg-red-600 text-white p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-red-700 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-transparent hover:border-red-500"
-        >
-          <Trash2 className="mx-auto mb-3" size={24} />
-          {isProcessing ? 'Processing...' : 'Delete VoLTE'}
-        </button>
       </div>
     </div>
   );

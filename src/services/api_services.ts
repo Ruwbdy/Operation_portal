@@ -1,15 +1,15 @@
 // API Service - Handles all API calls and data transformation
-import { API_ENDPOINTS } from './endpoints';
+import { API_ENDPOINTS } from './api_endpoints';
 import {
   transformHLRToVoiceProfile,
   transformHSSToBrowsingProfile,
   transformVoLTEProfile,
   transformAccountDetailToOffers,
-  transformAccountDetailToBalances,
+  transformAccountDetailToMABalance,
+  transformAccountDetailToDABalances,
   transformCDRToCDRRecords,
   extractDiagnostics
 } from './apiTransformers';
-import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Balances, CDRRecord } from './data_interface';
 import type { 
   ApiError, 
   ApiResponse, 
@@ -114,7 +114,8 @@ export async function fetchDataProfile(
     const rawData = await response.json();
 
     // Transform balances if present
-    const balances = transformAccountDetailToBalances(rawData.accountDetails);
+    const balance = transformAccountDetailToMABalance(rawData.accountDetails);
+    const dabalances = transformAccountDetailToDABalances(rawData.accountDetails);
     
     // Transform CDR records using the new transformer
     const cdrRecords = transformCDRToCDRRecords(rawData.cdrRecords?.records || []);
@@ -122,7 +123,8 @@ export async function fetchDataProfile(
     return {
       success: true,
       data: {
-        balances: balances || undefined,
+        balance: balance || undefined,
+        dabalances: dabalances || undefined,
         cdrRecords: cdrRecords
       }
     };

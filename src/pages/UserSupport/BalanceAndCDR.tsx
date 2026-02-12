@@ -8,9 +8,8 @@ import CDRTable from '../../components/user-support/balance-cdr/CDRTable';
 import CDRSummary from '../../components/user-support/balance-cdr/CDRSummary';
 import { validateMSISDN, validateDateRange } from '../../utils/validators';
 import { parseCDRRecords } from '../../services/cdrParser';
-import { fetchDataProfile } from '../../services/api';
-import type { Balances } from '../../services/data_interface';
-import type { CDRTabType, CategorizedCDR, CDRSummary as CDRSummaryType } from '../../services/api_definitions';
+import { fetchDataProfile } from '../../services/api_services';
+import type { Balance, DedicatedAccount, CDRTabType, CategorizedCDR, CDRSummary as CDRSummaryType } from '../../services/data_interface';
 
 export default function BalanceAndCDR() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -21,7 +20,8 @@ export default function BalanceAndCDR() {
   const [isLoading, setIsLoading] = useState(false);
   
   // Data states
-  const [balances, setBalances] = useState<Balances | null>(null);
+  const [balance, setBalances] = useState<Balance | null>(null);
+  const [dabalance, setDABalances] = useState<DedicatedAccount | null>(null);
   const [categorizedCDR, setCategorizedCDR] = useState<CategorizedCDR | null>(null);
   const [summaries, setSummaries] = useState<Record<string, CDRSummaryType> | null>(null);
   
@@ -57,7 +57,7 @@ export default function BalanceAndCDR() {
       }
       
       // Update balances
-      setBalances(response.data.balances || null);
+      setBalances(response.data.balance || null);
       
       // Parse and categorize CDR records
       if (response.data.cdrRecords && response.data.cdrRecords.length > 0) {
@@ -122,7 +122,7 @@ export default function BalanceAndCDR() {
     { id: 'other' as CDRTabType, label: 'Other Record', icon: <FileText size={14} />, color: 'text-gray-600', count: categorizedCDR?.other.length || 0 }
   ];
 
-  const hasData = balances !== null || categorizedCDR !== null;
+  const hasData = balance !== null || dabalance !== null || categorizedCDR !== null;
 
   return (
     <div className="flex min-h-screen bg-[#F8F9FA] selection:bg-[#FFCC00] selection:text-black font-sans">
@@ -266,8 +266,8 @@ export default function BalanceAndCDR() {
         {/* Tab Content */}
         {hasData && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {activeTab === 'balance' && balances && (
-              <BalanceTab balances={balances} />
+            {activeTab === 'balance' && balance && dabalance &&(
+              <BalanceTab balance={balance} and dabalance/>
             )}
             {activeTab === 'voice' && categorizedCDR && summaries && (
               <>

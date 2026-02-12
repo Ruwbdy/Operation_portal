@@ -94,8 +94,16 @@ export interface Offer {
   expiryDate: string;
 }
 
-export interface Diagnostics{
-  diagnostics: any;
+export interface Diagnostics {
+  category: 'voice' | 'browsing' | 'offer';
+  key: string;
+  message: string;
+}
+
+export interface DiagnosticsData {
+  voiceDiagnostics?: Record<string, string>;
+  browsingDiagnostics?: Record<string, string>;
+  offerDiagnostics?: Record<string, string>;
 }
 
 export interface DedicatedAccount {
@@ -107,13 +115,12 @@ export interface DedicatedAccount {
   dedicatedAccountUnitType?: number;
 }
 
-export interface Balances {
+export interface Balance {
   subscriberNumber: string;
   serviceClassCurrent: number;
   currency1: string;
   accountValue1: number;
   expiryDate: string;
-  dedicatedAccounts: DedicatedAccount[];
 }
 
 // CDR Record Type Definitions
@@ -140,4 +147,41 @@ export interface CDRRecord {
   operator: string;
   bytes_received_qty: number;
   bytes_sent_qty: number;
+}
+
+export interface CDRSummary {
+  totalTransactions: number;
+  startingBalance: number;
+  endingBalance: number;
+  totalCharged: number;
+  totalDuration?: number; // For voice
+  totalData?: number; // For data (in bytes)
+  avgCallLength?: number; // For voice
+  totalRecharges?: number; // For credit
+  netChange?: number; // For DA adjustments
+}
+
+export interface CategorizedCDR {
+  all: CDRRecord[];
+  voice: CDRRecord[];
+  data: CDRRecord[];
+  sms: CDRRecord[];
+  credit: CDRRecord[];
+  daAdjustment: CDRRecord[];
+  other: CDRRecord[];
+}
+
+export type CDRTabType = 'balance' | 'voice' | 'data' | 'sms' | 'credit' | 'daAdjustment' | 'other';
+
+export interface CDRApiResponse {
+  APIStatus: {
+    msisdn: string;
+    requestId: string;
+    dateRange: string[];
+    maxRecs: number;
+    numRecs: number;
+    statusCode: number;
+    statusMsg: string;
+  };
+  APIData: CDRRecord[];
 }

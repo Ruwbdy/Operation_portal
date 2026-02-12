@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Globe, Smartphone, Server, Wifi } from 'lucide-react';
 import ProfileCard from '../../ui/ProfileCard';
 import DataRow from '../../ui/DataRow';
-import { resetAPN } from '../../../services/api';
+import { resetAPN } from '../../../services/api_services';
 import type { BrowsingProfile } from '../../../services/data_interface';
 
 interface BrowsingProfileTabProps {
@@ -51,6 +51,26 @@ export default function BrowsingProfileTab({ profile, msisdn, onSuccess, onError
 
   return (
     <div className="space-y-8">
+      {/* Action Buttons */}
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+        <button
+          onClick={handleResetAPNPhone}
+          disabled={isProcessing}
+          className="bg-black text-[#FFCC00] p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-900 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-transparent hover:border-[#FFCC00]"
+        >
+          <Smartphone className="mx-auto mb-3" size={24} />
+          {isProcessing ? 'Processing...' : 'Reset Browsing - Mobile'}
+        </button>
+        <button
+          onClick={handleResetAPNIoT}
+          disabled={isProcessing}
+          className="bg-white text-black p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-50 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-gray-200 hover:border-[#FFCC00]"
+        >
+          <Wifi className="mx-auto mb-3" size={24} />
+          {isProcessing ? 'Processing...' : 'Reset Browsing - IoT'}
+        </button>
+      </div> */}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* GPRS Configuration */}
         <ProfileCard
@@ -132,26 +152,6 @@ export default function BrowsingProfileTab({ profile, msisdn, onSuccess, onError
             </div>
           </div>
         </ProfileCard>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-        <button
-          onClick={handleResetAPNPhone}
-          disabled={isProcessing}
-          className="bg-black text-[#FFCC00] p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-900 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-transparent hover:border-[#FFCC00]"
-        >
-          <Smartphone className="mx-auto mb-3" size={24} />
-          {isProcessing ? 'Processing...' : 'Reset Browsing - Mobile'}
-        </button>
-        <button
-          onClick={handleResetAPNIoT}
-          disabled={isProcessing}
-          className="bg-white text-black p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-50 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-gray-200 hover:border-[#FFCC00]"
-        >
-          <Wifi className="mx-auto mb-3" size={24} />
-          {isProcessing ? 'Processing...' : 'Reset Browsing - IoT'}
-        </button>
       </div>
     </div>
   );

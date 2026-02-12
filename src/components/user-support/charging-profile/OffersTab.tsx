@@ -135,28 +135,6 @@ export default function OffersTab({ offers }: OffersTabProps) {
           </table>
         </div>
       </div>
-
-      {/* Resolution Notes */}
-      <div className="bg-blue-50 border-2 border-blue-200 p-8 rounded-[2rem]">
-        <div className="flex items-start space-x-4">
-          <div className="bg-blue-500 p-3 rounded-xl shrink-0">
-            <Gift size={20} className="text-white" />
-          </div>
-          <div>
-            <h3 className="text-sm font-black text-black uppercase tracking-wide mb-3">
-              Offers Analysis
-            </h3>
-            <ul className="space-y-2 text-xs font-bold text-gray-600">
-              <li>• Total of {offers.length} offers configured for this subscriber</li>
-              <li>• {permanentOffers.length} permanent offers (no expiry)</li>
-              <li>• {activeOffers.length} time-bound offers with specific expiry dates</li>
-              {activeOffers.some(o => new Date(o.expiryDate) < new Date()) && (
-                <li className="text-red-600">• Some offers have expired and may need renewal</li>
-              )}
-            </ul>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

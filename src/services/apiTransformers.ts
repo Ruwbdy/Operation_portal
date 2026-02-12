@@ -1,7 +1,7 @@
 // Data Transformers for API Responses
 // Converts backend API response structures to frontend TypeScript interfaces
 
-import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Balances, DedicatedAccount, CDRRecord } from './data_interface';
+import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Balance, DedicatedAccount, CDRRecord } from './data_interface';
 
 /**
  * Transform HLR profile from API response to VoiceProfile interface
@@ -34,11 +34,11 @@ export function transformHLRToVoiceProfile(hlrData: any): VoiceProfile | null {
       cfnry: data.cfnry || { provisionState: 0, ts10: { activationState: 0 }, ts60: { activationState: 0 }, bs20: { activationState: 0 }, bs30: { activationState: 0 } },
       caw: data.caw || { provisionState: 0, ts10: { activationState: 0 }, ts60: { activationState: 0 }, bs20: { activationState: 0 }, bs30: { activationState: 0 } },
       dcf: data.dcf || {
-        provisionState: 1,
-        ts10: { activationState: 1, fnum: '234612', noReplyTime: 15 },
-        ts60: { activationState: 1, fnum: '234612', noReplyTime: 15 },
-        bs20: { activationState: 1, fnum: '234612', noReplyTime: 15 },
-        bs30: { activationState: 1, fnum: '234612', noReplyTime: 15 }
+        provisionState: 0,
+        ts10: { activationState: 0, fnum: '', noReplyTime: 15 },
+        ts60: { activationState: 0, fnum: '', noReplyTime: 15 },
+        bs20: { activationState: 0, fnum: '', noReplyTime: 15 },
+        bs30: { activationState: 0, fnum: '', noReplyTime: 15 }
       }
     },
     locationData: {
@@ -151,7 +151,7 @@ export function transformAccountDetailToOffers(accountData: any): Offer[] {
 /**
  * Transform balances from account details
  */
-export function transformAccountDetailToBalances(accountData: any): Balances | null {
+export function transformAccountDetailToMABalance(accountData: any): Balance | null {
   const accDetails = accountData?.moAttributes?.getAccountDetailResponse;
   
   if (!accDetails) {
@@ -159,23 +159,34 @@ export function transformAccountDetailToBalances(accountData: any): Balances | n
   }
 
   const balanceData = accDetails.balanceAndDate || accDetails.accountDetails?.balanceAndDate;
-  const dedicatedAccs = accDetails.dedicatedAccountInformation || [];
 
   return {
     subscriberNumber: accDetails.subscriberNumber || '',
     serviceClassCurrent: balanceData?.serviceClassCurrent || 0,
     currency1: balanceData?.currency1 || 'NGN',
     accountValue1: balanceData?.accountValue1 || 0,
-    expiryDate: balanceData?.expiryDate || '',
-    dedicatedAccounts: dedicatedAccs.map((da: any) => ({
+    expiryDate: balanceData?.expiryDate || ''
+  };
+}
+
+/**
+ * Transform offers from account details
+ */
+export function transformAccountDetailToDABalances(accountData: any): DedicatedAccount[] {
+  const dedicatedAcc = accountData?.moAttributes?.getAccountDetailResponse?.balanceAndDate?.dedicatedAccountInformation;
+  
+  if (!Array.isArray(dedicatedAcc)) {
+    return [];
+  }
+
+  return dedicatedAcc.map((da: any) => ({
       dedicatedAccountID: da.dedicatedAccountID?.toString() || '0',
       dedicatedAccountValue1: da.dedicatedAccountValue1 || 0,
       expiryDate: da.expiryDate || '',
       startDate: da.startDate || undefined,
       dedicatedAccountActiveValue1: da.dedicatedAccountActiveValue1 || undefined,
       dedicatedAccountUnitType: da.dedicatedAccountUnitType || undefined
-    }))
-  };
+  }));
 }
 
 /**
@@ -219,12 +230,12 @@ export function extractDiagnostics(diagnosticsData: any): any[] {
 
   const diagnostics: any[] = [];
 
-  // Add browsing diagnostics
-  if (diagnosticsData.browsingDiagnostics) {
-    Object.entries(diagnosticsData.browsingDiagnostics).forEach(([key, value]) => {
+  // Add voice diagnostics
+  if (diagnosticsData.voiceDiagnostics) {
+    Object.entries(diagnosticsData.voiceDiagnostics).forEach(([key, value]) => {
       if (value) {
         diagnostics.push({
-          category: 'browsing',
+          category: 'voice',
           key,
           message: value
         });
@@ -232,12 +243,12 @@ export function extractDiagnostics(diagnosticsData: any): any[] {
     });
   }
 
-  // Add voice diagnostics
-  if (diagnosticsData.voiceDiagnostics) {
-    Object.entries(diagnosticsData.voiceDiagnostics).forEach(([key, value]) => {
+  // Add browsing diagnostics
+  if (diagnosticsData.browsingDiagnostics) {
+    Object.entries(diagnosticsData.browsingDiagnostics).forEach(([key, value]) => {
       if (value) {
         diagnostics.push({
-          category: 'voice',
+          category: 'browsing',
           key,
           message: value
         });

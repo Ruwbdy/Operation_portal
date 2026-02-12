@@ -1,7 +1,7 @@
 import React from 'react';
 import { Activity, TrendingUp, TrendingDown, Clock, Database } from 'lucide-react';
 import { formatBytes } from '../../../services/cdrParser';
-import type { CDRSummary as CDRSummaryType, CDRTabType } from '../../../services/api_definitions';
+import type { CDRSummary as CDRSummaryType, CDRTabType } from '../../../services/data_interface';
 
 interface CDRSummaryProps {
   summary: CDRSummaryType;

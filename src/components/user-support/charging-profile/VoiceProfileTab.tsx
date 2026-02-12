@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Phone, MapPin, Shield, PhoneForwarded, PhoneIncoming, PhoneOff, AlertCircle } from 'lucide-react';
 import ProfileCard from '../../ui/ProfileCard';
 import DataRow from '../../ui/DataRow';
-import { resetCallProfile } from '../../../services/api';
+import { resetCallProfile } from '../../../services/api_services';
 import type { VoiceProfile } from '../../../services/data_interface';
 
 interface VoiceProfileTabProps {
@@ -54,30 +54,6 @@ export default function VoiceProfileTab({ profile, onSuccess, onError }: VoicePr
 
   return (
     <div className="space-y-8">
-      {/* Diagnostic Summary */}
-      {(hasCallBlockingIssues || hasForwardingActive) && (
-        <div className="bg-amber-50 border-2 border-amber-200 p-8 rounded-[2rem]">
-          <div className="flex items-start space-x-4">
-            <div className="bg-amber-500 p-3 rounded-xl shrink-0">
-              <AlertCircle size={20} className="text-white" />
-            </div>
-            <div>
-              <h3 className="text-sm font-black text-black uppercase tracking-wide mb-2">
-                Diagnostic Summary
-              </h3>
-              <ul className="space-y-1 text-xs font-bold text-gray-600">
-                {hasCallBlockingIssues && (
-                  <li>â€¢ Active call blocking detected on some services</li>
-                )}
-                {hasForwardingActive && (
-                  <li>â€¢ Call forwarding is currently active</li>
-                )}
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Action Buttons */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
         <button
@@ -89,7 +65,7 @@ export default function VoiceProfileTab({ profile, onSuccess, onError }: VoicePr
           {isProcessing ? 'Processing...' : 'Reset Call Profile'}
         </button>
         <button
-          onClick={handleResetCSP}
+          onClick={handleResetCallProfile}
           disabled={isProcessing}
           className="bg-white text-black p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-50 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-gray-200 hover:border-[#FFCC00]"
         >

@@ -1,3 +1,7 @@
+// Import types from data_interface for response structures
+import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Diagnostics, Balance, DedicatedAccount, CDRRecord } from './data_interface';
+
+
 // API Request/Response Type Definitions
 export interface ApiError {
   message: string;
@@ -32,9 +36,6 @@ export interface BatchJobResponse {
   };
 }
 
-// Import types from data_interface for response structures
-import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Diagnostics, Balances, CDRRecord } from './data_interface';
-
 // Charging Profile API Response
 export interface ChargingProfileResponse {
   voice?: VoiceProfile;
@@ -46,51 +47,7 @@ export interface ChargingProfileResponse {
 
 // Data Profile API Response
 export interface DataProfileResponse {
-  balances?: Balances;
+  balance?: Balance;
+  dabalances?: DedicatedAccount;
   cdrRecords?: CDRRecord[];
-}
-
-// CDR Record Type Definitions
-export interface DADetail {
-  account_id: string;
-  amount_before: number;
-  amount_after: number;
-  amount_charged: number;
-}
-
-export interface CDRSummary {
-  totalTransactions: number;
-  startingBalance: number;
-  endingBalance: number;
-  totalCharged: number;
-  totalDuration?: number; // For voice
-  totalData?: number; // For data (in bytes)
-  avgCallLength?: number; // For voice
-  totalRecharges?: number; // For credit
-  netChange?: number; // For DA adjustments
-}
-
-export interface CategorizedCDR {
-  all: CDRRecord[];
-  voice: CDRRecord[];
-  data: CDRRecord[];
-  sms: CDRRecord[];
-  credit: CDRRecord[];
-  daAdjustment: CDRRecord[];
-  other: CDRRecord[];
-}
-
-export type CDRTabType = 'balance' | 'voice' | 'data' | 'sms' | 'credit' | 'daAdjustment' | 'other';
-
-export interface CDRApiResponse {
-  APIStatus: {
-    msisdn: string;
-    requestId: string;
-    dateRange: string[];
-    maxRecs: number;
-    numRecs: number;
-    statusCode: number;
-    statusMsg: string;
-  };
-  APIData: CDRRecord[];
 }

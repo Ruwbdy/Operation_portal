@@ -1,6 +1,5 @@
 // CDR Records Parser
-import type { CDRRecord } from './data_interface';
-import type { CDRSummary, CategorizedCDR, CDRApiResponse } from './api_definitions';
+import type { CDRRecord, CDRSummary, CategorizedCDR, CDRApiResponse } from './data_interface';
 
 /**
  * Parse and categorize CDR records from API response
