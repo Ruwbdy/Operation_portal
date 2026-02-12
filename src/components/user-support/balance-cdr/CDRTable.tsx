@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatCDRDateTime } from '../../../utils/dateFormatter';
 import { formatBytes } from '../../../services/cdrParser';
-import type { CDRRecord,CDRTabType } from '../../../services/data_interface';
+import { getDADescription } from '../../../services/daMapping';
+import type { CDRRecord, CDRTabType } from '../../../services/data_interface';
 
 interface CDRTableProps {
   records: CDRRecord[];
@@ -17,6 +18,7 @@ type Column<T> = {
   sortable?: boolean;
   filterable?: boolean;
   accessor?: (record: T) => any;
+  minWidth?: string; // Add minimum width for columns
 };
 
 export default function CDRTable({ records, type }: CDRTableProps) {
@@ -79,22 +81,22 @@ export default function CDRTable({ records, type }: CDRTableProps) {
 
   // Define columns based on type
   const getColumns = (): Column<CDRRecord>[] => {
-    const baseColumns = [
-      { key: 'event_dt', label: 'Date/Time', sortable: true, filterable: true },
-      { key: 'number_called', label: 'Number Called', sortable: true, filterable: true },
-      { key: 'charged_amount', label: 'Charged', sortable: true, filterable: true },
-      { key: 'balance_before_amt', label: 'MA Bal Before', sortable: true, filterable: true },
-      { key: 'balance_after_amt', label: 'MA Bal After', sortable: true, filterable: true }
+    const baseColumns: Column<CDRRecord>[] = [
+      { key: 'event_dt', label: 'Date/Time', sortable: true, filterable: true, minWidth: '160px' },
+      { key: 'number_called', label: 'Number Called', sortable: true, filterable: true, minWidth: '140px' },
+      { key: 'charged_amount', label: 'Charged', sortable: true, filterable: true, minWidth: '120px' },
+      { key: 'balance_before_amt', label: 'MA Bal Before', sortable: true, filterable: true, minWidth: '130px' },
+      { key: 'balance_after_amt', label: 'MA Bal After', sortable: true, filterable: true, minWidth: '130px' }
     ];
 
     if (type === 'voice') {
       return [
         ...baseColumns.slice(0, 2),
-        { key: 'call_duration_qty', label: 'Duration (s)', sortable: true, filterable: true },
+        { key: 'call_duration_qty', label: 'Duration (s)', sortable: true, filterable: true, minWidth: '110px' },
         ...baseColumns.slice(2),
-        { key: 'discount_amt', label: 'Discount Amt', sortable: false, filterable: false },
-        { key: 'country', label: 'Country', sortable: true, filterable: true },
-        { key: 'operator', label: 'Operator', sortable: true, filterable: true }
+        { key: 'discount_amt', label: 'Discount Amt', sortable: false, filterable: false, minWidth: '120px' },
+        { key: 'country', label: 'Country', sortable: true, filterable: true, minWidth: '100px' },
+        { key: 'operator', label: 'Operator', sortable: true, filterable: true, minWidth: '120px' }
       ];
     }
 
@@ -102,22 +104,61 @@ export default function CDRTable({ records, type }: CDRTableProps) {
       return [
         ...baseColumns.slice(0, 2),
         ...baseColumns.slice(2),
-        { key: 'da_account_id', label: 'DA ID', sortable: true, filterable: true, accessor: (r) => r.da_details?.[0]?.account_id ?? '-'},
-        { key: 'da_amount_before', label: 'DA Amt Before', sortable: true, filterable: true, accessor: (r) => r.da_details?.[0]?.amount_before ?? 0},
-        { key: 'da_amount_after', label: 'DA Amt After', sortable: true, filterable: true, accessor: (r) => r.da_details?.[0]?.amount_after ?? 0},
-        { key: 'da_amount_charged', label: 'DA Amt Chg', sortable: true, filterable: true, accessor: (r) => r.da_details?.[0]?.amount_charged ?? 0},
-        { key: 'bytes_received_qty', label: 'Bytes RX', sortable: true, filterable: false },
-        { key: 'bytes_sent_qty', label: 'Bytes TX', sortable: true, filterable: false },
-        { key: 'country', label: 'Country', sortable: true, filterable: true },
-        { key: 'operator', label: 'Operator', sortable: true, filterable: true }
+        { 
+          key: 'da_account_id', 
+          label: 'DA ID', 
+          sortable: true, 
+          filterable: true, 
+          minWidth: '90px',
+          accessor: (r) => r.da_details?.[0]?.account_id ?? '-'
+        },
+        { 
+          key: 'da_description', 
+          label: 'DA Description', 
+          sortable: false, 
+          filterable: true, 
+          minWidth: '180px',
+          accessor: (r) => {
+            const daId = r.da_details?.[0]?.account_id;
+            return daId ? getDADescription(daId) : '-';
+          }
+        },
+        { 
+          key: 'da_amount_before', 
+          label: 'DA Amt Before', 
+          sortable: true, 
+          filterable: true, 
+          minWidth: '130px',
+          accessor: (r) => r.da_details?.[0]?.amount_before ?? 0
+        },
+        { 
+          key: 'da_amount_after', 
+          label: 'DA Amt After', 
+          sortable: true, 
+          filterable: true, 
+          minWidth: '130px',
+          accessor: (r) => r.da_details?.[0]?.amount_after ?? 0
+        },
+        { 
+          key: 'da_amount_charged', 
+          label: 'DA Amt Chg', 
+          sortable: true, 
+          filterable: true, 
+          minWidth: '120px',
+          accessor: (r) => r.da_details?.[0]?.amount_charged ?? 0
+        },
+        { key: 'bytes_received_qty', label: 'Bytes RX', sortable: true, filterable: false, minWidth: '110px' },
+        { key: 'bytes_sent_qty', label: 'Bytes TX', sortable: true, filterable: false, minWidth: '110px' },
+        { key: 'country', label: 'Country', sortable: true, filterable: true, minWidth: '100px' },
+        { key: 'operator', label: 'Operator', sortable: true, filterable: true, minWidth: '120px' }
       ];
     }
 
     if (type === 'sms') {
       return [
         ...baseColumns,
-        { key: 'country', label: 'Country', sortable: true, filterable: true },
-        { key: 'operator', label: 'Operator', sortable: true, filterable: true }
+        { key: 'country', label: 'Country', sortable: true, filterable: true, minWidth: '100px' },
+        { key: 'operator', label: 'Operator', sortable: true, filterable: true, minWidth: '120px' }
       ];
     }
 
@@ -160,7 +201,6 @@ export default function CDRTable({ records, type }: CDRTableProps) {
     return String(value ?? '-');
   };
 
-
   return (
     <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden">
       <div className="p-8 border-b border-gray-100 flex justify-between items-center">
@@ -187,7 +227,11 @@ export default function CDRTable({ records, type }: CDRTableProps) {
           <thead>
             <tr className="bg-gray-50">
               {columns.map((col) => (
-                <th key={col.key} className="px-6 py-4 text-left">
+                <th 
+                  key={col.key} 
+                  className="px-6 py-4 text-left"
+                  style={{ minWidth: col.minWidth || 'auto' }}
+                >
                   <div className="flex flex-col space-y-2">
                     <button
                       onClick={() => col.sortable && handleSort(col.key)}
@@ -195,14 +239,14 @@ export default function CDRTable({ records, type }: CDRTableProps) {
                         col.sortable ? 'cursor-pointer hover:text-[#FFCC00]' : ''
                       } transition-colors`}
                     >
-                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">
+                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider whitespace-nowrap">
                         {col.label}
                       </span>
                       {col.sortable && sortColumn === col.key && (
                         sortDirection === 'asc' ? (
-                          <ChevronUp size={12} className="text-[#FFCC00]" />
+                          <ChevronUp size={12} className="text-[#FFCC00] flex-shrink-0" />
                         ) : sortDirection === 'desc' ? (
-                          <ChevronDown size={12} className="text-[#FFCC00]" />
+                          <ChevronDown size={12} className="text-[#FFCC00] flex-shrink-0" />
                         ) : null
                       )}
                     </button>
@@ -213,7 +257,7 @@ export default function CDRTable({ records, type }: CDRTableProps) {
                           value={filters[col.key] || ''}
                           onChange={(e) => handleFilterChange(col.key, e.target.value)}
                           placeholder="Filter..."
-                          className="w-full px-2 py-1 text-[10px] bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#FFCC00] placeholder:text-gray-300"
+                          className="w-full min-w-[100px] px-2 py-1 text-[10px] bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#FFCC00] placeholder:text-gray-300"
                         />
                         <Filter size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
                       </div>
@@ -232,6 +276,7 @@ export default function CDRTable({ records, type }: CDRTableProps) {
                       col.key === 'charged_amount' ? 'text-red-600' :
                       col.key === 'balance_after_amt' ? 'text-green-600' :
                       col.key === 'event_dt' ? 'text-blue-600' :
+                      col.key === 'da_description' ? 'text-purple-600' :
                       'text-gray-700'
                     }`}>
                       {renderCellValue(record, col)}

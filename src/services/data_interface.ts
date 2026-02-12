@@ -113,6 +113,7 @@ export interface DedicatedAccount {
   startDate?: string;
   dedicatedAccountActiveValue1?: number;
   dedicatedAccountUnitType?: number;
+  description?: string;
 }
 
 export interface Balance {

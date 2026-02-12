@@ -9,6 +9,7 @@ import CDRSummary from '../../components/user-support/balance-cdr/CDRSummary';
 import { validateMSISDN, validateDateRange } from '../../utils/validators';
 import { parseCDRRecords } from '../../services/cdrParser';
 import { fetchDataProfile } from '../../services/api_services';
+import { initializeDAMapping, getDADescription } from '../../services/daMapping';
 import type { Balance, DedicatedAccount, CDRTabType, CategorizedCDR, CDRSummary as CDRSummaryType } from '../../services/data_interface';
 
 export default function BalanceAndCDR() {
@@ -21,13 +22,19 @@ export default function BalanceAndCDR() {
   
   // Data states
   const [balance, setBalances] = useState<Balance | null>(null);
-  const [dabalance, setDABalances] = useState<DedicatedAccount | null>(null);
+  const [dabalances, setDABalances] = useState<DedicatedAccount[]>([]);
   const [categorizedCDR, setCategorizedCDR] = useState<CategorizedCDR | null>(null);
   const [summaries, setSummaries] = useState<Record<string, CDRSummaryType> | null>(null);
   
   // Toast states
   const [successToast, setSuccessToast] = useState<string | null>(null);
   const [errorToast, setErrorToast] = useState<string | null>(null);
+
+  // Initialize DA mapping on mount
+  useEffect(() => {
+    initializeDAMapping();
+  }, []);
+
 
   const handleSearch = async () => {
     const msisdnValidation = validateMSISDN(msisdn);
@@ -58,6 +65,7 @@ export default function BalanceAndCDR() {
       
       // Update balances
       setBalances(response.data.balance || null);
+      setDABalances(response.data.dabalances || []);
       
       // Parse and categorize CDR records
       if (response.data.cdrRecords && response.data.cdrRecords.length > 0) {
@@ -80,6 +88,7 @@ export default function BalanceAndCDR() {
       } else {
         // No CDR records found
         setCategorizedCDR({
+          all: [],
           voice: [],
           data: [],
           sms: [],
@@ -88,15 +97,15 @@ export default function BalanceAndCDR() {
           other: []
         });
         setSummaries({
-          voice: { totalCalls: 0, totalDuration: 0, totalCharged: 0, recordCount: 0 },
-          data: { totalBytes: 0, totalCharged: 0, recordCount: 0 },
-          sms: { totalMessages: 0, totalCharged: 0, recordCount: 0 },
-          credit: { totalAmount: 0, recordCount: 0 },
-          daAdjustment: { totalAmount: 0, recordCount: 0 },
-          other: { recordCount: 0 }
+          all: { totalTransactions: 0, startingBalance: 0, endingBalance: 0, totalCharged: 0 },
+          voice: { totalTransactions: 0, startingBalance: 0, endingBalance: 0, totalCharged: 0 },
+          data: { totalTransactions: 0, startingBalance: 0, endingBalance: 0, totalCharged: 0 },
+          sms: { totalTransactions: 0, startingBalance: 0, endingBalance: 0, totalCharged: 0 },
+          credit: { totalTransactions: 0, startingBalance: 0, endingBalance: 0, totalCharged: 0 },
+          daAdjustment: { totalTransactions: 0, startingBalance: 0, endingBalance: 0, totalCharged: 0 },
+          other: { totalTransactions: 0, startingBalance: 0, endingBalance: 0, totalCharged: 0 }
         });
-      }
-      
+      }      
       setSuccessToast('Data loaded successfully');
     } catch (error) {
       setErrorToast(error instanceof Error ? error.message : 'Failed to load data');
@@ -122,7 +131,7 @@ export default function BalanceAndCDR() {
     { id: 'other' as CDRTabType, label: 'Other Record', icon: <FileText size={14} />, color: 'text-gray-600', count: categorizedCDR?.other.length || 0 }
   ];
 
-  const hasData = balance !== null || dabalance !== null || categorizedCDR !== null;
+  const hasData = balance !== null || dabalances.length > 0 || categorizedCDR !== null;
 
   return (
     <div className="flex min-h-screen bg-[#F8F9FA] selection:bg-[#FFCC00] selection:text-black font-sans">
@@ -266,8 +275,8 @@ export default function BalanceAndCDR() {
         {/* Tab Content */}
         {hasData && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {activeTab === 'balance' && balance && dabalance &&(
-              <BalanceTab balance={balance} and dabalance/>
+            {activeTab === 'balance' && balance && dabalances.length > 0 && (
+              <BalanceTab balance={balance} dabalances={dabalances} />
             )}
             {activeTab === 'voice' && categorizedCDR && summaries && (
               <>

@@ -48,6 +48,6 @@ export interface ChargingProfileResponse {
 // Data Profile API Response
 export interface DataProfileResponse {
   balance?: Balance;
-  dabalances?: DedicatedAccount;
+  dabalances?: DedicatedAccount[];
   cdrRecords?: CDRRecord[];
 }

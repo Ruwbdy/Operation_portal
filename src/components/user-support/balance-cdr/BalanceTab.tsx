@@ -1,16 +1,17 @@
 import React from 'react';
 import { Wallet, TrendingUp, Calendar } from 'lucide-react';
 import { formatTelecomDate } from '../../../utils/dateFormatter';
-import type { Balances } from '../../../services/data_interface';
+import type { Balance, DedicatedAccount } from '../../../services/data_interface';
 
 interface BalanceTabProps {
-  balances: Balances;
+  balance: Balance;
+  dabalances: DedicatedAccount[];
 }
 
-export default function BalanceTab({ balances }: BalanceTabProps) {
-  const totalMA = balances.accountValue1 / 100; // Convert from kobo to naira
-  const totalDA = balances.dedicatedAccounts.reduce((sum, da) => sum + da.dedicatedAccountValue1, 0);
-  const combinedBalance = totalMA + totalDA;
+export default function BalanceTab({ balance, dabalances }: BalanceTabProps) {
+  const totalMA = balance.accountValue1 / 100; // Convert from kobo to naira
+  //const totalDA = dabalances.reduce((sum, da) => sum + da.dedicatedAccountValue1, 0);
+  //const combinedBalance = totalMA + totalDA;
 
   return (
     <div className="space-y-8">
@@ -37,10 +38,10 @@ export default function BalanceTab({ balances }: BalanceTabProps) {
               DA Accounts
             </span>
           </div>
-          <p className="text-4xl font-black text-black italic">{balances.dedicatedAccounts.length}</p>
+          <p className="text-4xl font-black text-black italic">{dabalances.length}</p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-8 rounded-[2rem] border-2 border-purple-100">
+        {/* <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-8 rounded-[2rem] border-2 border-purple-100">
           <div className="flex items-center space-x-3 mb-4">
             <div className="bg-purple-500 p-2.5 rounded-xl">
               <Wallet size={20} className="text-white" />
@@ -50,7 +51,7 @@ export default function BalanceTab({ balances }: BalanceTabProps) {
             </span>
           </div>
           <p className="text-4xl font-black text-black italic">₦{combinedBalance.toFixed(2)}</p>
-        </div>
+        </div> */}
       </div>
 
       {/* MA Balance Card */}
@@ -64,7 +65,7 @@ export default function BalanceTab({ balances }: BalanceTabProps) {
               Main Account Balance
             </h3>
             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mt-1">
-              MSISDN: {balances.subscriberNumber}
+              MSISDN: {balance.subscriberNumber}
             </p>
           </div>
         </div>
@@ -83,7 +84,7 @@ export default function BalanceTab({ balances }: BalanceTabProps) {
               Service Class
             </p>
             <p className="text-2xl font-black text-[#FFCC00] italic">
-              {balances.serviceClassCurrent}
+              {balance.serviceClassCurrent}
             </p>
           </div>
           <div>
@@ -91,7 +92,7 @@ export default function BalanceTab({ balances }: BalanceTabProps) {
               Currency
             </p>
             <p className="text-2xl font-black text-gray-600 italic">
-              {balances.currency1}
+              {balance.currency1}
             </p>
           </div>
           <div>
@@ -99,7 +100,7 @@ export default function BalanceTab({ balances }: BalanceTabProps) {
               Expiry Date
             </p>
             <p className="text-sm font-black text-gray-600">
-              {formatTelecomDate(balances.expiryDate)}
+              {formatTelecomDate(balance.expiryDate)}
             </p>
           </div>
         </div>
@@ -119,6 +120,11 @@ export default function BalanceTab({ balances }: BalanceTabProps) {
                 <th className="px-8 py-4 text-left">
                   <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">
                     DA ID
+                  </span>
+                </th>
+                <th className="px-8 py-4 text-left">
+                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">
+                    Description
                   </span>
                 </th>
                 <th className="px-8 py-4 text-left">
@@ -149,7 +155,7 @@ export default function BalanceTab({ balances }: BalanceTabProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {balances.dedicatedAccounts.map((da, index) => (
+              {dabalances.map((da, index) => (
                 <tr key={index} className="hover:bg-gray-50 transition-colors">
                   <td className="px-8 py-5">
                     <span className="text-sm font-black text-[#FFCC00]">
@@ -157,13 +163,18 @@ export default function BalanceTab({ balances }: BalanceTabProps) {
                     </span>
                   </td>
                   <td className="px-8 py-5">
+                    <span className="text-sm font-bold text-gray-700">
+                      {da.description || 'Unknown DA'}
+                    </span>
+                  </td>
+                  <td className="px-8 py-5">
                     <span className="text-sm font-bold text-black">
-                      {da.dedicatedAccountValue1.toFixed(2)}
+                      {da.dedicatedAccountValue1}
                     </span>
                   </td>
                   <td className="px-8 py-5">
                     <span className="text-sm font-bold text-gray-600">
-                      {da.dedicatedAccountActiveValue1?.toFixed(2) || '0.00'}
+                      {da.dedicatedAccountActiveValue1 || '0.00'}
                     </span>
                   </td>
                   <td className="px-8 py-5">

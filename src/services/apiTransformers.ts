@@ -170,7 +170,7 @@ export function transformAccountDetailToMABalance(accountData: any): Balance | n
 }
 
 /**
- * Transform offers from account details
+ * Transform dedicated accounts from account details
  */
 export function transformAccountDetailToDABalances(accountData: any): DedicatedAccount[] {
   const dedicatedAcc = accountData?.moAttributes?.getAccountDetailResponse?.balanceAndDate?.dedicatedAccountInformation;
@@ -185,7 +185,8 @@ export function transformAccountDetailToDABalances(accountData: any): DedicatedA
       expiryDate: da.expiryDate || '',
       startDate: da.startDate || undefined,
       dedicatedAccountActiveValue1: da.dedicatedAccountActiveValue1 || undefined,
-      dedicatedAccountUnitType: da.dedicatedAccountUnitType || undefined
+      dedicatedAccountUnitType: da.dedicatedAccountUnitType || undefined,
+      description: undefined // Will be populated by DA mapping service
   }));
 }
 
