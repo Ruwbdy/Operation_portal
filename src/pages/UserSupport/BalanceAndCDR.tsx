@@ -12,11 +12,39 @@ import { fetchDataProfile } from '../../services/api_services';
 import { initializeDAMapping, getDADescription } from '../../services/daMapping';
 import type { Balance, DedicatedAccount, CDRTabType, CategorizedCDR, CDRSummary as CDRSummaryType } from '../../services/data_interface';
 
+
+// --- Add these helpers ---
+function formatDateLocal(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function todayLocal(): string {
+  const now = new Date();
+  const local = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return formatDateLocal(local);
+}
+
+function daysAgoLocal(days: number): string {
+  const now = new Date();
+  const local = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  local.setDate(local.getDate() - days);
+  return formatDateLocal(local);
+}
+// --- End helpers ---
+
+
 export default function BalanceAndCDR() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [msisdn, setMsisdn] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  
+  // ✅ Pre-populate: start = 7 days ago, end = today (local)
+  const [startDate, setStartDate] = useState<string>(daysAgoLocal(7));
+  const [endDate, setEndDate] = useState<string>(todayLocal());
+
+
   const [activeTab, setActiveTab] = useState<CDRTabType>('balance');
   const [isLoading, setIsLoading] = useState(false);
   
