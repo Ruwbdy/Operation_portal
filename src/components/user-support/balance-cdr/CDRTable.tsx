@@ -102,8 +102,7 @@ export default function CDRTable({ records, type }: CDRTableProps) {
 
     if (type === 'data') {
       return [
-        ...baseColumns.slice(0, 2),
-        ...baseColumns.slice(2),
+        ...baseColumns.slice(0, 1),
         { 
           key: 'da_account_id', 
           label: 'DA ID', 
@@ -147,10 +146,12 @@ export default function CDRTable({ records, type }: CDRTableProps) {
           minWidth: '120px',
           accessor: (r) => r.da_details?.[0]?.amount_charged ?? 0
         },
+        ...baseColumns.slice(3, 5),
+        { key: 'charged_amount', label: 'Total Chrg', sortable: true, filterable: true, minWidth: '120px' },
         { key: 'bytes_received_qty', label: 'Bytes RX', sortable: true, filterable: false, minWidth: '110px' },
         { key: 'bytes_sent_qty', label: 'Bytes TX', sortable: true, filterable: false, minWidth: '110px' },
         { key: 'country', label: 'Country', sortable: true, filterable: true, minWidth: '100px' },
-        { key: 'operator', label: 'Operator', sortable: true, filterable: true, minWidth: '120px' }
+        //{ key: 'operator', label: 'Operator', sortable: true, filterable: true, minWidth: '120px' }
       ];
     }
 
@@ -163,7 +164,10 @@ export default function CDRTable({ records, type }: CDRTableProps) {
     }
 
     // Default columns for credit, daAdjustment, other
-    return [...baseColumns];
+    return [...baseColumns.slice(0, 2),
+        { key: 'record_type', label: 'Type', sortable: true, filterable: true, minWidth: '110px' },
+        ...baseColumns.slice(2),
+      ];
   };
 
   const columns = getColumns();
