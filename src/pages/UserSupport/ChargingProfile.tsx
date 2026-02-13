@@ -41,8 +41,11 @@ export default function ChargingProfile() {
     setIsLoading(true);
     
     try {
+      // Use normalized MSISDN for API call
+      const normalizedMsisdn = validation.normalized || msisdn;
+      
       // Call the consolidated API
-      const response = await fetchChargingProfile(msisdn);
+      const response = await fetchChargingProfile(normalizedMsisdn);
       
       if (!response.success || !response.data) {
         throw new Error(response.error?.message || 'Failed to fetch charging profile');
@@ -145,9 +148,8 @@ export default function ChargingProfile() {
                 value={msisdn}
                 onChange={(e) => setMsisdn(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="234XXXXXXXXXX"
+                placeholder="234XXXXXXXXXX, 09XXXXXXXXX, or 9XXXXXXXXX"
                 className="flex-1 px-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-black font-bold text-sm focus:outline-none focus:border-[#FFCC00] transition-colors placeholder:text-gray-300"
-                maxLength={13}
               />
               <button
                 onClick={handleSearch}

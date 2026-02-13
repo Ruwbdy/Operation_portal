@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatCDRDateTime } from '../../../utils/dateFormatter';
 import { formatBytes } from '../../../services/cdrParser';
-import { getDADescription } from '../../../services/daMapping';
+import { getDADescription, formatDAAmount } from '../../../services/daMapping';
 import type { CDRRecord, CDRTabType } from '../../../services/data_interface';
 
 interface CDRTableProps {
@@ -179,6 +179,17 @@ export default function CDRTable({ records, type }: CDRTableProps) {
 
     if (column.key === 'event_dt') {
       return formatCDRDateTime(Number(value));
+    }
+
+    // Handle DA amount columns with data conversion
+    if (column.key === 'da_amount_before' || 
+        column.key === 'da_amount_after' || 
+        column.key === 'da_amount_charged') {
+      const daId = record.da_details?.[0]?.account_id;
+      if (daId) {
+        return formatDAAmount(daId, Number(value));
+      }
+      return formatCurrency(String(value));
     }
 
     if (

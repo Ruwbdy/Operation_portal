@@ -10,8 +10,6 @@ interface BalanceTabProps {
 
 export default function BalanceTab({ balance, dabalances }: BalanceTabProps) {
   const totalMA = balance.accountValue1 / 100; // Convert from kobo to naira
-  //const totalDA = dabalances.reduce((sum, da) => sum + da.dedicatedAccountValue1, 0);
-  //const combinedBalance = totalMA + totalDA;
 
   return (
     <div className="space-y-8">
@@ -40,18 +38,6 @@ export default function BalanceTab({ balance, dabalances }: BalanceTabProps) {
           </div>
           <p className="text-4xl font-black text-black italic">{dabalances.length}</p>
         </div>
-
-        {/* <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-8 rounded-[2rem] border-2 border-purple-100">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="bg-purple-500 p-2.5 rounded-xl">
-              <Wallet size={20} className="text-white" />
-            </div>
-            <span className="text-[9px] font-black text-gray-500 uppercase tracking-wider">
-              Combined
-            </span>
-          </div>
-          <p className="text-4xl font-black text-black italic">₦{combinedBalance.toFixed(2)}</p>
-        </div> */}
       </div>
 
       {/* MA Balance Card */}

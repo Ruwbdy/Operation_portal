@@ -1,0 +1,1389 @@
+da_id,description,balance_type
+1,Blast event bundle,data
+2,Bulk USSD/Non GSM Data Bundle,data
+3,Mobile-TV,money
+4,Staff Data Share,data
+5,BB Bundle (BBOS),
+6,2Go event bundle plan,
+7,Twitter Event Bundle,
+8,Data Bonus,
+9,mPulse 300MB Weekly Plan,data
+10,BBM on BB10,
+11,Facebook Zero,
+12,Facebook social,
+13,Enhanced Pulse/Songstar,
+14,UA14,
+15,SME Bizplus (Data),
+16,Smooth Talk/CVM/BetterMe Daily data bundle,
+17,Eskimi Event Based Bundle,
+18,Other Data Bonus/Surprise n Delight/BetterMe,
+19,Instagram bundle,
+20,Compensation Data,data
+21,Recharge bonus/tripple delight/Voice bonus/DYA,
+22,M2U & BFF Bonus @ 40k/per,
+23,WOW Weekend Bonus,
+24,Voice Bonus (Imcomplete SIMReg),
+25,SIM Reg Drive,
+26,SME Bizplus (Voice),
+27,VPN Voice Call,
+28,SME One Box (International Voice),
+29,CLM/Anniversary wow offer.,
+30,MNP Bonus/ES Sales reps,
+31,DOLA Bonus,
+32,VTU,
+33,InfoSearch Bonus for MTN Liberty 6,
+34,SME One Box (Local Voice),
+35,International Destination Bundle 1000,
+36,Surprise n Delight/CVM,
+37,International Destination Bundle 1500,
+38,International Destination Bundle 500,
+38,International Destination Bundle 500,
+39,Compensation Airtime,money
+40,M2M SMS,
+41,SME Bizplus (SMS),
+42,SME One Box (lnternational SMS),
+43,CLM/Shikena/BetterMe Offer,
+44,RIMP- Free data Allocation,
+45,Surprise n Delight SMS @ N4/CVM,
+46,"Akanchawa RC offer, Nursery Program–SMS Bonus",
+47,Segmented Offering/HVC Bunsle/just4u(DA47),
+48,HVC Port-in SMS offer/HVC Bunsle(DA48),
+49,Tiwa n Tiwa,
+50,VPN CUG SMS,
+51,Bizplus voice share/BetterMe Offer,
+52,Super Smart Bundlev(Local Mins),
+53,Akanchawa,
+54,CLM16_U06B Campaign 100% Bonus on Recharge,
+55,BTL Offer(),
+56,Tiwa n Tiwa,
+57,SME FLEX Product Private Voice(DA57),
+58,SME FLEX Product Private Voice(DA58),
+59,SME FLEX Product Private Voice(DA59),
+60,Valid,
+61,Mobile Money(DA62),
+62,Mobile Money(DA62),
+63,Mobile Money(DA63),
+64,JUST FOR ME,
+65,M2M Main Account,
+66,DOLA Main Acct,
+67,Mgaming Airbet,
+68,WOW Sunshine Bonus,
+69,mPulse Birthday Reward,
+70,MNP High value port -in,
+71,100% Recharge bonus for target customers,
+72,Enhanced Goody Bag main account,
+73,Enhanced Goody Bag Bonus,
+74,New SIM Activation Recharge Bonus,
+75,Recharge Bonus for MTN Beta Talk,
+76,Visitor SIM,
+77,Super Sunday CVM,
+78,SuperSaver Bundle,
+79,VPN CUG,
+80,True Postpaid Credit Limit (DA80),money
+80,True Postpaid Credit Limit (Convergence),money
+81,Do Box Movie Download,
+82,Nimbuzz Event Based Bundle,
+83,Viber Event Based Bundle,
+84,We Chat Event Based Bundle,
+85,MTN Music Plus_RG67,
+86,SME data share Sponsor,
+87,SME datashare beneficiary,
+88,Quick Win Data,
+89,GDS data,data
+90,GDS Top up,data
+91,Bizplus data bundles,
+92,Tool of Trade data for SC 304 (Monthly crediting),
+93,300MBBetterMe offer,
+94,Comedy Plus,
+95,mAcademy,
+96,Jobberman event based bundle,
+97,M2M Override Price,money
+98,M2M Auto Renewal Override Price,
+99,Shared Data/Whatsapp,
+100,Xtratime,money
+101,Convergence,
+102,True Postpaid Credit Limit (Convergence overflow1),
+103,True Postpaid Unsecured Credit,
+104,"DA104 (DOLA Bonus, DYA Airtime Offer1)",
+105,Shared Account,
+106,BizLife Bonus (National),
+107,Free BetterMe Bundle- Retailer,
+108,Consumer Previous Month Usage,
+109,Main Account for Staff,
+110,DA110 ( DYA Airtime Offer2),
+111,Recharge accumulation for New Acctivation,
+112,DYA Customer Loyalty Program,
+113,DYA Fund your wallet and get N200,
+114,SIM Act. Recharge Bonus,
+115,SIM Reg Offer for Non-disconnected(DA116),
+116,SIMReg Offer for Non-Discon.,
+117,Paymaster_Pay out(DA117),
+118,Convergence(DA118),
+119,BUNDLE 4U_Voice & SMS,
+120,National voice for 777/Shikenna,
+121,National voice Bonus-Yello Biz/VTU 10% Comeback,
+122,National voice Bonus,
+123,National Voice-100%on recharge,
+124,National voice Bonus,
+125,National Voice (DA125),
+126,Super Smart Bundle (International Mins),
+127,All service class supersaver bundle(DA128),
+128,Free Incoming Minutes,voice
+129,4G data Bundle,
+130,FREE 10 minutes on (DYA to DYA� ) (DA130),
+131,FREE 10 minutes on (DYA to DYA� ) (DA131),
+132,GVP Bundles Voice,
+133,Extra Combo (Voice),
+134,Product private Voice CUG DA(DA134),
+135,200% Bonus on Recharge Sundays only(DA135),
+136,Shared Account Voice DA(DA136),
+137,Awuf4u,
+138,TrueTalk 100% Recharge Bonus,
+139,Shared Account Data DA(DA139),
+140,Win back offer,
+141,Bundle4U,
+142,DA 142,
+143,DA 143,
+144,DYA data offerings,
+145,100% or 200% bonus on recharge,
+146,VTU bonus,
+147,MTN Spinlet Music _RG80(DA147),
+148,Corporate Data Gifting,data
+149,Sponsored Data Pass Share,data
+150,Consumer National Voice Mins for Combo Pack,voice
+151,mPulse Weekly Data,
+152,Consumer Data Bundle for Combo Pack,
+153,WWTBAM App Databundle,
+154,Shared Data/Instagram(DA154),
+155,4G Link Offer,
+156,mPulse Monthly Data,
+157,Tiwa n Tiwa,
+158,Shikena,
+159,Yafun Yafun Data,voice
+160,Consumer National Voice Mins for BoltOnCombo Pack,
+161,GAME+,
+162,XtraCombo Data,
+163,As an Expert(DA163),
+164,Ghana & SA Data,
+165,Voice (Outgoing) Roaming Bundle,
+166,Voice (Incoming) Roaming Bundle,
+167,Data  Other Destination,
+168,Roaming Bundle China (Outgoing),
+169,Roaming Bundle China (Incoming),
+170,Binge Night and Off Peak,
+171,Sponsored data(DA171),
+172,Data Bonus,
+173,Multi-service: Voice and SMS,
+174,Project Fame Bundle,
+175,WoW Weekend Data Bonus,
+176,Binge Weekend,
+177,Social Media Pass,
+178,"CLM, Nursery Program – Data Bonus",
+179,DA-179,
+180,Minibundles wallet,
+181,XtraData Maxi Data,data
+182,XtraData Maxi Voice,voice
+183,DYA Bonus SMS,
+184,XtraCombo Voice,
+185,HAJJ Roaming Voice Outgoing,
+186,HAJJ Roaming Voice Incoming,
+187,HAJJ Roaming Data,
+188,HAJJ Roaming Voice&Data,
+189,Xtra Mini Voice,
+190,XtraTalk Mini Data,
+191,Night (1am-7am) Data Bundle Bonus,data
+192,Yafun Yafun Voice,voice
+193,Revised XtraValue Bundles,
+194,Roaming SMS,
+195,Hello World Data,
+196,DA 196,
+197,DA 197,data
+198,DA 198,
+199,Xtrabyte,data
+200,Usage from Credit Limit,
+201,Kwese data DA,
+203,Daily Data Unused,
+204,Weekly Data Unused,
+205,Monthly Data Unused,
+206,Postpaid contract for suspension DA206,
+207,Postpaid contract for suspension DA207,
+208,Postpaid contract for suspension DA208,
+209,Postpaid contract for suspension DA209,
+210,Postpaid contract for suspension DA210,
+211,Fastlink Daily,data
+212,Fastlink 2 Days,
+213,Fastlink Weekly,data
+214,Fastlink 30Days,data
+215,Fastlink 7am-7pm Weekday Plan,data
+216,Fastlink 60 Days,data
+217,Fastlink 90 Days,data
+218,Fastlink 180 Days,
+219,Fastlink 365 Days,
+220,Fastlink Night Plan,
+221,Fastlink Weekend,
+222,All Day Data Bundle and Device bonus,
+223,Outgoing Roaming Calls,
+224,Incoming Roaming calls,
+225,DA 225,
+226,DA 226,
+228,DA 228,
+229,Sponsore Data Bundle DA 229,
+230,SMS Dealz,
+231,Sponsor data bundle,
+232,Sponsored Data  Bundle,
+233,Sponsored Data  Bundle,
+234,Sponsored Data  Bundle DA 234,
+235,Sponsored Data  Bundle DA 235,
+236,Sponsored Data  Bundle DA 236,
+237,Sponsored Data  Bundle DA 237,
+238,Sponsored Data  Bundle DA 238,
+239,Xtrabyte Control DA 239,
+240,Control DA for DYA (Internal use),money
+243,Independence 1min free offer,
+244,500MB Pulse Nightlife Plan,data
+245,DOLA,
+246,CLM,
+247,Postpaid contract for recharges DA247,
+248,Postpaid contract for recharges DA248,
+249,Postpaid contract for recharges DA249,
+250,1 Hour Youtube pack and 3 Hour Youtube pack,
+251,Postpaid contract for recharges DA251,
+252,250MB Welcome Back Data,
+253,CLM/CVM,
+254,RECHARGE ACCUMULATOR,
+255,Snapchat bundle wallet,
+256,Postpaid GSM CUG activation Indicator DA256,
+257,Star Time Bundle DA257,
+258,DA258,
+259,Friday 10pm . Saturday 7am (DA259),
+261,Hynetflex One Account,data
+263,Farmers Bundle,
+265,SME Deskphone Voice bundle (450),
+266,SME Deskphone Voice bundle (900),
+267,SME Deskphone Voice bundle (1200),
+269,SME Data Beneficiary DA (7 days validity),data
+270,SIM REG Acquisition Offer Data Bonus for BetaGist Subs,data
+280,Pulse Instabinge,data
+281,25% LTE Bonus,
+282,Smart Feature Phone Renewal Balance,
+300,Accesscom Voice,
+502,FMB Voice Bundle,voice
+519,Fibrenet Voice,
+520,Fibrenet_Showmax Voice,
+522,CuG_400_Postpaid Voice,
+523,CUG_500_Postpaid Voice,
+525,CUG_750_Postpaid Voice,
+526,"CUG_1,000_Postpaid Voice",
+528,CUG_1200_Postpaid Voice,
+530,"CUG_1,500_Postpaid Voice",
+531,"CUG_2,000_Postpaid Voice",
+532,CUG_500_Prepaid Voice,
+533,CUG_650_Prepaid Voice,
+534,CUG_750_Prepaid Voice,
+535,"CUG_1,000_Prepaid Voice",
+536,CUG_1200_Prepaid Voice,
+539,CUG Reseller_500_Postpaid Voice,
+541,CUG Reseller_650_Prepaid Voice,
+543,"CUG Reseller_1,000_Prepaid Voice",
+547,"CUG Reseller_1,500_Postpaid Voice",
+570,1.5GB+5mins Postpaid Monthly Plan Voice benefits,
+571,3GB+5mins Postpaid Monthly Plan Voice benefits,
+572,6GB+15mins Postpaid Monthly Plan Voice benefits,
+573,12gb+25mins Postpaid Monthly Plan Voice benefits,
+574,20gb+25mins Postpaid Monthly Plan Voice benefits,
+575,40gb+40 mins Postpaid Monthly Plan Voice benefits,
+576,75gb+40 mins Postpaid Monthly Plan Voice benefits,
+577,120gb+80 mins Postpaid Monthly Plan Voice benefits,
+578,1.5GB+5mins Topup Postpaid Bundle Plan Voice benefits,
+579,3GB+5mins  Topup Postpaid Bundle Plan Voice benefits,
+580,6GB+15mins  Topup Postpaid Bundle Plan Voice benefits,
+581,10GB+20mins  Topup Postpaid Bundle Plan Voice benefits,
+582,20gb+25mins Topup Postpaid Bundle Plan Voice benefits,
+583,40gb+40 mins  Topup Postpaid Bundle Plan Voice benefits,
+584,25gb+25mins Postpaid Monthly Plan Voice benefits,
+585,1.2GB+5mins Postpaid Monthly Plan Voice benefits,
+586,4GB+10mins Postpaid Monthly Plan Voice benefits,
+587,8GB+15mins Postpaid Monthly Plan Voice benefits,
+588,10GB+20mins Postpaid Monthly Plan Voice benefits,
+757,Flexa with Apple Music 1GB,
+758,Flexa with Apple Music 5GB,
+759,Flexa with Apple Music 15GB,
+792,Premium Data Roaming,
+1300,Family pack Voice DA,money
+1300,Family pack Voice DA,money
+1400,135 mins from Vibe Starter 160GB+135mins,voice
+1401,275 mins from Vibe Insider1 200GB+275mins,voice
+1402,275 mins from Vibe Insider2 200GB+275mins,voice
+1403,450 mins from Vibe Curator1 240GB+450mins,voice
+1404,450 mins from Vibe Curator2 240GB+450mins,voice
+1422,Smart Bundle Daily Usage Offer,
+1423,Smart Bundle Weekly Usage Offer,
+1424,Smart Bundle Bi-Weekly Usage Offer,
+1425,Smart Bundle Monthly Usage Offer,
+1425,Smart Bundle Monthly Usage Offer,
+1506,FlexaMini,
+1506,XtraData+ (voice),
+1508,BetaMix bundle Mini Voice,money
+1509,BetaMix bundle Max Voice,money
+1510,BetaGist Get back minutes,voice
+1521,Combo Plus Voice,
+1522,CVM Combo Plus Voice,
+1523,Winback Recharge National Voice Bundle,data
+1524,Sponsored Callertune/Callerfeel Voice benefits,
+1530,Loyalty Voice Gift,
+1531,Activation Bonus,
+1533,New SIM REG Bumper Package Voice,
+1540,Garabasa Airtime (Below N100),money
+1541,Garabasa Airtime (N100 and Above),money
+1545,CVM Bonus on Voice_2500,
+1546,CVM Bonus on Voice_2000,
+1547,CVM Bonus on Voice_1500,
+1548,CVM Bonus on Voice_1000,
+1549,CVM Bonus on Voice_500,
+1550,CVM Bonus on Voice_300,
+1551,CVM Bonus on Voice_150,
+1552,1GB+1.5mins Daily Plan,voice
+1553,3 minutes from 350MB Weekly Plan,voice
+1554,1GB+5mins Weekly Plan,voice
+1555,1.5GB+5mins Weekly Plan,voice
+1555,10 minutes from 1.5GB Weekly Plan,voice
+1557,2GB+2mins Monthly Plan,voice
+1558,2.7GB+2mins Monthly Plan,voice
+1559,3.5GB+5mins Monthly Plan,voice
+1560,Betamix Bundle Mini,voice
+1561,Betamix Bundle Max,voice
+1562,500MB+3mins Weekly Plan,voice
+1563,12.5GB Monthly Plan,voice
+1564,16.5GB+10mins Monthly Plan,voice
+1565,20GB Monthly Plan,voice
+1566,25GB Monthly Plan,voice
+1566,25GB Monthly Plan,voice
+1567,36GB Monthly Plan,voice
+1568,75GB Monthly Plan,voice
+1568,75GB Monthly Plan,voice
+1569,165GB Monthly Plan,voice
+1570,20 minutes from 11GB Monthly Plan,voice
+1571,25 minutes from 13GB Monthly Plan,voice
+1571,25 minutes from 13GB Monthly Plan,voice
+1572,25 minutes from 22GB Monthly Plan,voice
+1573,25 minutes from 27GB Monthly Plan,voice
+1574,Xtrabyte (Voice element),
+1596,MTN Device Partnership Plan Voice,voice
+1597,SIM REG Acquisition Offer Voice and SMS for BetaGist subs,voice
+1598,Sachet Voice Bundle N100,voice
+1599,Sachet Voice Bundle N200,voice
+1600,Sachet Voice Bundle N500,voice
+1603,Device Financing 500 Bundle Voice,money
+1604,Device Financing 1000 Bundle Voice,money
+1605,Device Financing 2000 Bundle Voice,money
+1606,Device Financing 3000 Bundle Voice,money
+1607,Device Financing 5000 Bundle Voice,money
+1705,7days TravelPass (Voice),voice
+1706,14days TravelPass (Voice+Data),voice
+1710,1day TravelPass (Voice),voice
+1711,30days TravelPass (Voice),voice
+1800,Yello Gifted Data Accumulation,data
+1801,500MB Gifting Bonus Restriction,
+1802,1GB Gifting Bonus Restriction,
+1821,XtraData Maxi SMS,sms
+1963,C2C Offer- Voice,
+3000,eSuperSaver_Threshold1,
+3340,DA  Description for Youtube FUP (12am - 5am),
+3341,DA  Description for Youtube All day,
+3350,Promo Code Weekly Bundle,data
+3351,Promo Code Monthly Bundle,data
+3352,BizConnect Data Bonus,
+3353,YouTube Corporate Data Gifting,
+3354,Facebook Corporate Data Gifting,
+3355,Instagram Corporate Data Gifting,
+3356,WhatsApp Corporate Data Gifting,
+3357,BizPlus Points Balance,
+3360,Thryve Ad Lite Data Add on,
+3361,Thryve Ad Bumper Data Add on,
+3362,Thryve Ad Mega Data Add on,
+3363,Broadband Earn Point,
+3363,Broadband Earn Point,
+3364,Broadband Earn Point,
+3364,Broadband Earn Point,
+3365,Thryve Ad Bumper - Google,
+3366,Thryve Ad Mega - Google,
+3370,Meetings Daily,
+3371,Meetings Weekly,
+3372,Meetings Monthly,
+3397,Gift-A-Byte (Corporate) 100GB (Monthly),data
+3398,Gift-A-Byte (Corporate) 250GB (Monthly),data
+3406,Fixed Mobile Broadband Bundle,data
+3412,Broadband Capped Data Bundle,data
+3413,Broadband Bonus,data
+3414,6th Capped bundle Bonus,data
+3414,6th Capped bundle Bonus,data
+3414,SME Capped Data Bundle/SME Loyalty bonus,data
+3416,Broadband 120GB Bonus,
+3427,6GB Top Up Bundle,data
+3428,Accesscom Data,
+3429,12GB Top Up Bundle,data
+3430,90GB Night Broadband Plan,data
+3431,150GB Night Broadband plan,data
+3432,250GB Postpaid HynetFlex Antenna Device Bonus,
+3433,250GB HynetFlex Antenna Device Bonus,
+3434,Get 1GB and enjoy Business Tips at N350. Valid for 3 days,
+3435,BizPlus Standard,
+3436,BizPlus Premium,
+3437,BizPlus Points Balance,
+3455,Youtube,
+3455,Youtube Bonus,
+3467,MSME Learning Bundle,
+3468,120GB Home 4GCAT6 Indoor Router Activation bonus,data
+3469,120GB Office 4GCAT6 Indoor Router Activation bonus,data
+3470,Data,
+3470,Broadband Nursery Bonus,
+3471,100GB Home5G Broadband Router Device offer,data
+3471,100GB Office5G Broadband router device offer,data
+3472,100GB Office5G Broadband router device offer,data
+3482,5G Home Device Offer additional Bonus 100GB,
+3483,5G Office Device Offer additional Bonus 100GB,
+3484,50GB Welcome 4GCAT4 Indoor Router Home,data
+3485,50GB Welcome 4GCAT4 Indoor Router Office,data
+3490,275GB Fixed Plan,
+3491,450GB Fixed Plan,
+3492,1.5TB Fixed Plan,
+3493,100GB Top Up Bundle,
+3494,250GB Top Up Bundle,
+3496,Broadband unlimited premium plan (100Mpbs),
+3500,IOT Data Bundle,
+3505,IoT Acquisition Data,
+3521,35GB SME Data Plan,data
+3522,165GB SME Data Plan,data
+3523,Gift-A-Byte� (SME) 20TB (90 Days),data
+3524,360GB SME Data Plan,data
+3525,5TB SME Data Plan,data
+3526,Gift-A-Byte� (SME) 50TB (90 Days),data
+3527,Gift-A-Byte (SME) 50TB Monthly,data
+3528,Gift-A-Byte (SME) 20TB Monthly,data
+3529,Gift-A-Byte (SME) 100TB Monthly,data
+3532,Gift-A-Byte (SME) 150TB Monthly,data
+3533,Corporate Data Gifting 5TB,data
+3533,Corporate Data Gifting 5TB,data
+3534,Corporate Data Gifting 40TB,data
+3535,Corporate Data Gifting 50TB,data
+3536,Corporate Data Gifting 25TB,data
+3537,Corporate Data Gifting 25GB Monthly,data
+3538,Corporate Data Gifting 35GB Monthly,data
+3539,Corporate Data Gifting 165GB Monthly,data
+3540,Corporate Data Gifting 360GB Monthly,data
+3541,Corporate Data Gifting 1TB Monthly,data
+3542,Corporate Data Gifting 5TB,data
+3543,Corporate Data Gifting 12TB Monthly,data
+3544,Corporate Data Gifting 25 TB Monthly,data
+3544,Gift-A-Byte (Corporate) 20TB  (Monthly),data
+3545,Corporate Data Gifting 30 TB Monthly,data
+3546,Corporate Data Gifting 40 TB Monthly,data
+3547,Corporate Data Gifting 50TB Monthly,data
+3547,Gift-A-Byte (Corporate) 50TB (Monthly),data
+3548,Corporate Data Gifting 1TB Monthly,data
+3549,Corporate Data Gifting 12TB Monthly,data
+3551,30GB Monthly Broadband Plan,data
+3552,60GB Monthly Mifi Broadband Plan,data
+3553,100GB Monthly Broadband Plan,data
+3554,200GB Monthly Broadband Plan,data
+3555,300GB Monthly Broadband Plan,data
+3556,400GB 3-Months Broadband Plan,data
+3557,1TB 6-Months Broadband Plan,data
+3558,1.5TB Yearly Broadband Plan,data
+3559,120GB Monthly Broadband Plan,data
+3560,Corporate Data Gifting 20TB,data
+3561,Corporate Data Gifting 0TB,data
+3562,Ent WiFi_300GB_BASIC_IN,data
+3563,Ent WiFi_500GB_BASIC_IN,data
+3564,250GB 2-Months Broadband Plan,data
+3565,Ent WiFi_300GB_ADV-512-IN,data
+3565,12GB Monthly Broadband Plan,data
+3566,Ent WiFi_250GB_ADV-256-OUT,data
+3566,6GB Monthly Broadband Plan,data
+3567,Ent WiFi_300GB_ADV-256-OUT,data
+3567,WelcomeBack 8GB Broadband Data plan,data
+3568,Ent WiFi_300GB_BASIC_IN_POSTPAID,data
+3568,WelcomeBack 20GB Broadband Data plan,data
+3569,Ent WiFi_500GB_BASIC_IN_POSTPAID,data
+3570,25GB SME Data Plan,data
+3571,Ent WiFi_250GB_BASIC_IN,data
+3572,Ent WiFi_250GB_ ADV-512-IN_POSTPAID,data
+3573,Ent WiFi_500GB_ADV-512-IN,data
+3574,Ent WiFi_250GB_ADV-512-IN,data
+3575,Ent WiFi_250GB_BASIC_IN_POSTPAID,data
+3585,One Box-Premium-11700,data
+3585,One Box-Premium-11700 Data,data
+3586,One Box-Preimum 18600,data
+3586,One Box-Preimum 18600 Data,data
+3587,One Box-Lite 1900,data
+3587,One Box-Lite 1900 Data,data
+3588,One Box-Preimum 14200,data
+3588,One Box-Preimum 14200 Data,data
+3589,One Box - Lite 2300,data
+3589,One Box - Lite 2300 Data,data
+3590,One Box-Plus-3300,data
+3590,One Box - Lite 3300 Data,data
+3591,One Box-Plus-5500,data
+3591,One Box-Plus-5500 Data,data
+3592,One Box-Premium-8000,data
+3592,One Box-Premium-8000 Data,data
+3593,12GB Monthly Broadband Plan,data
+3594,6GB Monthly Broadband Plan,data
+3595,WelcomeBack 8GB Broadband Data plan,data
+3595,WelcomeBack 8GB Broadband Data plan,data
+3596,WelcomeBack 20GB Broadband Data plan,data
+3605,Broadband unlimited standard plan (50Mpbs),
+3610,10GB  Bundle for Jamb,
+3611,50GB  Bundle for Jamb,
+3612,100GB Bundle for Jamb,
+3613,1.5GB Postpaid Monthly Plan,data
+3613,1.5GB Postpaid Monthly Plan,data
+3613,1.5GB Postpaid Monthly Plan,data
+3614,2GB Postpaid Monthly Plan,data
+3614,2GB Postpaid Monthly Plan,data
+3614,2GB Postpaid Monthly Plan,data
+3615,3GB Postpaid Monthly Plan,data
+3615,3GB Postpaid Monthly Plan,data
+3615,3GB Postpaid Monthly Plan,data
+3616,4.5GB Postpaid Monthly Plan,data
+3616,4.5GB Postpaid Monthly Plan,data
+3616,4.5GB Postpaid Monthly Plan,data
+3617,6GB Postpaid Monthly Plan,data
+3617,6GB Postpaid Monthly Plan,data
+3617,6GB Postpaid Monthly Plan,data
+3618,12GB Postpaid Monthly Plan,data
+3618,12GB Postpaid Monthly Plan,data
+3618,12GB Postpaid Monthly Plan,data
+3619,20GB Postpaid Monthly Plan,data
+3619,20GB Postpaid Monthly Plan,data
+3619,20GB Postpaid Monthly Plan,data
+3620,40GB Postpaid Monthly Plan,data
+3620,40GB Postpaid Monthly Plan,data
+3620,40GB Postpaid Monthly Plan,data
+3621,75GB Postpaid Monthly Plan,data
+3621,75GB Postpaid Monthly Plan,data
+3621,75GB Postpaid Monthly Plan,data
+3621,75GB Postpaid Monthly Plan,data
+3622,1.5GB topup Postpaid Bundle Plan,data
+3622,1.5GB topup Postpaid Bundle Plan,data
+3622,1.5GB topup Postpaid Bundle Plan,data
+3623,2GB topup Postpaid Bundle Plan,data
+3623,2GB topup Postpaid Bundle Plan,data
+3623,2GB topup Postpaid Bundle Plan,data
+3624,3GB topup Postpaid Bundle Plan,data
+3624,3GB topup Postpaid Bundle Plan,data
+3624,3GB topup Postpaid Bundle Plan,data
+3625,4.5GB topup Postpaid Bundle Plan,data
+3625,4.5GB topup Postpaid Bundle Plan,data
+3625,4.5GB topup Postpaid Bundle Plan,data
+3626,6GB topup Postpaid Bundle Plan,data
+3626,6GB topup Postpaid Bundle Plan,data
+3626,6GB topup Postpaid Bundle Plan,data
+3627,10GB topup Postpaid Bundle Plan,data
+3627,10GB topup Postpaid Bundle Plan,data
+3627,10GB topup Postpaid Bundle Plan,data
+3628,Sponsored Data 10TB,
+3629,Sponsored Data 20TB,
+3630,Sponsored Data 25TB,
+3631,Sponsored Data 30TB,
+3632,Sponsored Data 35TB,
+3633,Sponsored Data 40TB,
+3634,Sponsored Data 50TB,
+3635,Sponsored Data 25GB,
+3636,Sponsored Data 50GB,
+3637,Sponsored Data 75GB,
+3638,Sponsored Data 100GB,
+3639,Sponsored Data 195GB,
+3640,Sponsored Data 280GB,
+3641,Sponsored Data 465GB,
+3642,Sponsored Data 920GB,
+3643,Sponsored Data 1225GB,
+3644,Sponsored Topup 25GB,
+3645,Sponsored Topup 50GB,
+3646,Sponsored Topup 75GB,
+3647,Sponsored Topup 100GB,
+3648,Sponsored Topup 195GB,
+3649,Sponsored Topup 280GB,
+3650,Sponsored Topup 465GB,
+3651,Sponsored Topup 920GB,
+3652,Sponsored Topup 1225GB,
+3653,SME SmartTalk 300 Voice,
+3654,SME SmartTalk 500 Voice,
+3654,SME SmartTalk 500 Voice,
+3655,SME SmartTalk 750 Voice,
+3655,SME SmartTalk 750 Voice,
+3656,SME SmartTalk 1000 Voice,
+3656,SME SmartTalk 1000 Voice,
+3657,SME SmartData 300 Voice,
+3657,SME SmartData 300 Voice,
+3658,SME SmartData 500 Voice,
+3658,SME SmartData 500 Voice,
+3659,SME SmartData 750 Voice,
+3659,SME SmartData 750 Voice,
+3660,SME SmartData 1000 Voice,
+3660,SME SmartData 1000 Voice,
+3661,Postpaid Sponsored Data 25 GB,
+3662,Postpaid Sponsored Data 50 GB,
+3663,Postpaid Sponsored Data 75GB,
+3664,Postpaid Sponsored Data 100GB,
+3665,Postpaid Sponsored Data 195GB,
+3666,Postpaid Sponsored Data 280GB,
+3667,Postpaid Sponsored Data 465GB,
+3668,Postpaid Sponsored Data 920GB,
+3669,Postpaid Sponsored Data 1225GB,
+3670,Postpaid Sponsored Topup 10TB,
+3671,Postpaid Sponsored Topup 20TB,
+3672,Postpaid Sponsored Topup 25TB,
+3673,Postpaid Sponsored Topup 30TB,
+3674,Postpaid Sponsored Topup 35TB,
+3675,Postpaid Sponsored Topup 40TB,
+3676,Postpaid Sponsored Topup 50TB,
+3677,Postpaid Sponsored Topup 25GB,
+3678,Postpaid Sponsored Topup 50GB,
+3679,Postpaid Sponsored Topup 75GB,
+3680,Postpaid Sponsored Topup 100GB,
+3681,Postpaid Sponsored Topup 195GB,
+3682,Postpaid Sponsored Topup 280GB,
+3683,Postpaid Sponsored Topup 465GB,
+3684,Postpaid Sponsored Topup 920GB,
+3685,Postpaid Sponsored Topup 1225GB,
+3687,Bulk SMS,
+3690,SME SmartTalk 300 Data,
+3691,SME SmartTalk 500 Data,
+3692,SME SmartTalk 750 Data,
+3693,SME SmartTalk 1000 Data,
+3694,SME SmartData 300 Data,
+3695,SME SmartData 500 Data,
+3696,SME SmartData 750 Data,
+3697,SME SmartData 1000 Data,
+3698,ThryveTalk1500,voice
+3699,ThryveTalk3000,voice
+3700,ThryveTalk5000,voice
+3701,ThryveTalk10000,voice
+3702,ThryveTalk20000,voice
+3703,ThryveTalk1500,data
+3704,ThryveTalk3000,data
+3705,ThryveTalk5000,data
+3706,ThryveTalk10000,data
+3707,ThryveTalk20000,data
+3708,ThryveData1500,voice
+3709,ThryveData3000,voice
+3710,ThryveData5000,voice
+3711,ThryveData10000,voice
+3712,ThryveData20000,voice
+3713,ThryveData1500,data
+3714,ThryveData3000,data
+3715,ThryveData5000,data
+3716,ThryveData10000,data
+3717,ThryveData20000,data
+3718,ThryveTalk BULK SMS,sms
+3719,,data
+3720,,data
+3721,,data
+3721,ConnectMore 5GB + 2GB for MS TEAMS,data
+3722,,data
+3722,ConnectMore 18GB + 2GB for MS TEAMS,data
+3723,,data
+3724,,data
+3724,ConnectMore 12 GB + 2GB for MS TEAMS,data
+3725,,data
+3726,,data
+3727,,data
+3728,,data
+3729,MS Teams/Zoom,data
+3729,MS Teams,data
+3729,,data
+3730,Xmas Broadband Mifi Offer,data
+3731,25GB Postpaid Monthly Plan,data
+3731,25GB Postpaid Monthly Plan,data
+3732,120GB Postpaid Monthly Plan,data
+3732,120GB Postpaid Monthly Plan,data
+3733,200GB Postpaid Monthly Plan,data
+3733,200GB Postpaid Monthly Plan,data
+3754,Unlimited FUP Daily Bonus,data
+3755,Enterprise  WIFI Basic IN,
+3756,Enterprise  WIFI Adv IN,
+3758,Ent WIFI Topup Bundle,
+3761,Tiktok Corporate Data Gifting 7days,data
+3762,Tiktok Corporate Data Gifting 30days,data
+3765,Ent WIFI Basic In Postpaid,
+3765,Ent WIFI Basic In Postpaid,
+3766,ENt WIFI Adv In Postpaid,
+3767,Ent WIFI Adv Out Postpaid,
+3788,20gb+25mins Topup Postpaid Bundle Plan Data benefits,
+3790,40gb+40 mins  Topup Postpaid Bundle Plan Data benefits,
+3793,1.2GB+5mins Postpaid Monthly Plan Data benefits,
+3794,4GB+10mins Postpaid Monthly Plan Data benefits,
+3795,8GB+15mins Postpaid Monthly Plan Data benefits,data
+3796,10GB+20mins Postpaid Monthly Plan Data benefits,
+3798,MTNN Director 200GB Data Bundle,data
+3799,MTNN Director 5GB YouTube,data
+4000,MUL_(Credit LImit),
+4100,Staff Data Share,
+4101,Data for MTN Ambassadors,data
+4103,Yafun-Yafun 300% Data Bonus,data
+4300,Postpaid_DA101,
+4505,DA-4505,data
+4507,DA-4507,data
+4513,Data(Social-AIH),
+4516,Unlimited Bundle,
+4521,Music Time Bundle,
+4521,Music Time Bundle,
+4522,Kwese iflix,data
+4523,Solo Device Financing Repayment,data
+4523,SOLO Repayment,data
+4524,Solo Device Financing Data,data
+4524,Solo Data benefit,data
+4525,Solo Device Financing Voice,money
+4525,SOLO VOICE,money
+4526,VTU Bank Recharge Bonus,
+4527,25% of bonus on Auto renewal,
+4528,35 MB Beta Talk,
+4529,WhatsApp chap bundle,
+4532,2CTV-All-Day-Bundle,
+4533,2CTV Night-Bundle,
+4534,Youtube+Instagram+Tiktalk 350MB,data
+4535,WhatsApp and Facebook Daily,data
+4536,WhatsApp and Facebook Weekly,data
+4537,WhatsApp and Facebook Monthly,data
+4538,Opera Mini Daily,data
+4539,Opera Mini Weekly,data
+4540,Opera Mini Monthly,data
+4541,YouTube Plus,data
+4542,YouTube Plus,
+4551,150MB TikTok Daily Plan,
+4552,2GB TikTok Weekly Plan,
+4553,Value Data 10000,data
+4562,750MB Social Mega Bundle,data
+4563,1GB Social Mega Bundle,data
+4564,Boomplay Data Plan Daily,data
+4565,Boomplay Data Plan Weekly,data
+4566,Boomplay Data Plan Monthly,data
+4569,Ifediche N300 Bundle,data
+4570,Ifediche N1000 Bundle,data
+4573,mPulse 4GB Monthly Plan,
+4574,10GB Education Monthly Plan,data
+4575,Upfront 75MB Weekly Plan,
+4576,Upfront 200MB Bi-Weekly Plan,
+4577,Upfront 1GB Monthly Plan,
+4578,Upfront 75MB Weekly Plan Bonus,
+4579,Upfront 200MB Bi-Weekly Plan Bonus,
+4580,Upfront 1GB Monthly Plan Bonus,
+4583,50GB MyMTN NG App Download Offer,data
+4586,Bumpa Month 1 Data,data
+4587,Bumpa Month 2 Data,data
+4590,75GB Monthly Plan(80%),data
+4590,75GB Monthly Plan(80%),data
+4591,150GB 2-Month Plan(80%),data
+4591,150GB 2-Month Plan(80%),data
+4592,165GB Monthly Plan(80%),data
+4592,165GB Monthly Plan(80%),data
+4593,200GB 2-Month Plan(80%),data
+4593,200GB 2-Month Plan(80%),data
+4594,250GB Monthly Plan(80%),data
+4594,250GB Monthly Plan(80%),data
+4595,480GB 3-Month Plan(80%),data
+4595,480GB 3-Month Plan(80%),data
+4596,600GB 3-Month Plan(80%),data
+4596,600GB 3-Month Plan(80%),data
+4597,800GB 6-Month Plan(80%),data
+4598,1TB Yearly Plan(80%),data
+4598,1TB Yearly Plan(80%),data
+4599,200GB Monthly Plan(20%),data
+4600,4.5TB Yearly Plan(80%),data
+4600,2.5TB Yearly Plan(80%),data
+4601,Mpulse Whats App Bonus,data
+4602,UduX Access plus Data,data
+4604,YouTube Night Streaming Bonus,data
+4607,SonyOne Standard Data,data
+4608,SonyOne Product Private Data,data
+4611,7 Days  Visitor Bundle - Data,data
+4612,14 Days  Visitor Bundle - Data,data
+4613,350MB IG/TikTok Pulse Bundle,data
+4614,1GB IG/TT/YT Weekly Plan,data
+4617,Ayoba Daily Bundle,data
+4618,40MB Ayoba Weekly Plan,data
+4619,Ayoba Monthly Bundle,data
+4620,Yello Star Daily Access + 200MB,
+4621,Yello Star Weekly Access + 600MB,
+4622,Sponsored Callertune/Callerfeel Data benefits,
+4623,ShowMax Mobile Bundle,
+4624,ShowMax Mobile Binge Bundle,
+4629,SuperTV Daily Suscription Trial,
+4630,SuperTV Daily Subscription Family,
+4631,SuperTV Weekly Subscription Family,
+4632,SuperTV Monthly Subscription Family,
+4633,SuperTV Daily Subscription Gold,
+4634,Super TV Weekly Subscription Gold,
+4635,SuperTV Monthly Subscription Gold,
+4636,SuperTV Daily Subscription Silver,
+4637,SuperTV Weekly Subscription Silver,
+4638,SuperTV Monthly Subscription Silver,
+4639,SuperTV Daily Subscription Bronze,
+4640,SuperTV Weekly Subscription Bronze,
+4641,SuperTV Monthly Subscription Bronze,
+4642,SuperTV Daily Subscription Kiddies,
+4643,SuperTV Weekly Subscription Kiddies,
+4644,SuperTV Monthly Subscription Kiddies,
+4645,SuperTV CINEMART (INTERNATIONAL),
+4646,SuperTV CINEMART (LOCAL),
+4647,SuperTV PREMIUM LIVE SPORTING EVENTS,
+4648,"SuperTV PREMIUM LIVE EVENTS: CONCERTS, SHOWS, E.T.C",
+4649,Daily Subscription Premium,
+4650,SuperTV Weekly Subscription Premium,
+4651,SuperTV Monthly Subscription Premium,
+4652,100% MiFi data Bonus,
+4653,Audiomack Weekly Access with Data,
+4654,Audiomack Monthly Access with Data,
+4656,MiFi Top-up Plan,
+4663,Pulse Special Bundles 200MB,
+4664,Pulse Special Bundles 260MB,
+4665,Pulse Special Bundles 1000MB,
+4666,Pulse Special Bundles 800MB,
+4670,COMBOMAX 300 Data,data
+4671,COMBOMAX 500 Data,data
+4672,COMBOMAX 1000 Data,data
+4673,COMBOMAX 2000 Data,data
+4674,COMBOMAX 3500 Data,data
+4675,COMBOMAX 5000 Data,data
+4676,COMBOMAX 7000 Data,data
+4677,COMBOMAX 10000 Data,data
+4678,400MB Hourly Bundle,data
+4679,5GB Hourly bundle,data
+4680,10GB Hourly bundle,data
+4681,2Go Daily Bundle,
+4682,2Go Weekly Bundle,
+4683,2Go Monthly Bundle,
+4684,20MB Facebook Daily Plan,data
+4685,40MB Facebook Weekly Plan,data
+4686,120MB Facebook Monthly Plan,data
+4687,Eskimi Daily Bundle,data
+4688,Eskimi Weekly Bundle,data
+4689,Eskimi Monthly Bundle,data
+4690,We Chat Daily Bundle,data
+4691,We Chat Weekly Bundle,data
+4692,We Chat Monthly Bundle,data
+4693,20MB WhatsApp Daily Plan,data
+4694,40MB WhatsApp Weekly Plan,data
+4695,120MB WhatsApp Monthly Plan,data
+4696,FREE 1hour YouTube/IG/TikTok,
+4697,FREE 1hour YouTube/IG/TikTok,
+4698,Virtual Recharge Bonus (Data),money
+4699,YouTube Music,voice
+4700,Betamix Bundle Mini,data
+4701,Betamix Bundle Max,data
+4702,165GB Monthly Plan(20%),data
+4703,150GB 2-Month Plan(20%),data
+4704,200GB 2-Month Plan(20%),data
+4705,480GB 3-Month Plan(20%),data
+4706,600GB 3-Month Plan(20%),data
+4707,800GB 6-Month Plan(20%),data
+4708,4.5TB Yearly Plan(20%),data
+4709,1TB Yearly Plan(20%),data
+4710,2.5TB Yearly Plan(20%),data
+4710,2.5TB Yearly Plan(20%),data
+4711,FastLinkDataBundle Bonus(DA155),
+4712,250GB Monthly Plan(20%),data
+4712,200GB Monthly Plan(20%),data
+4713,75GB Monthly Plan(20%),data
+4713,75GB Monthly Plan(20%),data
+4718,AWF4U_DATA,
+4719,3.75GB + 1GB Bonus Monthly DATA (Xtraspecial),data
+4720,Fastlink 2 Days Data Bundle,
+4721,2-Week Data Bundle,data
+4722,Monthly (4G Only) Bundle,
+4723,250MB 2-DAYSData Plan,data
+4725,MiFI Offer,data
+4726,200GB Monthly,data
+4726,200GB Monthly Plan (80%),data
+4727,800GB 6month Plan(80%),data
+4727,800GB 6-Month Plan(80%),data
+4728,1TB Yearly Plan(80%),data
+4728,1TB Yearly Plan(80%),data
+4729,200MB Daily Day & Night Plan(Day),data
+4730,200MB Daily Day & Night Plan(Night),data
+4731, 450MB Weekly Day & Night Plan(Day),data
+4732, 450MB Weekly Day & Night Plan(Night),data
+4733,18.6GB Monthly Always On Plan,data
+4734,45GB Monthly Always On Plan,data
+4736,750MB Weekly bundle,data
+4737,11 GB Monthly Plan,data
+4738,13 GB Monthly Plan,data
+4739,22 GB Monthly Plan,data
+4740,27 GB Monthly Plan,data
+4741,EasyBuy 1.5GB Monthly Plan,data
+4742,Device Financing 4.5GB Monthly Plan,data
+4743,EasyBuy 10GB Monthly Plan,data
+4744,Device Financing Payment Wallet,
+4745,EASY BUY SPONSOR WALLET,
+4746,Bumpa Month 1 Voice,voice
+4747,3.2GB 2-Days Plan,data
+4748,11GB Weekly Plan,data
+4749,2.5GB Partner Smartphone Data Offer,data
+4750,Data Transfer-Beneficiary,data
+4753,6.75GB Xtravalue Plan,data
+4754,14.5GB Xtravalue Plan,data
+4778,Smart Feature Phone 500MB Bonus,data
+4780,Kpalasa 50% Bonus,data
+4781,DA-4781,
+4782,Startimes Bundles,data
+4783,Spin & WIN 2GB Data,data
+4783,Yello Season Bonus,data
+4785,Combo Plus Data,data
+4786,CVM Grace DA,
+4787,CVM Combo Plus Data DA4787,data
+4787,CVM Combo Plus Data,data
+4788,Data bonus on Recharge (BOR),data
+4789,Solo Device Financing,
+4789,Solo Device Monthly Payment,
+4790,Solo Device Financing,data
+4790,Solo Device Total Payment Received,data
+4791,Solo Device Financing,data
+4791,Solo Device Total Payment Expected,data
+4797,CVM 5GB for N1000 DA4797,
+4798,CVM 5GB for N1000 Grace DA4798,data
+4800,Loyalty Data Gift,data
+4801,Activation Bonus Data,data
+4802,Moretime Data,data
+4804,Free 10Mb Data offer,
+4808,Pulse Points Balance DA4808,money
+4809,Pulse Points Balance DA4809,money
+4811,40GB@10000 monthly family plan Shared,data
+4812,75GB@15000 monthly family plan Shared,data
+4813,120GB@20000 monthly family plan Shared DA,data
+4814,200GB@30000 monthly family plan Shared DA,data
+4815,4GB@1000 Top-up family plan Shared DA,data
+4816,14GB@3000 Top-up family plan Shared DA,data
+4817,110GB @ 21000 Monthly plan,data
+4818,75GB @ N21000 60 Day Plan,data
+4819,120GB @ N31500 60 Day plan,data
+4820,400GB@50000 3-month family plan Shared DA,data
+4821,600GB@75000 3-month family plan Shared DA,data
+4822,20GB@ 5000 monthly family plan Shared,data
+4828,Bumpa Month 2 Voice,voice
+4829,SIM REG Acquisition Offer Data Bonus for Pulse Subs,data
+4830,New SIM REG Bumper Package Data,data
+4845,300 Million Celebration 300MB Data,data
+4850,200MB Refers Incentives,data
+4851,Friday TGIF 150MB Bonus,data
+4852,1GB Refers Incentives,data
+4853,myMTN Offer Bonus,data
+4854,myMTN Offer Bonus,data
+4855,Revamped Winback 100% Data Bonus,data
+4856,Campus Delight Data,data
+4857,Winback Data  Bundle DA,
+4860,750MB 3 days data plan (SC44 only),
+4861,Pulse 1st Recharge (monthly) 10MB,data
+4862,Pulse 1st Recharge (monthly) 20MB,
+4863,Monthly Mpulse Data Bonus,data
+4864,Weekly Mpulse Data Bonus,data
+4865,Pulse Subsequent (weekly) Recharge 10MB,data
+4867,WInback Recharge Data DA,data
+4867,WinbackRecharge Data DA,data
+4870,10MB Data Bonus,data
+4874,RAS 5GB FUP,data
+4877,17GB Postpaid Monthly Plan,data
+4878,25GB Postpaid Monthly Plan,data
+4879,40GB Postpaid 2-Month Plan,data
+4880,Moretime Data_Control DA,
+4881,FlexaMax,
+4881,XtraData+ (Data),
+4885,BetaTalk Data Bonus Via Recharge,money
+4886,Family pack bonus offer,
+4890,Jolly Offer,data
+4891,Garabasa Data (Below N100),data
+4892,Garabasa Data (N100 and Above),data
+4894,5G Device Bonus (New Device),
+4895,5G Device Bonus (Existing Device),
+4896,5G Pass Weekly Bundle,
+4897,100GB 5G Monthly Plan +11GB 5G Bonus,
+4950,Youtube 100% Bonus (12am � 5am),
+4951,4G 25% bonus _Restricted to 4G Network,
+4952,Nexgen App Bonus Offer,data
+4954,11GB 5G Device Bonus,
+4960,Spin & WIN 3GB Data,
+4962,Spin & WIN N10000 Airtime,
+4985,CVM Free Data,data
+4986,All Night Streaming,
+5004,Yello Gifting Bonus,data
+5007,MTN Device Partnership Plan Data,data
+5008,CVM Bonus on Data,
+5009,800GB Yearly Plan(80%),data
+5009,800GB Yearly Plan(80%),data
+5010,20GB Weekly Plan,data
+5011,800GB Yearly Plan(20%),data
+5011,DA-5011,data
+5050,Vibe Starter 160GB+135mins,data
+5051,Vibe Insider1 200GB+275mins,data
+5052,Vibe Insider2 200GB+275mins,data
+5053,Vibe Curator1 240GB+450mins,data
+5054,Vibe Curator2 240GB+450mins,data
+5059,3.5GB Daily Plan,data
+5060,4GB 2-Days Plan,data
+5061,5.5GB 2-Days Plan,data
+5080,50MB Inflight Roaming Data Bundle,
+5081,14days TravelPass (Voice+Data),data
+5082,7days TravelPass (Data),data
+5083,1day TravelPass (Data),data
+5084,5GB 30days TravelPass (Data),data
+5085,10GB 30days TravelPass (Data),data
+5086,30days TravelPass (Data),data
+5088,Black Friday Data Bonus,data
+5096,DA-5096,
+5100,MoMo 40MB Daily Plan,data
+5101,MoMo 120MB 2-Day Plan,data
+5102,MOMO DATA BONUS,money
+5103,MOMO 100% DATA BONUS,
+5732,13GB Monthly Plan + 25mins,data
+6302,Accesscom SMS,sms
+6432,CuG_400_Postpaid SMS,sms
+6433,CUG_500_Postpaid SMS,sms
+6435,CUG_750_Postpaid SMS,sms
+6436,"CUG_1,000_Postpaid SMS",sms
+6438,CUG_1200_Postpaid SMS,sms
+6440,"CUG_1,500_Postpaid SMS",sms
+6441,"CUG_2,000_Postpaid SMS",sms
+6442,CUG_500_Prepaid SMS,sms
+6443,CUG_650_Prepaid SMS,sms
+6444,CUG_750_Prepaid SMS,sms
+6445,"CUG_1,000_Prepaid SMS",sms
+6446,CUG_1200_Prepaid SMS,sms
+6800,Family pack SMS DA,money
+7000,Moretime SMS,
+7001,Sponsored Callertune/Callerfeel SMS benefits,
+7225,C2C Offer- SMS,
+7301,Temporary credit limit,
+7302,CUG Reseller_500_Postpaid SMS,
+7302,CUG Reseller_500_Postpaid SMS,
+7304,CUG Reseller_650_Prepaid SMS,
+7306,"CUG Reseller_1,000_Prepaid SMS",
+7310,"CUG Reseller_1,500_Postpaid SMS",
+7346,Thryve Lite Voice Add on,
+7350,Airtime Sponsor For Device Financing,
+7350,Airtime Sponsor For Device Financing,
+7351,Airtime Beneficiary Device Financing,
+7351,Airtime Beneficiary Device Financing,
+7382,N600 for 3GB Smart Bundle Weekly,Date
+7400,Staff Monthly Airtime,money
+7400,Monthly staff Balance,money
+7400,Monthly staff Balance,money
+7401,Execs Monthly Airtime,money
+7401,Monthly staff Balance,money
+7402,5GB MTN Staff Anniversary,
+7502,BetaTalk Bonus,money
+7502,MTN NewBetatalk Airtime Bonus,money
+7513,GistPlus,money
+7515,Sim registration Bonus,data
+7518,Moretime Voice,money
+7520,7 Days Visitor Bundle - Local,money
+7521,14 Days Visitor Bundle - Local,money
+7522,7 Days Visitor Bundle - Intl,money
+7523,14 Days Visitor Bundle - Intl,money
+7524,MOD/MTNapp Recharge Bonus,money
+7525,"N5,000 Postpaid Contract Bundle",data
+7526,"N10,000 Postpaid Contract Bundle",data
+7527,"N20,000 Postpaid Contract Bundle",data
+7528,"N30,000 Postpaid Contract Bundle",data
+7529,"N40,000 Postpaid Contract Bundle",data
+7530,"N50,000 Postpaid Contract Bundle",data
+7532,200% AWUF4u Plus Data,data
+7537,COMBOMAX 300 Voice,money
+7538,COMBOMAX 500 Voice,money
+7539,COMBOMAX 100 Voice,money
+7540,COMBOMAX 2000 Voice,money
+7541,COMBOMAX 3500 Voice,money
+7542,COMBOMAX 5000 Voice,money
+7543,COMBOMAX 7000 Voice,money
+7544,COMBOMAX 1000 Voice,money
+7545,MOMO AIRTIME BONUS,money
+7550,Cash Token Airtime Refill Accumulation DA,money
+7551,500MB Daily Plan,data
+7552,3.5GB Weekly Plan,data
+7554,65GB Monthly Plan,data
+7574,BokuVoice_100,voice
+7575,BokuVoice_200,voice
+7576,BokuVoice_300,voice
+7577,BokuVoice_400,voice
+7578,BokuVoice_500,voice
+7579,BokuVoice_600,voice
+7580,BokuVoice_800,voice
+7581,BokuVoice_1000,voice
+7582,BokuVoice_1500,voice
+7583,BokuVoice_2000,voice
+7584,BokuVoice_3000,voice
+7600,Yafun-Yafun 400% Voice Bonus,money
+7601,Revamped Winback 200% Voice/SMS Bonus,sms
+7602,Spin & WIN N5000 Airtime,money
+7602,Valentine Airtime Bonus,money
+7603,Moretime Voice & SMS_Control DA,data
+7608,XtraValue More (Data),data
+7609,XtraValue More (Voice),voice
+7610,2.5GB 1-Hour Dynamic Bundle,data
+7611,5GB 1-Hour Dynamic Bundle,data
+7612,40MB 2-Hours Dynamic Bundle,data
+7613,100MB 2-Hours Dynamic Bundle,data
+7614,250MB 2-Hours Dynamic Bundle,data
+7614,250MB 2-Hours Dynamic Bundle,data
+7615,500MB 2-Hours Dynamic Bundle,data
+7616,40MB 6-Hours Dynamic Bundle,data
+7617,100MB 6-Hours Dynamic Bundle,data
+7618,250MB 6-Hours Dynamic Bundle,data
+7619,1GB 6-Hours Dynamic Bundle,data
+7620,40MB 24-Hours Dynamic Bundle,data
+7621,100MB 24-Hours Dynamic Bundle,data
+7622,500MB 24-Hours Dynamic Bundle,data
+7623,1GB 24-Hours Dynamic Bundle,data
+7624,2GB 24-Hours Dynamic Bundle,data
+7625,10GB Weekly Bundle,data
+7626,2.5GB Smart Daily Bundle,data
+7626,Smart Bundle Daily,data
+7626,SMART Bundle Product Daily,data
+7627,Smart Bundle Weekly,data
+7628,SMART Bundle Product Two Weeks,data
+7629,SMART Bundle Product Monthly,data
+7630,Device Financing 500 Bundle Data,data
+7631,Device Financing 1000 Bundle Data,data
+7632,Device Financing 2000 Bundle Data,data
+7633,Device Financing 3000 Bundle Data,data
+7634,Device Financing 5000 Bundle Data,data
+7640,1GB Daily Bundle,money
+7641,3.5GB 2-Days Bundle,data
+7642,15GB Weekly Bundle,data
+7643,2.5GB NollyTube Daily Bundle,data
+7644,1.5GB 2-Day Plan,data
+7650,2.5GB Daily Bundle,data
+7651,1GB Content Daily Bundle,data
+7652,2.5GB Content Daily Bundle,data
+7653,3.5GB Content Daily Bundle,data
+7654,4 Hrs YouTube Buffet Daily Bundle,data
+7655,12 hrs YouTube Buffet 2 Days Bundle,data
+7662,N100 for 600MB Smart Bundle Daily,data
+7663,N250 for 1.5GB Smart Bundle Daily,data
+7665,N500 for 2.5GB Smart Bundle Daily,data
+7666,N500 for 3GB Smart Bundle Daily,data
+7667,N150 for 700MB Smart Bundle Daily,data
+7670,N300 for 1.5GB Smart Bundle Daily,data
+7671,N400 for 2.5GB Smart Bundle Daily,data
+7672,N1000 for 4.5GB Smart Bundle Daily,data
+7674,N200 for 800MB Smart Bundle Daily,data
+7675,N100 for 500MB Smart Bundle Daily,data
+7679,N1500 for 8GB Smart Bundle Daily,data
+7682,N2500 for 15GB Smart Bundle Daily,data
+7683,N2500 for 12GB Smart Bundle Daily,data
+7684,N2000 for 12GB Smart Bundle Daily,data
+7685,N3000 for 15GB Smart Bundle Daily,data
+7686,N3500 for 17GB Smart Bundle Daily,data
+7687,N4500 for 25GB Smart Bundle Daily,data
+7688,N3000 for 16GB Smart Bundle Daily,data
+7689,N4000 for 22GB Smart Bundle Daily,data
+7690,N6000 for 35GB Smart Bundle Daily,data
+7691,N3500 for 20GB Smart Bundle Daily,data
+7692,N6000 for 30GB Smart Bundle Daily,data
+7693,N4000 for 18GB Smart Bundle Daily,data
+7694,N5000 for 30GB Smart Bundle Daily,data
+7695,N5000 for 25GB Smart Bundle Daily,data
+7696,N4500 for 30GB Smart Bundle Daily,data
+7697,N2000 for 13GB Smart Bundle Weekly,data
+7698,N800 for 5GB Smart Bundle Weekly,data
+7699,N2000 for 11GB Smart Bundle Weekly,data
+7701,N2500 for 13GB Smart Bundle Weekly,data
+7702,N700 for 4GB Smart Bundle Weekly,data
+7703,N5000 for 30GB Smart Bundle Weekly,data
+7704,N4000 for 20GB Smart Bundle Weekly,data
+7705,N1500 for 7GB Smart Bundle Weekly,data
+7706,N2500 for 12GB Smart Bundle Weekly,data
+7707,N3000 for 15GB Smart Bundle Weekly,data
+7708,N4500 for 25GB Smart Bundle Weekly,data
+7709,N1000 for 6GB Smart Bundle Weekly,data
+7710,N3500 for 18GB Smart Bundle Weekly,data
+7711,N3000 for 13GB Smart Bundle Weekly,data
+7712,N7000 for 40GB Smart Bundle Weekly,data
+7713,N5000 for 25GB Smart Bundle Weekly,data
+7714,N4000 for 22GB Smart Bundle Weekly,data
+7716,N1500 for 9GB Smart Bundle Weekly,data
+7717,N10000 for 50GB Smart Bundle Weekly,data
+7718,N7000 for 30GB Smart Bundle Weekly,data
+7719,N3500 for 15GB Smart Bundle Weekly,data
+7720,N600 for 4GB Smart Bundle Weekly,data
+7721,N12000 for 65GB Smart Bundle Weekly,data
+7722,N10000 for 60GB Smart Bundle Weekly,data
+7723,N13000 for 70GB Smart Bundle Weekly,data
+7724,N15000 for 90GB Smart Bundle Weekly,data
+7725,N11000 for 55GB Smart Bundle Weekly,data
+7726,N4500 for 20GB Smart Bundle Weekly,data
+7727,N12000 for 60GB Smart Bundle Weekly,data
+7728,N15000 for 70GB Smart Bundle Weekly,data
+7729,N11000 for 60GB Smart Bundle Weekly,data
+7730,N13000 for 60GB Smart Bundle Weekly,data
+8000,DA-8000,data
+8051,M2M,data
+8052,Hynet Wimax data bonus,data
+8053,Staff  Hynet Wimax data bonus,data
+8054,SME Bundles,data
+8055,100GB ONE-OFF DATA,data
+8057,SME One Box (Data),data
+8059,Yafun Yafun WhatsApp 25MB,data
+8060,AIR_BONUS_Pulse-10MB-20MB,data
+8061,N-Power 750 MB Bundle,data
+8062,20MB WhatsApp Daily Plan,data
+8063,AIR_BONUS_Winback Bonus_XtraTime,data
+8065,FLY Campaign Bonus,data
+8066,MyMTN App Adoption Bonus,data
+8068,mPulse Whatsapp Bonus,data
+8069,RechargeCVM18,data
+8071,150MB All Social Daily Plan,data
+8072,HelloWorld Global Roaming SMS,sms
+8088,SME VP Device Bundle,data
+8090,AIR_BONUS_Winback Bonus_XtraTime,data
+8091,FLY Campaign Bonus,data
+8094,AIR_BONUS_20MB-Bonus,data
+8096,500MB Data Bundle For MTN App,data
+8099,XtraCarte IDD,data
+8116,4GB Month All Day plan(winback)-Segmented,data
+8155,1GB Weekly All Day plan(winback)-Segmented,data
+8200,Fastlink Bonus LTE 100 percent,data
+8201,4G Bonus offer 100%_25%,data
+8201,4G Bonus offer 100%_25%,data
+8202,Fastlink Bonus CVM 100 percent,data
+8203,Fastlink Kpalasa Bonus,data
+8204,Fastlink-Samsung Device Offer-BONUS,data
+8205,Fastlink LCMS Bonus,data
+8206,BOBR-BONUS,data
+8206,fastlink BOBR bonus,data
+8207,Fastlink freetel bonus,data
+8208,Fastlink-Upfront Data -100PER-BONUS,data
+8209,Fastlink-Pulse 500-BONUS,data
+8210,Fastlink-ALUMNUS-4305-50PER-BONUS,data
+8211,Fastlink Bonus  CLM Agent Store,data
+8212,Fastlink Bonus Yafun Yafun,data
+8215,50% Bonus on 25MB/75MB,data
+8216,10MB Daily Plan,data
+8217,75MB Daily Plan,data
+8218,35MB Daily Plan,data
+8219,110MB Daily Plan,data
+8220,100MB Daily Plan,data
+8221,1GB+1.5mins Daily Plan,data
+8222,230MB Daily Plan,data
+8223,250MB 2-Day Plan,data
+8224,2GB 2-Day Plan,data
+8225,2.5GB 2-Day Plan,data
+8226,250MB 3-Day Plan,data
+8227,750MB+1hr (YT/IG/TT),data
+8228,75MB Weekly Plan,data
+8229,350MB Weekly Plan,data
+8230,750MB  Weekly Plan,data
+8231,1GB Weekly Plan,data
+8232,1GB Weekly Plan,data
+8233,1.5GB Weekly Plan,data
+8234,6GB Weekly Plan,data
+8235,1.2GB+1hr (YT/IG/TT),data
+8236,500MB Weekly Plan,data
+8237,2GB 14-Day Plan,data
+8238,200MB bi-Weekly Plan,data
+8239,25MB Monthly Plan,data
+8240,50MB Monthly Plan,data
+8241,1GB  Monthly Plan,data
+8242,2GB+2mins Monthly Plan,data
+8243,2.7GB+2mins Monthly Plan,data
+8244,3.5GB+5mins Monthly Plan,data
+8245,7GB Monthly Plan,data
+8246,4.25GB+10mins Monthly Plan,data
+8246,4.25GB+10mins Monthly Plan,data
+8247,4GB Monthly Plan,data
+8248,7GB Monthly Plan,data
+8248,5.5GB Monthly Plan,data
+8249,10GB+10mins Monthly Plan,data
+8250,12.5GB Monthly Plan,data
+8251,16.5GB+10mins Monthly Plan,data
+8252,20GB Monthly Plan,data
+8253,25GB Monthly Plan,data
+8254,36GB Monthly Plan,data
+8255,75GB+40mins Monthly Plan(80%),data
+8255,75GB+40mins Monthly Plan(80%),data
+8256,120GB Monthly plan(80%),data
+8256,120GB Monthly Plan(80%),data
+8257,25GB Monthly 4G Plan,data
+8258,50GB Monthly 4G Plan,data
+8259,100GB 2month plan(80%),data
+8259,100GB 2-Month Plan(80%),data
+8260,160GB 2month plan(80%),data
+8260,160GB 2-Month Plan(80%),data
+8261,400GB 3month plan(80%),data
+8261,400GB 3-Month Plan,data
+8262,600GB 3month plan(80%),data
+8262,600GB 3-Month Plan(80%),data
+8263,325GB 6-Month Plan,data
+8264,400GB Yearly Plan,data
+8265,2.5TB 1year Plan(80%),data
+8265,2.5TB Yearly Plan(80%),data
+8266,4.5TB 1year plan(80%),data
+8266,4.5TB Yearly Plan(80%),data
+8267,90GB 2-Month Plan,data
+8268,1.5GB 14-Days Plan ,data
+8269,131 Upsell 100% Bonus,data
+8300,Fastlink Bonus LTE 100 percent Night,data
+8301,Fastlink Bonus 4G 25 percent Night,data
+8302,Fastlink Bonus CVM 100 percent Night,data
+8303,Fastlink Kpalasa Bonus Night,data
+8304,Fastlink Bonus Samsung Night,data
+8305,Fastlink LCMS Bonus  Night,data
+8306,fastlink BOBR bonus Night,data
+8307,Fastlink freetel bonus Night,data
+8308,Fastlink Upfront Data Night,data
+8309,Fastlink Pulse Bonus  Night,data
+8310,Fastlink Alumnus Bonus 50 percent Night,data
+8311,Fastlink Bonus  CLM Agent Store Night,data
+8312,Fastlink Bonus Yafun Yafun Night,data
+8315,Fastlink Default Bonus Night,data
+8316,50% Jara Bonus,data
+8395,Xtravalue Carte Data,data
+8397,XVCB_NGN500_500MB_Day,data
+8398,XVCB_NGN500_250MB_Night,data
+8400,SME OneBox,data
+8402,UAE Roaming Bundle SMS,sms
+8450,AWUF4U AIR BONUS,money
+8451,NIN TOP 1%,
+8452,NIN NEXT 4%,
+8453,NIN NEXT 15%,
+8454,NIN NEXT 30%,
+8455,NIN NOT RGS & BOP,
+8456,NIN Bonus,
+8491,Betatalk Recharge Usage  main account Airtime,money
+8491,Betatalk Recharge Usage  main account Airtime,money
+8493,MOMO MAIN ACCOUNT,money
+8498,Xtravalue Carte Voice and SMS,money
+9990,Data Bundle-threshold-Notification,data
+11029,75MB Weekly Plan,data
+11203,DA-11203,data
+16059,DA-16059,data
+18018,Temporary credit limit,data
+19011,FLYTXT,data
+19013,FLYTXT,data
+20557,Use and Get Segmnet for 50MB,data
+20557,Use and Get Segmnet for 50MB,data
+20558,Use and Get Segmnet for 100MB,data
+20559,Use and Get Segmnet for 200MB,data
+20560,Use and Get Segmnet for 300MB,data
+20561,Use and Get Segmnet for 500MB,data
+20562,Use and Get Segmnet for 750MB,data
+20563,Use and Get Segmnet for 1024MB,data
+21605,CVM BoD_50,data
+21606,CVM BoD_100,data
+21607,CVM BoD_200,data
+21608,CVM BoD_300,data
+21609,CVM BoD_500,data
+21610,CVM BoD_750,data
+21611,CVM BoD_1024,data
+21612,Use and Get Usage offer  for 50MB,data
+21613,Use and Get Usage offer  for 100MB,data
+21614,Use and Get Usage offer  for 200MB,data
+21615,Use and Get Usage offer  for 300MB,data
+21616,Use and Get Usage offer  for 500MB,data
+21617,Use and Get Usage offer  for 750MB,data
+21618,Use and Get Usage offer  for 1024MB,data
+21791,New All Night Streaming,data
+1510_1,BetaGist Get back minutes,
+DA4614,1GB IG/TIKTOK Weekly Bundle,
+MA,Main Account,
+UA102,Pulse Midnight Voice and Data,
+UA103,Pulse Midnight Subscription,

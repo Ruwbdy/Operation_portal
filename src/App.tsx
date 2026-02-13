@@ -2,6 +2,8 @@ import React, { Component, ReactNode, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import { initializeDAMapping } from './services/daMapping';
+
 
 // Lazy load pages for better performance
 const Login = lazy(() => import('./pages/Login'));
@@ -13,6 +15,8 @@ const DCLM = lazy(() => import('./pages/INSupport/DCLM'));
 const ServiceDesk = lazy(() => import('./pages/INSupport/ServiceDesk'));
 const DSA = lazy(() => import('./pages/INSupport/DSA'));
 const EnterpriseBusiness = lazy(() => import('./pages/INSupport/EnterpriseBusiness'));
+
+await initializeDAMapping();
 
 interface ErrorBoundaryProps {
   children?: ReactNode;

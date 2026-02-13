@@ -6,6 +6,7 @@ import Toast from '../../components/common/Toast';
 import BalanceTab from '../../components/user-support/balance-cdr/BalanceTab';
 import CDRTable from '../../components/user-support/balance-cdr/CDRTable';
 import CDRSummary from '../../components/user-support/balance-cdr/CDRSummary';
+import DAAnalysis from '../../components/user-support/balance-cdr/DAAnalysis';
 import { validateMSISDN, validateDateRange } from '../../utils/validators';
 import { parseCDRRecords } from '../../services/cdrParser';
 import { fetchDataProfile } from '../../services/api_services';
@@ -40,7 +41,7 @@ export default function BalanceAndCDR() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [msisdn, setMsisdn] = useState('');
   
-  // ✅ Pre-populate: start = 7 days ago, end = today (local)
+  // Pre-populate: start = 7 days ago, end = today (local)
   const [startDate, setStartDate] = useState<string>(daysAgoLocal(7));
   const [endDate, setEndDate] = useState<string>(todayLocal());
 
@@ -79,12 +80,15 @@ export default function BalanceAndCDR() {
     setIsLoading(true);
     
     try {
+      // Use normalized MSISDN for API call
+      const normalizedMsisdn = msisdnValidation.normalized || msisdn;
+      
       // Convert dates to YYYYMMDD format for API
       const formattedStartDate = startDate.replace(/-/g, '');
       const formattedEndDate = endDate.replace(/-/g, '');
 
       // Call the consolidated API
-      const response = await fetchDataProfile(msisdn, formattedStartDate, formattedEndDate);
+      const response = await fetchDataProfile(normalizedMsisdn, formattedStartDate, formattedEndDate);
       
       if (!response.success || !response.data) {
         throw new Error(response.error?.message || 'Failed to fetch data profile');
@@ -108,7 +112,7 @@ export default function BalanceAndCDR() {
       if (response.data.cdrRecords && response.data.cdrRecords.length > 0) {
         const mockApiResponse = {
           APIStatus: {
-            msisdn: msisdn,
+            msisdn: normalizedMsisdn,
             requestId: 'REQ-' + Date.now(),
             dateRange: [formattedStartDate, formattedEndDate],
             maxRecs: 1000,
@@ -238,9 +242,8 @@ export default function BalanceAndCDR() {
                   value={msisdn}
                   onChange={(e) => setMsisdn(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="234XXXXXXXXXX"
+                  placeholder="234XXXXXXXXXX, 09XXXXXXXXX, or 9XXXXXXXXX"
                   className="w-full px-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-black font-bold text-sm focus:outline-none focus:border-[#FFCC00] transition-colors placeholder:text-gray-300"
-                  maxLength={13}
                 />
               </div>
               <div>
@@ -324,7 +327,7 @@ export default function BalanceAndCDR() {
             )}
             {activeTab === 'data' && categorizedCDR && summaries && (
               <>
-                <CDRSummary summary={summaries.data} type="data" />
+                <DAAnalysis records={categorizedCDR.data} />
                 <CDRTable records={categorizedCDR.data} type="data" />
               </>
             )}

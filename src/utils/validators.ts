@@ -1,28 +1,46 @@
 // Input Validation Utilities
 
 /**
- * Validate MSISDN format (13 digits starting with 234)
+ * Validate and normalize MSISDN format
+ * Accepts: 2349066756790, 09066756790, 9066756790
+ * Normalizes to: 2349066756790 (13 digits starting with 234)
  */
-export function validateMSISDN(msisdn: string): { valid: boolean; error?: string } {
+export function validateMSISDN(msisdn: string): { valid: boolean; error?: string; normalized?: string } {
   if (!msisdn) {
     return { valid: false, error: 'MSISDN is required' };
   }
   
-  const trimmed = msisdn.trim();
+  let trimmed = msisdn.trim();
   
   if (!/^\d+$/.test(trimmed)) {
     return { valid: false, error: 'MSISDN must contain only digits' };
   }
   
+  // Normalize different formats to 234XXXXXXXXXX
+  if (trimmed.startsWith('0') && trimmed.length === 11) {
+    // 09066756790 -> 2349066756790
+    trimmed = '234' + trimmed.substring(1);
+  } else if (!trimmed.startsWith('234') && !trimmed.startsWith('0') && trimmed.length === 10) {
+    // 9066756790 -> 2349066756790
+    trimmed = '234' + trimmed;
+  } else if (trimmed.startsWith('234') && trimmed.length === 13) {
+    // Already in correct format
+    trimmed = trimmed;
+  } else if (trimmed.startsWith('0')) {
+    return { valid: false, error: 'MSISDN starting with 0 must be 11 digits (e.g., 09066756790)' };
+  } else if (!trimmed.startsWith('234')) {
+    return { valid: false, error: 'MSISDN must start with 234, 0, or be 10 digits' };
+  }
+  
   if (trimmed.length !== 13) {
-    return { valid: false, error: 'MSISDN must be exactly 13 digits' };
+    return { valid: false, error: 'MSISDN must normalize to 13 digits (234XXXXXXXXXX)' };
   }
   
   if (!trimmed.startsWith('234')) {
-    return { valid: false, error: 'MSISDN must start with 234' };
+    return { valid: false, error: 'Normalized MSISDN must start with 234' };
   }
   
-  return { valid: true };
+  return { valid: true, normalized: trimmed };
 }
 
 /**
