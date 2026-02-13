@@ -115,14 +115,14 @@ export default function VoLTEProfileTab({ profile, msisdn, onSuccess, onError }:
           <Power className="mx-auto mb-3" size={24} />
           {isProcessing ? 'Processing...' : 'Deactivate VoLTE'}
         </button>
-        <button
+        {/* <button
           onClick={handleDeleteVoLTE}
           disabled={isProcessing}
           className="bg-red-600 text-white p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-red-700 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-transparent hover:border-red-500"
         >
           <Trash2 className="mx-auto mb-3" size={24} />
           {isProcessing ? 'Processing...' : 'Delete VoLTE'}
-        </button>
+        </button> */}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* VoLTE Identity */}

@@ -17,6 +17,7 @@ type TabType = 'voice' | 'browsing' | 'volte' | 'offers';
 export default function ChargingProfile() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [msisdn, setMsisdn] = useState('');
+  const [normalizedMsisdn, setNormalizedMsisdn] = useState(''); // Store normalized MSISDN
   const [activeTab, setActiveTab] = useState<TabType>('voice');
   const [isLoading, setIsLoading] = useState(false);
   
@@ -42,10 +43,11 @@ export default function ChargingProfile() {
     
     try {
       // Use normalized MSISDN for API call
-      const normalizedMsisdn = validation.normalized || msisdn;
+      const normalizedValue = validation.normalized || msisdn;
+      setNormalizedMsisdn(normalizedValue); // Store it in state
       
       // Call the consolidated API
-      const response = await fetchChargingProfile(normalizedMsisdn);
+      const response = await fetchChargingProfile(normalizedValue);
       
       if (!response.success || !response.data) {
         throw new Error(response.error?.message || 'Failed to fetch charging profile');
@@ -195,7 +197,8 @@ export default function ChargingProfile() {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             {activeTab === 'voice' && voiceProfile && (
               <VoiceProfileTab 
-                profile={voiceProfile} 
+                profile={voiceProfile}
+                msisdn={normalizedMsisdn}
                 onSuccess={(msg) => setSuccessToast(msg)}
                 onError={(msg) => setErrorToast(msg)}
               />
@@ -203,7 +206,7 @@ export default function ChargingProfile() {
             {activeTab === 'browsing' && browsingProfile && (
               <BrowsingProfileTab 
                 profile={browsingProfile}
-                msisdn={msisdn}
+                msisdn={normalizedMsisdn}
                 onSuccess={(msg) => setSuccessToast(msg)}
                 onError={(msg) => setErrorToast(msg)}
               />
@@ -211,7 +214,7 @@ export default function ChargingProfile() {
             {activeTab === 'volte' && (
               <VoLTEProfileTab 
                 profile={volteProfile}
-                msisdn={msisdn}
+                msisdn={normalizedMsisdn}
                 onSuccess={(msg) => setSuccessToast(msg)}
                 onError={(msg) => setErrorToast(msg)}
               />

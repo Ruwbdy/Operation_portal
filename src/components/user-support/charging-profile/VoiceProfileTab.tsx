@@ -7,17 +7,18 @@ import type { VoiceProfile } from '../../../services/data_interface';
 
 interface VoiceProfileTabProps {
   profile: VoiceProfile;
+  msisdn: string; // Pass normalized MSISDN from parent
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
 }
 
-export default function VoiceProfileTab({ profile, onSuccess, onError }: VoiceProfileTabProps) {
+export default function VoiceProfileTab({ profile, msisdn, onSuccess, onError }: VoiceProfileTabProps) {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleResetCallProfile = async () => {
     setIsProcessing(true);
     try {
-      const response = await resetCallProfile(profile.msisdn);
+      const response = await resetCallProfile(msisdn); // Use prop instead of profile.msisdn
       
       if (!response.success) {
         throw new Error(response.error?.message || 'Failed to reset call profile');
