@@ -33,7 +33,7 @@ export function parseCDRRecords(response: CDRApiResponse): {
       categorized.sms.push(record);
     } else if (type.includes('credit') || type.includes('recharge') || type.includes('topup')) {
       categorized.credit.push(record);
-    } else if (type.includes('adjustment') || type.includes('da')) {
+    } else if (type.includes('adjustment') /*|| type.includes('da')*/) {
       categorized.daAdjustment.push(record);
     } else {
       categorized.other.push(record);

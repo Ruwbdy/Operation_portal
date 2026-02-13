@@ -13,33 +13,6 @@ export default function BalanceTab({ balance, dabalances }: BalanceTabProps) {
 
   return (
     <div className="space-y-8">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-8 rounded-[2rem] border-2 border-green-100">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="bg-green-500 p-2.5 rounded-xl">
-              <Wallet size={20} className="text-white" />
-            </div>
-            <span className="text-[9px] font-black text-gray-500 uppercase tracking-wider">
-              Main Account
-            </span>
-          </div>
-          <p className="text-4xl font-black text-black italic">₦{totalMA.toFixed(2)}</p>
-        </div>
-
-        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-8 rounded-[2rem] border-2 border-blue-100">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="bg-blue-500 p-2.5 rounded-xl">
-              <TrendingUp size={20} className="text-white" />
-            </div>
-            <span className="text-[9px] font-black text-gray-500 uppercase tracking-wider">
-              DA Accounts
-            </span>
-          </div>
-          <p className="text-4xl font-black text-black italic">{dabalances.length}</p>
-        </div>
-      </div>
-
       {/* MA Balance Card */}
       <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 p-8">
         <div className="flex items-center space-x-4 mb-8 pb-6 border-b border-gray-100">

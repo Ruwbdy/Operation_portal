@@ -24,7 +24,8 @@ export default function BrowsingProfileTab({ profile, msisdn, onSuccess, onError
         throw new Error(response.error?.message || 'Failed to reset browsing profile');
       }
       
-      onSuccess('Browsing profile reset successfully (Mobile)');
+      // Use the actual API response message
+      onSuccess(response.data?.message || 'Browsing profile reset successfully (Mobile)');
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Failed to reset browsing profile');
     } finally {
@@ -41,7 +42,8 @@ export default function BrowsingProfileTab({ profile, msisdn, onSuccess, onError
         throw new Error(response.error?.message || 'Failed to reset browsing profile');
       }
       
-      onSuccess('Browsing profile reset successfully (IoT)');
+      // Use the actual API response message
+      onSuccess(response.data?.message || 'Browsing profile reset successfully (IoT)');
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Failed to reset browsing profile');
     } finally {

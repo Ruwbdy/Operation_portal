@@ -23,7 +23,8 @@ export default function VoiceProfileTab({ profile, onSuccess, onError }: VoicePr
         throw new Error(response.error?.message || 'Failed to reset call profile');
       }
       
-      onSuccess('Call profile reset successfully');
+      // Use the detailed message from the API response
+      onSuccess(response.data?.message || 'Call profile reset successfully');
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Failed to reset call profile');
     } finally {

@@ -83,10 +83,10 @@ export default function CDRTable({ records, type }: CDRTableProps) {
   const getColumns = (): Column<CDRRecord>[] => {
     const baseColumns: Column<CDRRecord>[] = [
       { key: 'event_dt', label: 'Date/Time', sortable: true, filterable: true, minWidth: '160px' },
-      { key: 'number_called', label: 'Number Called', sortable: true, filterable: true, minWidth: '140px' },
-      { key: 'charged_amount', label: 'Charged', sortable: true, filterable: true, minWidth: '120px' },
-      { key: 'balance_before_amt', label: 'MA Bal Before', sortable: true, filterable: true, minWidth: '130px' },
-      { key: 'balance_after_amt', label: 'MA Bal After', sortable: true, filterable: true, minWidth: '130px' }
+      { key: 'number_called', label: 'Number Called', sortable: true, filterable: true, minWidth: '100px' },
+      { key: 'charged_amount', label: 'Charged', sortable: true, filterable: true, minWidth: '70px' },
+      { key: 'balance_before_amt', label: 'MA Bal Before', sortable: true, filterable: true, minWidth: '70px' },
+      { key: 'balance_after_amt', label: 'MA Bal After', sortable: true, filterable: true, minWidth: '70px' }
     ];
 
     if (type === 'voice') {
@@ -94,9 +94,36 @@ export default function CDRTable({ records, type }: CDRTableProps) {
         ...baseColumns.slice(0, 2),
         { key: 'call_duration_qty', label: 'Duration (s)', sortable: true, filterable: true, minWidth: '110px' },
         ...baseColumns.slice(2),
-        { key: 'discount_amt', label: 'Discount Amt', sortable: false, filterable: false, minWidth: '120px' },
-        { key: 'country', label: 'Country', sortable: true, filterable: true, minWidth: '100px' },
-        { key: 'operator', label: 'Operator', sortable: true, filterable: true, minWidth: '120px' }
+        { 
+          key: 'da_account_id', 
+          label: 'DA ID', 
+          sortable: true, 
+          filterable: true, 
+          minWidth: '50px',
+          accessor: (r) => r.da_details?.[0]?.account_id ?? '-'
+        },
+        { 
+          key: 'da_description', 
+          label: 'DA Description', 
+          sortable: false, 
+          filterable: true, 
+          minWidth: '120px',
+          accessor: (r) => {
+            const daId = r.da_details?.[0]?.account_id;
+            return daId ? getDADescription(daId) : '-';
+          }
+        },
+        { 
+          key: 'da_amount_charged', 
+          label: 'DA Amt Chg', 
+          sortable: true, 
+          filterable: true, 
+          minWidth: '70px',
+          accessor: (r) => r.da_details?.[0]?.amount_charged ?? 0
+        },
+        { key: 'discount_amt', label: 'Discount Amt', sortable: false, filterable: false, minWidth: '70px' },
+        { key: 'country', label: 'Country', sortable: true, filterable: true, minWidth: '70px' },
+        { key: 'operator', label: 'Operator', sortable: true, filterable: true, minWidth: '70px' }
       ];
     }
 
@@ -108,7 +135,7 @@ export default function CDRTable({ records, type }: CDRTableProps) {
           label: 'DA ID', 
           sortable: true, 
           filterable: true, 
-          minWidth: '90px',
+          minWidth: '40px',
           accessor: (r) => r.da_details?.[0]?.account_id ?? '-'
         },
         { 
@@ -116,7 +143,7 @@ export default function CDRTable({ records, type }: CDRTableProps) {
           label: 'DA Description', 
           sortable: false, 
           filterable: true, 
-          minWidth: '180px',
+          minWidth: '170px',
           accessor: (r) => {
             const daId = r.da_details?.[0]?.account_id;
             return daId ? getDADescription(daId) : '-';
@@ -127,7 +154,7 @@ export default function CDRTable({ records, type }: CDRTableProps) {
           label: 'DA Amt Before', 
           sortable: true, 
           filterable: true, 
-          minWidth: '130px',
+          minWidth: '70px',
           accessor: (r) => r.da_details?.[0]?.amount_before ?? 0
         },
         { 
@@ -135,7 +162,7 @@ export default function CDRTable({ records, type }: CDRTableProps) {
           label: 'DA Amt After', 
           sortable: true, 
           filterable: true, 
-          minWidth: '130px',
+          minWidth: '70px',
           accessor: (r) => r.da_details?.[0]?.amount_after ?? 0
         },
         { 
@@ -143,15 +170,14 @@ export default function CDRTable({ records, type }: CDRTableProps) {
           label: 'DA Amt Chg', 
           sortable: true, 
           filterable: true, 
-          minWidth: '120px',
+          minWidth: '70px',
           accessor: (r) => r.da_details?.[0]?.amount_charged ?? 0
         },
         ...baseColumns.slice(3, 5),
-        { key: 'charged_amount', label: 'Total Chrg', sortable: true, filterable: true, minWidth: '120px' },
-        { key: 'bytes_received_qty', label: 'Bytes RX', sortable: true, filterable: false, minWidth: '110px' },
-        { key: 'bytes_sent_qty', label: 'Bytes TX', sortable: true, filterable: false, minWidth: '110px' },
-        { key: 'country', label: 'Country', sortable: true, filterable: true, minWidth: '100px' },
-        //{ key: 'operator', label: 'Operator', sortable: true, filterable: true, minWidth: '120px' }
+        { key: 'charged_amount', label: 'Total Chrg', sortable: true, filterable: true, minWidth: '70px' },
+        { key: 'bytes_received_qty', label: 'Bytes RX', sortable: true, filterable: false, minWidth: '50px' },
+        { key: 'bytes_sent_qty', label: 'Bytes TX', sortable: true, filterable: false, minWidth: '50px' },
+        { key: 'country', label: 'Country', sortable: true, filterable: true, minWidth: '50px' },
       ];
     }
 

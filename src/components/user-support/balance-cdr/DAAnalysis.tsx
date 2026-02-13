@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { TrendingUp, Calendar, Database, Filter, BarChart3 } from 'lucide-react';
+import { TrendingUp, Calendar, Database, Filter, BarChart3, X, Maximize2 } from 'lucide-react';
 import { formatCDRDateTime } from '../../../utils/dateFormatter';
 import { formatDAAmount, getDADescription, getAllDAIds, isDataDA } from '../../../services/daMapping';
 import type { CDRRecord } from '../../../services/data_interface';
@@ -35,6 +35,7 @@ interface DailyUsage {
 }
 
 export default function DAAnalysis({ records }: DAAnalysisProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDA, setSelectedDA] = useState<string>('all');
   const [selectedDay, setSelectedDay] = useState<string>('all');
 
@@ -183,21 +184,30 @@ export default function DAAnalysis({ records }: DAAnalysisProps) {
   }, [selectedDA, selectedDay, daUsageMap, dailyUsageMap, records]);
 
   return (
-    <div className="space-y-8 mb-8">
+    <>
       {/* DA Overview Cards - Always visible */}
-      <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 p-8">
-        <div className="flex items-center space-x-4 mb-8 pb-6 border-b border-gray-100">
-          <div className="bg-purple-500 p-3 rounded-xl">
-            <BarChart3 size={20} className="text-white" />
+      <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 p-8 mb-8">
+        <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
+          <div className="flex items-center space-x-4">
+            <div className="bg-purple-500 p-3 rounded-xl">
+              <BarChart3 size={20} className="text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-black uppercase tracking-wide">
+                DA Usage Overview
+              </h3>
+              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mt-1">
+                All Dedicated Account Activity
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-sm font-black text-black uppercase tracking-wide">
-              DA Usage Overview
-            </h3>
-            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mt-1">
-              All Dedicated Account Activity
-            </p>
-          </div>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center space-x-2 px-6 py-3 bg-black text-[#FFCC00] rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-900 active:scale-95 transition-all shadow-lg"
+          >
+            <Maximize2 size={16} />
+            <span>Detailed Analysis</span>
+          </button>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -206,12 +216,11 @@ export default function DAAnalysis({ records }: DAAnalysisProps) {
             return (
               <div
                 key={daId}
-                className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                  selectedDA === daId
-                    ? 'bg-purple-50 border-purple-500'
-                    : 'bg-gray-50 border-gray-100 hover:border-purple-300'
-                }`}
-                onClick={() => setSelectedDA(selectedDA === daId ? 'all' : daId)}
+                className="p-4 rounded-xl border-2 bg-gray-50 border-gray-100 hover:border-purple-300 transition-all cursor-pointer"
+                onClick={() => {
+                  setSelectedDA(daId);
+                  setIsModalOpen(true);
+                }}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-black text-purple-600">DA {daId}</span>
@@ -232,309 +241,346 @@ export default function DAAnalysis({ records }: DAAnalysisProps) {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">
-              Filter by DA
-            </label>
-            <div className="relative">
-              <select
-                value={selectedDA}
-                onChange={(e) => setSelectedDA(e.target.value)}
-                className="w-full px-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-black font-bold text-sm focus:outline-none focus:border-purple-500 transition-colors appearance-none cursor-pointer"
+      {/* Modal for Detailed Analysis */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl border-4 border-[#FFCC00] w-full max-w-7xl max-h-[90vh] overflow-hidden animate-in zoom-in slide-in-from-bottom-4 duration-300">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-8 border-b border-gray-100 sticky top-0 bg-white z-10">
+              <div className="flex items-center space-x-4">
+                <div className="bg-purple-500 p-3 rounded-xl">
+                  <TrendingUp size={20} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-black uppercase tracking-wide">
+                    Detailed DA Analysis
+                  </h3>
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mt-1">
+                    Filter and analyze dedicated account usage
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setSelectedDA('all');
+                  setSelectedDay('all');
+                }}
+                className="p-3 hover:bg-gray-100 rounded-xl transition-colors"
               >
-                <option value="all">All DAs</option>
-                {sortedDAIds.map(daId => {
-                  const usage = daUsageMap.get(daId)!;
-                  return (
-                    <option key={daId} value={daId}>
-                      DA {daId} - {usage.description}
-                    </option>
-                  );
-                })}
-              </select>
-              <Filter size={16} className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <X size={24} className="text-gray-600" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
+              {/* Filters */}
+              <div className="bg-gray-50 rounded-[2rem] border border-gray-100 p-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">
+                      Filter by DA
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={selectedDA}
+                        onChange={(e) => setSelectedDA(e.target.value)}
+                        className="w-full px-6 py-4 bg-white border-2 border-gray-200 rounded-2xl text-black font-bold text-sm focus:outline-none focus:border-purple-500 transition-colors appearance-none cursor-pointer"
+                      >
+                        <option value="all">All DAs</option>
+                        {sortedDAIds.map(daId => {
+                          const usage = daUsageMap.get(daId)!;
+                          return (
+                            <option key={daId} value={daId}>
+                              DA {daId} - {usage.description}
+                            </option>
+                          );
+                        })}
+                      </select>
+                      <Filter size={16} className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">
+                      Filter by Day
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={selectedDay}
+                        onChange={(e) => setSelectedDay(e.target.value)}
+                        className="w-full px-6 py-4 bg-white border-2 border-gray-200 rounded-2xl text-black font-bold text-sm focus:outline-none focus:border-purple-500 transition-colors appearance-none cursor-pointer"
+                      >
+                        <option value="all">All Days</option>
+                        {sortedDates.map(date => {
+                          const daily = dailyUsageMap.get(date)!;
+                          return (
+                            <option key={date} value={date}>
+                              {date}
+                            </option>
+                          );
+                        })}
+                      </select>
+                      <Calendar size={16} className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+
+                {(selectedDA !== 'all' || selectedDay !== 'all') && (
+                  <button
+                    onClick={() => {
+                      setSelectedDA('all');
+                      setSelectedDay('all');
+                    }}
+                    className="mt-4 text-xs font-black text-red-600 uppercase tracking-wider hover:text-red-700 transition-colors"
+                  >
+                    Clear Filters
+                  </button>
+                )}
+              </div>
+
+              {/* Detailed Analysis Section */}
+              {filteredData && (
+                <div className="bg-white rounded-[2rem] shadow-lg border border-gray-100 p-8">
+                  <div className="flex items-center space-x-4 mb-8 pb-6 border-b border-gray-100">
+                    <div className="bg-blue-500 p-3 rounded-xl">
+                      <TrendingUp size={20} className="text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-black uppercase tracking-wide">
+                        Analysis Results
+                      </h3>
+                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mt-1">
+                        {filteredData.type === 'all' ? 'Overall Summary' :
+                         filteredData.type === 'da' ? `DA ${selectedDA} Analysis` :
+                         filteredData.type === 'day' ? `${selectedDay} Analysis` :
+                         `DA ${selectedDA} on ${selectedDay}`}
+                      </p>
+                    </div>
+                  </div>
+
+                  {filteredData.type === 'all' && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="p-6 bg-purple-50 rounded-xl border-2 border-purple-100">
+                        <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
+                          Total DAs Used
+                        </p>
+                        <p className="text-4xl font-black text-purple-600 italic">
+                          {filteredData.totalDAs}
+                        </p>
+                      </div>
+                      <div className="p-6 bg-blue-50 rounded-xl border-2 border-blue-100">
+                        <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
+                          Days with Activity
+                        </p>
+                        <p className="text-4xl font-black text-blue-600 italic">
+                          {filteredData.totalDays}
+                        </p>
+                      </div>
+                      <div className="p-6 bg-green-50 rounded-xl border-2 border-green-100">
+                        <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
+                          Total Transactions
+                        </p>
+                        <p className="text-4xl font-black text-green-600 italic">
+                          {filteredData.totalTransactions}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {filteredData.type === 'da' && (
+                    <div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div className="p-6 bg-purple-50 rounded-xl border-2 border-purple-100">
+                          <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
+                            Total Usage
+                          </p>
+                          <p className="text-3xl font-black text-purple-600 italic">
+                            {formatDAAmount(filteredData.daId, filteredData.totalUsage)}
+                          </p>
+                        </div>
+                        <div className="p-6 bg-blue-50 rounded-xl border-2 border-blue-100">
+                          <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
+                            Transactions
+                          </p>
+                          <p className="text-3xl font-black text-blue-600 italic">
+                            {filteredData.transactionCount}
+                          </p>
+                        </div>
+                        <div className="p-6 bg-green-50 rounded-xl border-2 border-green-100">
+                          <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
+                            Avg per Transaction
+                          </p>
+                          <p className="text-3xl font-black text-green-600 italic">
+                            {formatDAAmount(filteredData.daId, filteredData.totalUsage / filteredData.transactionCount)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="bg-gray-50">
+                              <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
+                                Date/Time
+                              </th>
+                              <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
+                                Amount Charged
+                              </th>
+                              <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
+                                Balance Before
+                              </th>
+                              <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
+                                Balance After
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100">
+                            {filteredData.transactions.map((txn, idx) => (
+                              <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                                <td className="px-6 py-4 text-sm font-bold text-gray-700">{txn.date}</td>
+                                <td className="px-6 py-4 text-sm font-bold text-red-600">
+                                  {formatDAAmount(filteredData.daId, txn.amountCharged)}
+                                </td>
+                                <td className="px-6 py-4 text-sm font-bold text-gray-600">
+                                  {formatDAAmount(filteredData.daId, txn.balanceBefore)}
+                                </td>
+                                <td className="px-6 py-4 text-sm font-bold text-green-600">
+                                  {formatDAAmount(filteredData.daId, txn.balanceAfter)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {filteredData.type === 'day' && (
+                    <div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div className="p-6 bg-blue-50 rounded-xl border-2 border-blue-100">
+                          <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
+                            Total Usage
+                          </p>
+                          <p className="text-3xl font-black text-blue-600 italic">
+                            {filteredData.totalUsage.toFixed(2)}
+                          </p>
+                        </div>
+                        <div className="p-6 bg-green-50 rounded-xl border-2 border-green-100">
+                          <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
+                            Transactions
+                          </p>
+                          <p className="text-3xl font-black text-green-600 italic">
+                            {filteredData.transactionCount}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="bg-gray-50">
+                              <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
+                                DA ID
+                              </th>
+                              <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
+                                Description
+                              </th>
+                              <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
+                                Amount Charged
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100">
+                            {filteredData.transactions.map((txn, idx) => (
+                              <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                                <td className="px-6 py-4 text-sm font-black text-purple-600">DA {txn.daId}</td>
+                                <td className="px-6 py-4 text-sm font-bold text-gray-700">{txn.description}</td>
+                                <td className="px-6 py-4 text-sm font-bold text-red-600">
+                                  {formatDAAmount(txn.daId, txn.amountCharged)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {filteredData.type === 'specific' && (
+                    <div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div className="p-6 bg-purple-50 rounded-xl border-2 border-purple-100">
+                          <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
+                            Total Usage
+                          </p>
+                          <p className="text-3xl font-black text-purple-600 italic">
+                            {formatDAAmount(filteredData.daId, filteredData.totalUsage)}
+                          </p>
+                        </div>
+                        <div className="p-6 bg-blue-50 rounded-xl border-2 border-blue-100">
+                          <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
+                            Transactions
+                          </p>
+                          <p className="text-3xl font-black text-blue-600 italic">
+                            {filteredData.transactionCount}
+                          </p>
+                        </div>
+                        <div className="p-6 bg-green-50 rounded-xl border-2 border-green-100">
+                          <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
+                            DA Description
+                          </p>
+                          <p className="text-sm font-black text-green-600">
+                            {filteredData.description}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="bg-gray-50">
+                              <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
+                                Time
+                              </th>
+                              <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
+                                Amount Charged
+                              </th>
+                              <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
+                                Balance Before
+                              </th>
+                              <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
+                                Balance After
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100">
+                            {filteredData.transactions.map((txn, idx) => (
+                              <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                                <td className="px-6 py-4 text-sm font-bold text-gray-700">{txn.date}</td>
+                                <td className="px-6 py-4 text-sm font-bold text-red-600">
+                                  {formatDAAmount(filteredData.daId, txn.amountCharged)}
+                                </td>
+                                <td className="px-6 py-4 text-sm font-bold text-gray-600">
+                                  {formatDAAmount(filteredData.daId, txn.balanceBefore)}
+                                </td>
+                                <td className="px-6 py-4 text-sm font-bold text-green-600">
+                                  {formatDAAmount(filteredData.daId, txn.balanceAfter)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-
-          <div>
-            <label className="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">
-              Filter by Day
-            </label>
-            <div className="relative">
-              <select
-                value={selectedDay}
-                onChange={(e) => setSelectedDay(e.target.value)}
-                className="w-full px-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-black font-bold text-sm focus:outline-none focus:border-purple-500 transition-colors appearance-none cursor-pointer"
-              >
-                <option value="all">All Days</option>
-                {sortedDates.map(date => {
-                  const daily = dailyUsageMap.get(date)!;
-                  return (
-                    <option key={date} value={date}>
-                      {date} ({daily.transactionCount} transactions)
-                    </option>
-                  );
-                })}
-              </select>
-              <Calendar size={16} className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
-        </div>
-
-        {(selectedDA !== 'all' || selectedDay !== 'all') && (
-          <button
-            onClick={() => {
-              setSelectedDA('all');
-              setSelectedDay('all');
-            }}
-            className="mt-4 text-xs font-black text-red-600 uppercase tracking-wider hover:text-red-700 transition-colors"
-          >
-            Clear Filters
-          </button>
-        )}
-      </div>
-
-      {/* Detailed Analysis Section */}
-      {filteredData && (
-        <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 p-8">
-          <div className="flex items-center space-x-4 mb-8 pb-6 border-b border-gray-100">
-            <div className="bg-blue-500 p-3 rounded-xl">
-              <TrendingUp size={20} className="text-white" />
-            </div>
-            <div>
-              <h3 className="text-sm font-black text-black uppercase tracking-wide">
-                Detailed Analysis
-              </h3>
-              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mt-1">
-                {filteredData.type === 'all' ? 'Overall Summary' :
-                 filteredData.type === 'da' ? `DA ${selectedDA} Analysis` :
-                 filteredData.type === 'day' ? `${selectedDay} Analysis` :
-                 `DA ${selectedDA} on ${selectedDay}`}
-              </p>
-            </div>
-          </div>
-
-          {filteredData.type === 'all' && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-6 bg-purple-50 rounded-xl border-2 border-purple-100">
-                <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
-                  Total DAs Used
-                </p>
-                <p className="text-4xl font-black text-purple-600 italic">
-                  {filteredData.totalDAs}
-                </p>
-              </div>
-              <div className="p-6 bg-blue-50 rounded-xl border-2 border-blue-100">
-                <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
-                  Days with Activity
-                </p>
-                <p className="text-4xl font-black text-blue-600 italic">
-                  {filteredData.totalDays}
-                </p>
-              </div>
-              <div className="p-6 bg-green-50 rounded-xl border-2 border-green-100">
-                <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
-                  Total Transactions
-                </p>
-                <p className="text-4xl font-black text-green-600 italic">
-                  {filteredData.totalTransactions}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {filteredData.type === 'da' && (
-            <div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="p-6 bg-purple-50 rounded-xl border-2 border-purple-100">
-                  <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
-                    Total Usage
-                  </p>
-                  <p className="text-3xl font-black text-purple-600 italic">
-                    {formatDAAmount(filteredData.daId, filteredData.totalUsage)}
-                  </p>
-                </div>
-                <div className="p-6 bg-blue-50 rounded-xl border-2 border-blue-100">
-                  <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
-                    Transactions
-                  </p>
-                  <p className="text-3xl font-black text-blue-600 italic">
-                    {filteredData.transactionCount}
-                  </p>
-                </div>
-                <div className="p-6 bg-green-50 rounded-xl border-2 border-green-100">
-                  <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
-                    Avg per Transaction
-                  </p>
-                  <p className="text-3xl font-black text-green-600 italic">
-                    {formatDAAmount(filteredData.daId, filteredData.totalUsage / filteredData.transactionCount)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
-                        Date/Time
-                      </th>
-                      <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
-                        Amount Charged
-                      </th>
-                      <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
-                        Balance Before
-                      </th>
-                      <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
-                        Balance After
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {filteredData.transactions.map((txn, idx) => (
-                      <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-bold text-gray-700">{txn.date}</td>
-                        <td className="px-6 py-4 text-sm font-bold text-red-600">
-                          {formatDAAmount(filteredData.daId, txn.amountCharged)}
-                        </td>
-                        <td className="px-6 py-4 text-sm font-bold text-gray-600">
-                          {formatDAAmount(filteredData.daId, txn.balanceBefore)}
-                        </td>
-                        <td className="px-6 py-4 text-sm font-bold text-green-600">
-                          {formatDAAmount(filteredData.daId, txn.balanceAfter)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {filteredData.type === 'day' && (
-            <div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="p-6 bg-blue-50 rounded-xl border-2 border-blue-100">
-                  <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
-                    Total Usage
-                  </p>
-                  <p className="text-3xl font-black text-blue-600 italic">
-                    {filteredData.totalUsage.toFixed(2)}
-                  </p>
-                </div>
-                <div className="p-6 bg-green-50 rounded-xl border-2 border-green-100">
-                  <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
-                    Transactions
-                  </p>
-                  <p className="text-3xl font-black text-green-600 italic">
-                    {filteredData.transactionCount}
-                  </p>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
-                        DA ID
-                      </th>
-                      <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
-                        Description
-                      </th>
-                      <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
-                        Amount Charged
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {filteredData.transactions.map((txn, idx) => (
-                      <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-black text-purple-600">DA {txn.daId}</td>
-                        <td className="px-6 py-4 text-sm font-bold text-gray-700">{txn.description}</td>
-                        <td className="px-6 py-4 text-sm font-bold text-red-600">
-                          {formatDAAmount(txn.daId, txn.amountCharged)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {filteredData.type === 'specific' && (
-            <div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="p-6 bg-purple-50 rounded-xl border-2 border-purple-100">
-                  <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
-                    Total Usage
-                  </p>
-                  <p className="text-3xl font-black text-purple-600 italic">
-                    {formatDAAmount(filteredData.daId, filteredData.totalUsage)}
-                  </p>
-                </div>
-                <div className="p-6 bg-blue-50 rounded-xl border-2 border-blue-100">
-                  <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
-                    Transactions
-                  </p>
-                  <p className="text-3xl font-black text-blue-600 italic">
-                    {filteredData.transactionCount}
-                  </p>
-                </div>
-                <div className="p-6 bg-green-50 rounded-xl border-2 border-green-100">
-                  <p className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">
-                    DA Description
-                  </p>
-                  <p className="text-sm font-black text-green-600">
-                    {filteredData.description}
-                  </p>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
-                        Time
-                      </th>
-                      <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
-                        Amount Charged
-                      </th>
-                      <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
-                        Balance Before
-                      </th>
-                      <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-wider">
-                        Balance After
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {filteredData.transactions.map((txn, idx) => (
-                      <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-bold text-gray-700">{txn.date}</td>
-                        <td className="px-6 py-4 text-sm font-bold text-red-600">
-                          {formatDAAmount(filteredData.daId, txn.amountCharged)}
-                        </td>
-                        <td className="px-6 py-4 text-sm font-bold text-gray-600">
-                          {formatDAAmount(filteredData.daId, txn.balanceBefore)}
-                        </td>
-                        <td className="px-6 py-4 text-sm font-bold text-green-600">
-                          {formatDAAmount(filteredData.daId, txn.balanceAfter)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
         </div>
       )}
-    </div>
+    </>
   );
 }

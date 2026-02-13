@@ -24,7 +24,8 @@ export default function VoLTEProfileTab({ profile, msisdn, onSuccess, onError }:
         throw new Error(response.error?.message || 'Failed to activate VoLTE');
       }
       
-      onSuccess('VoLTE activated successfully');
+      // Use the actual API response message
+      onSuccess(response.data?.message || 'VoLTE activated successfully');
       // You might want to trigger a refresh here to reload the profile
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Failed to activate VoLTE');
@@ -42,7 +43,8 @@ export default function VoLTEProfileTab({ profile, msisdn, onSuccess, onError }:
         throw new Error(response.error?.message || 'Failed to deactivate VoLTE');
       }
       
-      onSuccess('VoLTE deactivated successfully');
+      // Use the actual API response message
+      onSuccess(response.data?.message || 'VoLTE deactivated successfully');
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Failed to deactivate VoLTE');
     } finally {
@@ -59,7 +61,8 @@ export default function VoLTEProfileTab({ profile, msisdn, onSuccess, onError }:
         throw new Error(response.error?.message || 'Failed to delete VoLTE configuration');
       }
       
-      onSuccess('VoLTE configuration deleted successfully');
+      // Use the actual API response message
+      onSuccess(response.data?.message || 'VoLTE configuration deleted successfully');
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Failed to delete VoLTE configuration');
     } finally {

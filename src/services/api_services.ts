@@ -166,17 +166,21 @@ export async function resetCallProfile(
 
     const data = await response.json();
 
-    // Check if any actions failed
-    const failedActions = Object.entries(data).filter(([key, value]: [string, any]) => value.passed === false);
+    // Collect actions taken (passed: false with action-taken: true means success with action)
+    const actionsTaken = Object.entries(data)
+      .filter(([key, value]: [string, any]) => value['action-taken'] === true)
+      .map(([key, value]: [string, any]) => ({ check: key, action: value.action }));
     
-    if (failedActions.length > 0) {
-      const failedList = failedActions.map(([key, value]: [string, any]) => `${key}: ${value.action}`).join(', ');
-      throw new Error(`Some actions failed: ${failedList}`);
-    }
-
+    // All responses are successful - either no action needed or actions successfully taken
     return {
       success: true,
-      data
+      data: {
+        rawResponse: data,
+        actionsTaken,
+        message: actionsTaken.length > 0 
+          ? `Actions completed: ${actionsTaken.map(a => a.action).join('; ')}` 
+          : 'Profile check completed - no issues found'
+      }
     };
   } catch (error) {
     console.error('Error resetting call profile:', error);
@@ -218,9 +222,17 @@ export async function resetAPN(
 
     const data = await response.json();
 
+    // Check responseCode - 0 means success
+    if (data.responseCode !== 0) {
+      throw new Error(data.description || 'APN reset failed');
+    }
+
     return {
       success: true,
-      data
+      data: {
+        message: data.description || 'APN Reset Completed',
+        responseCode: data.responseCode
+      }
     };
   } catch (error) {
     console.error('Error resetting APN:', error);
@@ -260,9 +272,17 @@ export async function activateVoLTE(
 
     const data = await response.json();
 
+    // Check responseCode - "0" means success, "9999" means already active (treat as failure)
+    if (data.responseCode !== "0" && data.responseCode !== 0) {
+      throw new Error(data.description || 'VoLTE activation failed');
+    }
+
     return {
       success: true,
-      data
+      data: {
+        message: data.description || 'VoLTE activated successfully',
+        responseCode: data.responseCode
+      }
     };
   } catch (error) {
     console.error('Error activating VoLTE:', error);
@@ -302,9 +322,17 @@ export async function deactivateVoLTE(
 
     const data = await response.json();
 
+    // Check responseCode - 0 means success
+    if (data.responseCode !== 0) {
+      throw new Error(data.description || 'VoLTE deactivation failed');
+    }
+
     return {
       success: true,
-      data
+      data: {
+        message: data.description || 'VoLTE deactivated successfully',
+        responseCode: data.responseCode
+      }
     };
   } catch (error) {
     console.error('Error deactivating VoLTE:', error);
@@ -344,9 +372,17 @@ export async function deleteVoLTE(
 
     const data = await response.json();
 
+    // Check responseCode - 0 means success (assuming same pattern as other VoLTE endpoints)
+    if (data.responseCode !== undefined && data.responseCode !== 0) {
+      throw new Error(data.description || 'VoLTE deletion failed');
+    }
+
     return {
       success: true,
-      data
+      data: {
+        message: data.description || 'VoLTE profile deleted successfully',
+        responseCode: data.responseCode
+      }
     };
   } catch (error) {
     console.error('Error deleting VoLTE:', error);
