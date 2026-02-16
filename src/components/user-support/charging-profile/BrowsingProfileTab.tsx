@@ -10,9 +10,10 @@ interface BrowsingProfileTabProps {
   msisdn: string;
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
+  onRefresh: () => void;
 }
 
-export default function BrowsingProfileTab({ profile, msisdn, onSuccess, onError }: BrowsingProfileTabProps) {
+export default function BrowsingProfileTab({ profile, msisdn, onSuccess, onError, onRefresh }: BrowsingProfileTabProps) {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleResetAPNPhone = async () => {
@@ -26,6 +27,7 @@ export default function BrowsingProfileTab({ profile, msisdn, onSuccess, onError
       
       // Use the actual API response message
       onSuccess(response.data?.message || 'Browsing profile reset successfully (Mobile)');
+      onRefresh();
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Failed to reset browsing profile');
     } finally {
@@ -44,6 +46,7 @@ export default function BrowsingProfileTab({ profile, msisdn, onSuccess, onError
       
       // Use the actual API response message
       onSuccess(response.data?.message || 'Browsing profile reset successfully (IoT)');
+      onRefresh();
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Failed to reset browsing profile');
     } finally {
@@ -51,27 +54,35 @@ export default function BrowsingProfileTab({ profile, msisdn, onSuccess, onError
     }
   };
 
+  const notYetAvailable = async () => {
+    onSuccess('Option not available');
+  }
+
+
   return (
     <div className="space-y-8">
       {/* Action Buttons */}
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+      <div className="flex flex-wrap gap-4 mb-8">
         <button
-          onClick={handleResetAPNPhone}
+          //onClick={handleResetAPNPhone}
+          onClick={notYetAvailable}
           disabled={isProcessing}
-          className="bg-black text-[#FFCC00] p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-900 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-transparent hover:border-[#FFCC00]"
+          className="bg-black text-[#FFCC00] px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider hover:bg-gray-900 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border-2 border-transparent hover:border-[#FFCC00] flex items-center space-x-2"
         >
-          <Smartphone className="mx-auto mb-3" size={24} />
-          {isProcessing ? 'Processing...' : 'Reset Browsing - Mobile'}
+          <Smartphone size={16} />
+          <span>{isProcessing ? 'Processing...' : 'Reset Browsing - Mobile'}</span>
         </button>
         <button
-          onClick={handleResetAPNIoT}
+          //onClick={handleResetAPNIoT}
+          onClick={notYetAvailable}
           disabled={isProcessing}
-          className="bg-white text-black p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-50 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-gray-200 hover:border-[#FFCC00]"
+          className="bg-white text-black px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider hover:bg-gray-50 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border-2 border-gray-200 hover:border-[#FFCC00] flex items-center space-x-2"
         >
-          <Wifi className="mx-auto mb-3" size={24} />
-          {isProcessing ? 'Processing...' : 'Reset Browsing - IoT'}
+          <Wifi size={16} />
+          <span>{isProcessing ? 'Processing...' : 'Reset Browsing - IoT'}</span>
         </button>
-      </div> */}
+      </div>
+      
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* GPRS Configuration */}

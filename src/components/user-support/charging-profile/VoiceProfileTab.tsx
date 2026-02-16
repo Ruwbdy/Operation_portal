@@ -10,9 +10,10 @@ interface VoiceProfileTabProps {
   msisdn: string; // Pass normalized MSISDN from parent
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
+  onRefresh: () => void;
 }
 
-export default function VoiceProfileTab({ profile, msisdn, onSuccess, onError }: VoiceProfileTabProps) {
+export default function VoiceProfileTab({ profile, msisdn, onSuccess, onError, onRefresh }: VoiceProfileTabProps) {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleResetCallProfile = async () => {
@@ -26,6 +27,7 @@ export default function VoiceProfileTab({ profile, msisdn, onSuccess, onError }:
       
       // Use the detailed message from the API response
       onSuccess(response.data?.message || 'Call profile reset successfully');
+      onRefresh(); // Reload profile data
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Failed to reset call profile');
     } finally {
@@ -57,22 +59,22 @@ export default function VoiceProfileTab({ profile, msisdn, onSuccess, onError }:
   return (
     <div className="space-y-8">
       {/* Action Buttons */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+      <div className="flex flex-wrap gap-4 mb-8">
         <button
           onClick={handleResetCallProfile}
           disabled={isProcessing}
-          className="bg-black text-[#FFCC00] p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-900 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-transparent hover:border-[#FFCC00]"
+          className="bg-black text-[#FFCC00] px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider hover:bg-gray-900 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border-2 border-transparent hover:border-[#FFCC00] flex items-center space-x-2"
         >
-          <Phone className="mx-auto mb-3" size={24} />
-          {isProcessing ? 'Processing...' : 'Reset Call Profile'}
+          <Phone size={16} />
+          <span>{isProcessing ? 'Processing...' : 'Reset Call Profile'}</span>
         </button>
         <button
-          onClick={handleResetCallProfile}
+          onClick={handleResetCSP}
           disabled={isProcessing}
-          className="bg-white text-black p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-50 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-gray-200 hover:border-[#FFCC00]"
+          className="bg-white text-black px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider hover:bg-gray-50 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border-2 border-gray-200 hover:border-[#FFCC00] flex items-center space-x-2"
         >
-          <Shield className="mx-auto mb-3" size={24} />
-          {isProcessing ? 'Processing...' : 'Reset CSP'}
+          <Shield size={16} />
+          <span>{isProcessing ? 'Processing...' : 'Reset CSP'}</span>
         </button>
       </div>
 

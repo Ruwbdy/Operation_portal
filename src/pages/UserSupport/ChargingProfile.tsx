@@ -201,6 +201,7 @@ export default function ChargingProfile() {
                 msisdn={normalizedMsisdn}
                 onSuccess={(msg) => setSuccessToast(msg)}
                 onError={(msg) => setErrorToast(msg)}
+                onRefresh={handleSearch}
               />
             )}
             {activeTab === 'browsing' && browsingProfile && (
@@ -209,6 +210,7 @@ export default function ChargingProfile() {
                 msisdn={normalizedMsisdn}
                 onSuccess={(msg) => setSuccessToast(msg)}
                 onError={(msg) => setErrorToast(msg)}
+                onRefresh={handleSearch}
               />
             )}
             {activeTab === 'volte' && (
@@ -217,6 +219,7 @@ export default function ChargingProfile() {
                 msisdn={normalizedMsisdn}
                 onSuccess={(msg) => setSuccessToast(msg)}
                 onError={(msg) => setErrorToast(msg)}
+                onRefresh={handleSearch}
               />
             )}
             {activeTab === 'offers' && (

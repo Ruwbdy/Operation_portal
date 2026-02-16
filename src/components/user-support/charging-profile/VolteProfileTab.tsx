@@ -10,9 +10,10 @@ interface VoLTEProfileTabProps {
   msisdn: string;
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
+  onRefresh: () => void;
 }
 
-export default function VoLTEProfileTab({ profile, msisdn, onSuccess, onError }: VoLTEProfileTabProps) {
+export default function VoLTEProfileTab({ profile, msisdn, onSuccess, onError, onRefresh }: VoLTEProfileTabProps) {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleActivateVoLTE = async () => {
@@ -26,7 +27,7 @@ export default function VoLTEProfileTab({ profile, msisdn, onSuccess, onError }:
       
       // Use the actual API response message
       onSuccess(response.data?.message || 'VoLTE activated successfully');
-      // You might want to trigger a refresh here to reload the profile
+      onRefresh();
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Failed to activate VoLTE');
     } finally {
@@ -45,6 +46,7 @@ export default function VoLTEProfileTab({ profile, msisdn, onSuccess, onError }:
       
       // Use the actual API response message
       onSuccess(response.data?.message || 'VoLTE deactivated successfully');
+      onRefresh();
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Failed to deactivate VoLTE');
     } finally {
@@ -52,23 +54,24 @@ export default function VoLTEProfileTab({ profile, msisdn, onSuccess, onError }:
     }
   };
 
-  const handleDeleteVoLTE = async () => {
-    setIsProcessing(true);
-    try {
-      const response = await deleteVoLTE(msisdn);
+  // const handleDeleteVoLTE = async () => {
+  //   setIsProcessing(true);
+  //   try {
+  //     const response = await deleteVoLTE(msisdn);
       
-      if (!response.success) {
-        throw new Error(response.error?.message || 'Failed to delete VoLTE configuration');
-      }
+  //     if (!response.success) {
+  //       throw new Error(response.error?.message || 'Failed to delete VoLTE configuration');
+  //     }
       
-      // Use the actual API response message
-      onSuccess(response.data?.message || 'VoLTE configuration deleted successfully');
-    } catch (error) {
-      onError(error instanceof Error ? error.message : 'Failed to delete VoLTE configuration');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  //     // Use the actual API response message
+  //     onSuccess(response.data?.message || 'VoLTE configuration deleted successfully');
+  //     onRefresh();
+  //   } catch (error) {
+  //     onError(error instanceof Error ? error.message : 'Failed to delete VoLTE configuration');
+  //   } finally {
+  //     setIsProcessing(false);
+  //   }
+  // };
 
   if (!profile) {
     return (
@@ -98,22 +101,22 @@ export default function VoLTEProfileTab({ profile, msisdn, onSuccess, onError }:
   return (
     <div className="space-y-8">
       {/* Action Buttons */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+      <div className="flex flex-wrap gap-4 mb-8">
         <button
           onClick={handleActivateVoLTE}
           disabled={isProcessing}
-          className="bg-black text-[#FFCC00] p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-900 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-transparent hover:border-[#FFCC00]"
+          className="bg-black text-[#FFCC00] px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider hover:bg-gray-900 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border-2 border-transparent hover:border-[#FFCC00] flex items-center space-x-2"
         >
-          <Power className="mx-auto mb-3" size={24} />
-          {isProcessing ? 'Processing...' : 'Activate VoLTE'}
+          <Power size={16} />
+          <span>{isProcessing ? 'Processing...' : 'Activate VoLTE'}</span>
         </button>
         <button
           onClick={handleDeactivateVoLTE}
           disabled={isProcessing}
-          className="bg-white text-black p-8 rounded-[2rem] font-black text-sm uppercase tracking-wider hover:bg-gray-50 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl border-2 border-gray-200 hover:border-amber-500"
+          className="bg-white text-black px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider hover:bg-gray-50 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border-2 border-gray-200 hover:border-amber-500 flex items-center space-x-2"
         >
-          <Power className="mx-auto mb-3" size={24} />
-          {isProcessing ? 'Processing...' : 'Deactivate VoLTE'}
+          <Power size={16} />
+          <span>{isProcessing ? 'Processing...' : 'Deactivate VoLTE'}</span>
         </button>
         {/* <button
           onClick={handleDeleteVoLTE}
