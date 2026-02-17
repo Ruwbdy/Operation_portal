@@ -166,8 +166,8 @@ export default function Login() {
               Development Credentials
             </p>
             <div className="space-y-1 text-[10px] font-bold text-blue-700">
-              <p>Username: <span className="text-blue-900">Osazuwa</span></p>
-              <p>Password: <span className="text-blue-900">Osazuwa@123456</span></p>
+              <p>Username: <span className="text-blue-900">XXX</span></p>
+              <p>Password: <span className="text-blue-900">XXX</span></p>
             </div>
           </div>
 

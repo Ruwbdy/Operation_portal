@@ -16,7 +16,6 @@ const ServiceDesk = lazy(() => import('./pages/INSupport/ServiceDesk'));
 const DSA = lazy(() => import('./pages/INSupport/DSA'));
 const EnterpriseBusiness = lazy(() => import('./pages/INSupport/EnterpriseBusiness'));
 
-await initializeDAMapping();
 
 interface ErrorBoundaryProps {
   children?: ReactNode;
@@ -59,6 +58,13 @@ class AppErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState>
 }
 
 export default function App() {
+  // Initialize DA mapping on app mount
+  React.useEffect(() => {
+    initializeDAMapping().catch(error => {
+      console.error('Failed to initialize DA mapping:', error);
+    });
+  }, []);
+
   return (
     <AppErrorBoundary>
       <Suspense fallback={<LoadingSpinner />}>

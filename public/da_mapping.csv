@@ -533,6 +533,7 @@ da_id,description,balance_type
 3595,WelcomeBack 8GB Broadband Data plan,data
 3596,WelcomeBack 20GB Broadband Data plan,data
 3605,Broadband unlimited standard plan (50Mpbs),
+3607,25GB MSME Data Plan,
 3610,10GB  Bundle for Jamb,
 3611,50GB  Bundle for Jamb,
 3612,100GB Bundle for Jamb,
@@ -1013,6 +1014,8 @@ da_id,description,balance_type
 5010,20GB Weekly Plan,data
 5011,800GB Yearly Plan(20%),data
 5011,DA-5011,data
+5046,(p)20GB Weekly Plan,data
+5047,(p)20GB Weekly Plan,data
 5050,Vibe Starter 160GB+135mins,data
 5051,Vibe Insider1 200GB+275mins,data
 5052,Vibe Insider2 200GB+275mins,data

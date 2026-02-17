@@ -184,6 +184,33 @@ export default function CDRTable({ records, type }: CDRTableProps) {
     if (type === 'sms') {
       return [
         ...baseColumns,
+        { 
+          key: 'da_account_id', 
+          label: 'DA ID', 
+          sortable: true, 
+          filterable: true, 
+          minWidth: '50px',
+          accessor: (r) => r.da_details?.[0]?.account_id ?? '-'
+        },
+        { 
+          key: 'da_description', 
+          label: 'DA Description', 
+          sortable: false, 
+          filterable: true, 
+          minWidth: '120px',
+          accessor: (r) => {
+            const daId = r.da_details?.[0]?.account_id;
+            return daId ? getDADescription(daId) : '-';
+          }
+        },
+        { 
+          key: 'da_amount_charged', 
+          label: 'DA Amt Chg', 
+          sortable: true, 
+          filterable: true, 
+          minWidth: '70px',
+          accessor: (r) => r.da_details?.[0]?.amount_charged ?? 0
+        },
         { key: 'country', label: 'Country', sortable: true, filterable: true, minWidth: '100px' },
         { key: 'operator', label: 'Operator', sortable: true, filterable: true, minWidth: '120px' }
       ];
@@ -193,6 +220,33 @@ export default function CDRTable({ records, type }: CDRTableProps) {
     return [...baseColumns.slice(0, 2),
         { key: 'record_type', label: 'Type', sortable: true, filterable: true, minWidth: '110px' },
         ...baseColumns.slice(2),
+        { 
+          key: 'da_account_id', 
+          label: 'DA ID', 
+          sortable: true, 
+          filterable: true, 
+          minWidth: '50px',
+          accessor: (r) => r.da_details?.[0]?.account_id ?? '-'
+        },
+        { 
+          key: 'da_description', 
+          label: 'DA Description', 
+          sortable: false, 
+          filterable: true, 
+          minWidth: '120px',
+          accessor: (r) => {
+            const daId = r.da_details?.[0]?.account_id;
+            return daId ? getDADescription(daId) : '-';
+          }
+        },
+        { 
+          key: 'da_amount_charged', 
+          label: 'DA Amt Chg', 
+          sortable: true, 
+          filterable: true, 
+          minWidth: '70px',
+          accessor: (r) => r.da_details?.[0]?.amount_charged ?? 0
+        },
       ];
   };
 
