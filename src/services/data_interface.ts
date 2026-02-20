@@ -9,60 +9,163 @@ export interface ServiceStatus {
   bs30?: { activationState: number; fnum?: string; noReplyTime?: number };
 }
 
+// CAMEL / Intelligent Network parameters (all IN triggers and service options)
+export interface CamelProfile {
+  eoinci: number;   // Event Occurrence IN Capability Indicator (MO call trigger)
+  eoick: number;    // Event Occurrence IN Capability Key
+  etinci: number;   // Event Termination IN Capability Indicator
+  etick: number;    // Event Termination IN Capability Key
+  gcso: number;     // GPRS CAMEL Service Option (phase 1)
+  sslo: number;     // SS CAMEL Service Option
+  mcso: number;     // MO SMS CAMEL Service Option
+  gc2so: number;    // GPRS CAMEL phase 2 service option
+  mc2so: number;    // MO SMS CAMEL phase 2
+  tif: number;      // Translation Information Flag
+  gc3so: number;    // GPRS CAMEL phase 3
+  mc3so: number;    // MO SMS CAMEL phase 3
+  gprsso: number;   // GPRS CAMEL service option
+  osmsso: number;   // Originating SMS service option
+  tsmsso: number;   // Terminating SMS service option
+  mmso: number;     // Multimedia messaging service option
+  gc4so: number;    // GPRS CAMEL phase 4
+  mc4so: number;    // MO SMS CAMEL phase 4
+}
+
+// GPRS / HLR data profile
+export interface GPRSProfile {
+  pdpid: string;       // PDP Context ID (primary = 1)
+  apnid: string;       // APN identifier (internal ID, e.g. 25 = web.gprs.mtnnigeria.net)
+  pdpty: string;       // PDP Type: IPV4 | IPV6 | IPV4V6
+  eqosid?: string;     // Enhanced QoS profile ID
+  vpaa?: string;       // Visitor PLMN Address Allowed (0 = no, 1 = yes)
+  epdpind?: number;    // Enhanced PDP indicator (1 = EPC/LTE capable)
+  mc4so?: number | null; // MO SMS CAMEL phase 4 (GPRS context)
+}
+
+// Caller ID / CLIP / CLIR
+export interface CallerIdProfile {
+  clip: number;   // Calling Line Identity Presentation (1 = show caller ID)
+  clir: number;   // Calling Line Identity Restriction (1 = hidden, 2 = allowed, 0 = default)
+}
+
+// Supplementary / value-added services
+export interface SupplementaryServices {
+  hold: number;   // Call Hold (1 = enabled)
+  mpty: number;   // Multi-party / conference calls (1 = enabled)
+  ofa: number;    // Outgoing Flexible Alerting (group ringing)
+  prbt: number;   // Personalized Ring Back Tone (1 = active)
+  dbsg: number;   // Data Bearer Service Group
+  bs26: number;   // Data bearer service (2G)
+  bs3g: number;   // 3G bearer services
+  cat: number;    // Category (operator-defined subscriber category)
+  rsa: number;    // Radio Service Allowance (roaming/tech class)
+  stype: number;  // Subscriber type (1 = prepaid, 2 = postpaid)
+  schar: string;  // Service charge class / tariff indicator
+}
+
+// Service state / system access indicators
+export interface ServiceStateIndicators {
+  ocsist: number;    // Online Charging System access (1 = allowed)
+  osmcsist: number;  // MSC access permitted (1 = allowed)
+  tcsist: number;    // Telephony Control System active (1 = allowed)
+  socb: number;      // Service class barring status
+  socfb: number;     // Service class CFB status
+  socfrc: number;    // Service class CFNRC status
+  socfry: number;    // Service class CFNRY status
+  socfu: number;     // Service class CFU status
+  soclip: number;    // Service class CLIP override
+  soclir: number;    // Service class CLIR override
+  tsmo: number;      // Temporary service mode override
+}
+
 export interface VoiceProfile {
+  // ── Core identity ──────────────────────────────────────────────────────────
   msisdn: string;
   imsi: string;
-  msisdnState: string;
-  authd: string;
-  oick?: string;
-  csp: string;
+  msisdnState: string;    // CONNECTED | DETACHED | BARRED
+  authd: string;          // AVAILABLE | NOTAVAILABLE
+  pwd: string;            // Supplementary service password (default: 0000)
+  oick?: string;          // Outgoing Call Key
+  csp: string;            // Customer Service Profile number
+
+  // ── CAMEL / IN ─────────────────────────────────────────────────────────────
+  camel?: CamelProfile;
+
+  // ── Call blocking ──────────────────────────────────────────────────────────
   callBlocking: {
-    baic: ServiceStatus;
-    baoc: ServiceStatus;
-    boic: ServiceStatus;
-    bicro: ServiceStatus;
-    boiexh: ServiceStatus;
+    baic: ServiceStatus;    // Bar All Incoming Calls
+    baoc: ServiceStatus;    // Bar All Outgoing Calls
+    boic: ServiceStatus;    // Bar Outgoing International Calls
+    bicro: ServiceStatus;   // Bar Incoming Calls when Roaming
+    boiexh: ServiceStatus;  // Bar Outgoing International Except Home
   };
+
+  // ── Call forwarding ────────────────────────────────────────────────────────
   callForwarding: {
-    cfu: ServiceStatus;
-    cfb: ServiceStatus;
-    cfnrc: ServiceStatus;
-    cfnry: ServiceStatus;
-    caw: ServiceStatus;
-    dcf?: ServiceStatus;
+    cfu: ServiceStatus;    // Call Forwarding Unconditional
+    cfb: ServiceStatus;    // Call Forwarding Busy
+    cfnrc: ServiceStatus;  // Call Forwarding Not Reachable
+    cfnry: ServiceStatus;  // Call Forwarding No Reply
+    caw: ServiceStatus;    // Call Waiting
+    dcf?: ServiceStatus;   // Direct Call Forwarding
   };
+
+  // ── Location ───────────────────────────────────────────────────────────────
   locationData: {
-    vlrAddress: string;
-    mscNumber: string;
-    sgsnNumber: string;
+    vlrAddress: string;   // MSC/VLR serving node
+    mscNumber: string;    // Mobile Switching Centre number
+    sgsnNumber: string;   // SGSN number (UNKNOWN when on LTE only)
+    locState?: string | null; // Location state flag
   };
-  vlrData?: string;
-  smsSpam?: { active: string };
-  // Additional HLR fields
-  mdeuee?: string;
-  ts11?: number;
-  ts21?: number;
-  ts22?: number;
-  ts62?: number;
-  [key: string]: any; // For additional fields from HLR
+  vlrData?: string;       // Raw VLR data string
+
+  // ── Caller ID ──────────────────────────────────────────────────────────────
+  callerId?: CallerIdProfile;
+
+  // ── Supplementary services ─────────────────────────────────────────────────
+  supplementary?: SupplementaryServices;
+
+  // ── Service state indicators ───────────────────────────────────────────────
+  serviceState?: ServiceStateIndicators;
+
+  // ── Teleservices / bearer services ────────────────────────────────────────
+  ts11?: number;  // Telephony (basic voice call)
+  ts21?: number;  // Short Message MT (incoming SMS)
+  ts22?: number;  // Short Message MO (outgoing SMS)
+  ts62?: number;  // Call Transfer
+
+  // ── Misc / VAS ─────────────────────────────────────────────────────────────
+  smsSpam?: { active: string };  // SMS spam filter state
+  mdeuee?: string;               // Mobile data enable/usage flag (11 = enabled)
+  nam?: { prov: number };        // Number Portability / NAM provisioning
+  obo?: any;                     // Outgoing Barring Override
+  obi?: any;                     // Outgoing Barring Indicator
+
+  [key: string]: any; // Safety escape for any unlisted HLR fields
 }
 
 export interface BrowsingProfile {
-  gprs: {
-    pdpid: string;
-    apnid: string;
-    pdpty: string;
-    eqosid?: string;
-    vpaa?: string;
-  };
+  // ── HLR GPRS data config ───────────────────────────────────────────────────
+  gprs: GPRSProfile;
+
+  // ── HSS EPS subscription ───────────────────────────────────────────────────
   hss: {
-    epsProfileId: string;
-    epsRoamingAllowed: boolean;
-    epsIndividualDefaultContextId: string;
-    epsUserIpV4Address: string;
-    mmeAddress: string;
-    epsLocationState: string;
-    epsImeiSv?: string;
+    epsProfileId: string;                   // EPS subscription profile ID
+    epsOdb: string;                         // Operator Determined Barring (NONE = no bar)
+    epsRoamingAllowed: boolean;             // LTE roaming allowed
+    epsRoamingRestriction: boolean;         // Roaming restriction indicator present
+    epsIndividualDefaultContextId: string;  // Default LTE bearer/APN context ID
+    epsIndividualContextIds: number[];      // All allowed EPS context IDs
+    epsUserIpV4Address: string;             // Currently allocated IPv4 address
+    mmeAddress: string;                     // Serving MME FQDN
+    epsMmeRealm: string;                    // EPC domain realm of serving MME
+    epsLocationState: string;               // LOCATED | NOT_LOCATED
+    epsLastUpdateLocationDate?: string;     // Last LTE location update timestamp
+    epsImeiSv?: string;                     // Device IMEI + software version
+    epsDynamicPdnInformation?: string;      // APN + PGW routing string
+    epsUeSrVccCap?: number;                 // SRVCC capability (1 = supported)
+    epsSessionTransferNumber?: string | null; // STN-SR for VoLTE continuity
+    epsExtendedAccessRestriction?: string | null; // Access class restrictions
   };
 }
 
@@ -155,11 +258,11 @@ export interface CDRSummary {
   startingBalance: number;
   endingBalance: number;
   totalCharged: number;
-  totalDuration?: number; // For voice
-  totalData?: number; // For data (in bytes)
-  avgCallLength?: number; // For voice
-  totalRecharges?: number; // For credit
-  netChange?: number; // For DA adjustments
+  totalDuration?: number;
+  totalData?: number;
+  avgCallLength?: number;
+  totalRecharges?: number;
+  netChange?: number;
 }
 
 export interface CategorizedCDR {

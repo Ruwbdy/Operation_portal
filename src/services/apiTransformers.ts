@@ -1,65 +1,194 @@
 // Data Transformers for API Responses
 // Converts backend API response structures to frontend TypeScript interfaces
 
-import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Balance, DedicatedAccount, CDRRecord } from './data_interface';
+import type {
+  VoiceProfile,
+  BrowsingProfile,
+  VoLTEProfile,
+  Offer,
+  Balance,
+  DedicatedAccount,
+  CDRRecord,
+  CamelProfile,
+  GPRSProfile,
+  CallerIdProfile,
+  SupplementaryServices,
+  ServiceStateIndicators,
+} from './data_interface';
 
+// ─── Helper ───────────────────────────────────────────────────────────────────
+/** Safely coerce a value to string, returning undefined if null/undefined */
+function str(v: any): string | undefined {
+  return v == null ? undefined : String(v);
+}
+/** Coerce to string with fallback */
+function strOr(v: any, fallback: string): string {
+  return v == null ? fallback : String(v);
+}
+/** Coerce to number with fallback */
+function num(v: any, fallback = 0): number {
+  const n = Number(v);
+  return isNaN(n) ? fallback : n;
+}
+/** Default ServiceStatus when a barring/forwarding service is absent from API */
+function defaultServiceStatus() {
+  return {
+    provisionState: 0,
+    ts10: { activationState: 0 },
+    ts20: { activationState: 0 },
+    ts60: { activationState: 0 },
+    bs20: { activationState: 0 },
+    bs30: { activationState: 0 },
+  };
+}
+
+// ─── HLR → VoiceProfile ───────────────────────────────────────────────────────
 /**
- * Transform HLR profile from API response to VoiceProfile interface
+ * Transform HLR getResponseSubscription to VoiceProfile.
+ * Maps every parameter documented in the HLR profile reference.
  */
 export function transformHLRToVoiceProfile(hlrData: any): VoiceProfile | null {
   if (!hlrData?.moAttributes?.getResponseSubscription) {
     return null;
   }
 
-  const data = hlrData.moAttributes.getResponseSubscription;
+  const d = hlrData.moAttributes.getResponseSubscription;
+
+  // ── CAMEL / IN profile ──────────────────────────────────────────────────────
+  const camel: CamelProfile | undefined = d.camel ? {
+    eoinci:  num(d.camel.eoinci),   // MO call IN trigger indicator
+    eoick:   num(d.camel.eoick),    // MO call IN routing key
+    etinci:  num(d.camel.etinci),   // Call end IN trigger indicator
+    etick:   num(d.camel.etick),    // Call end IN routing key
+    gcso:    num(d.camel.gcso),     // GPRS CAMEL phase 1
+    sslo:    num(d.camel.sslo),     // SS CAMEL service option
+    mcso:    num(d.camel.mcso),     // MO SMS CAMEL phase 1
+    gc2so:   num(d.camel.gc2so),    // GPRS CAMEL phase 2
+    mc2so:   num(d.camel.mc2so),    // MO SMS CAMEL phase 2
+    tif:     num(d.camel.tif),      // Translation information flag
+    gc3so:   num(d.camel.gc3so),    // GPRS CAMEL phase 3
+    mc3so:   num(d.camel.mc3so),    // MO SMS CAMEL phase 3
+    gprsso:  num(d.camel.gprsso),   // GPRS service option
+    osmsso:  num(d.camel.osmsso),   // Originating SMS service option
+    tsmsso:  num(d.camel.tsmsso),   // Terminating SMS service option
+    mmso:    num(d.camel.mmso),     // MMS service option
+    gc4so:   num(d.camel.gc4so),    // GPRS CAMEL phase 4
+    mc4so:   num(d.camel.mc4so),    // MO SMS CAMEL phase 4
+  } : undefined;
+
+  // ── Caller ID ───────────────────────────────────────────────────────────────
+  const callerId: CallerIdProfile | undefined =
+    (d.clip != null || d.clir != null) ? {
+      clip: num(d.clip),   // 1 = show caller ID to called party
+      clir: num(d.clir),   // 1 = hide own number, 2 = presentation allowed
+    } : undefined;
+
+  // ── Supplementary / value-added services ────────────────────────────────────
+  const supplementary: SupplementaryServices | undefined =
+    (d.hold != null || d.mpty != null) ? {
+      hold:   num(d.hold),           // Call hold capability
+      mpty:   num(d.mpty),           // Multi-party / conference calls
+      ofa:    num(d.ofa),            // Outgoing flexible alerting (group ring)
+      prbt:   num(d.prbt),           // Personalized ring-back tone active
+      dbsg:   num(d.dbsg),           // Data bearer service group
+      bs26:   num(d.bs26),           // 2G data bearer service
+      bs3g:   num(d.bs3g),           // 3G bearer service
+      cat:    num(d.cat),            // Subscriber category
+      rsa:    num(d.rsa),            // Radio service allowance class
+      stype:  num(d.stype),          // 1 = prepaid, 2 = postpaid
+      schar:  strOr(d.schar, ''),    // Tariff/service charge indicator
+    } : undefined;
+
+  // ── Service state / system access indicators ────────────────────────────────
+  const serviceState: ServiceStateIndicators | undefined =
+    (d.ocsist != null || d.osmcsist != null) ? {
+      ocsist:   num(d.ocsist),    // OCS access allowed
+      osmcsist: num(d.osmcsist),  // MSC access permitted
+      tcsist:   num(d.tcsist),    // TCS active
+      socb:     num(d.socb),      // Service class barring
+      socfb:    num(d.socfb),     // CFB service class override
+      socfrc:   num(d.socfrc),    // CFNRC service class override
+      socfry:   num(d.socfry),    // CFNRY service class override
+      socfu:    num(d.socfu),     // CFU service class override
+      soclip:   num(d.soclip),    // CLIP override
+      soclir:   num(d.soclir),    // CLIR override
+      tsmo:     num(d.tsmo),      // Temporary service mode override
+    } : undefined;
 
   return {
-    msisdn: data.msisdn || '',
-    imsi: data.imsi || '',
-    msisdnState: data.msisdnstate || 'UNKNOWN',
-    authd: data.authd || 'UNKNOWN',
-    oick: data.oick?.toString() || '',
-    csp: data.csp?.toString() || '',
+    // ── Identity ──────────────────────────────────────────────────────────────
+    msisdn:      strOr(d.msisdn, ''),
+    imsi:        strOr(d.imsi, ''),
+    msisdnState: strOr(d.msisdnstate, 'UNKNOWN'),
+    authd:       strOr(d.authd, 'UNKNOWN'),
+    pwd:         strOr(d.pwd, ''),
+    oick:        str(d.oick),
+    csp:         strOr(d.csp, ''),
+
+    // ── CAMEL / IN ────────────────────────────────────────────────────────────
+    camel,
+
+    // ── Call blocking ─────────────────────────────────────────────────────────
     callBlocking: {
-      baic: data.baic || { provisionState: 0, ts10: { activationState: 0 }, ts20: { activationState: 0 }, ts60: { activationState: 0 }, bs20: { activationState: 0 }, bs30: { activationState: 0 } },
-      baoc: data.baoc || { provisionState: 0, ts10: { activationState: 0 }, ts20: { activationState: 0 }, ts60: { activationState: 0 }, bs20: { activationState: 0 }, bs30: { activationState: 0 } },
-      boic: data.boic || { provisionState: 0, ts10: { activationState: 0 }, ts20: { activationState: 0 }, ts60: { activationState: 0 }, bs20: { activationState: 0 }, bs30: { activationState: 0 } },
-      bicro: data.bicro || { provisionState: 0, ts10: { activationState: 0 }, ts20: { activationState: 0 }, ts60: { activationState: 0 }, bs20: { activationState: 0 }, bs30: { activationState: 0 } },
-      boiexh: data.boiexh || { provisionState: 0, ts10: { activationState: 0 }, ts20: { activationState: 0 }, ts60: { activationState: 0 }, bs20: { activationState: 0 }, bs30: { activationState: 0 } }
+      baic:   d.baic   || defaultServiceStatus(),
+      baoc:   d.baoc   || defaultServiceStatus(),
+      boic:   d.boic   || defaultServiceStatus(),
+      bicro:  d.bicro  || defaultServiceStatus(),
+      boiexh: d.boiexh || defaultServiceStatus(),
     },
+
+    // ── Call forwarding ───────────────────────────────────────────────────────
     callForwarding: {
-      cfu: data.cfu || { provisionState: 0, ts10: { activationState: 0 }, ts60: { activationState: 0 }, bs20: { activationState: 0 }, bs30: { activationState: 0 } },
-      cfb: data.cfb || { provisionState: 0, ts10: { activationState: 0 }, ts60: { activationState: 0 }, bs20: { activationState: 0 }, bs30: { activationState: 0 } },
-      cfnrc: data.cfnrc || { provisionState: 0, ts10: { activationState: 0 }, ts60: { activationState: 0 }, bs20: { activationState: 0 }, bs30: { activationState: 0 } },
-      cfnry: data.cfnry || { provisionState: 0, ts10: { activationState: 0 }, ts60: { activationState: 0 }, bs20: { activationState: 0 }, bs30: { activationState: 0 } },
-      caw: data.caw || { provisionState: 0, ts10: { activationState: 0 }, ts60: { activationState: 0 }, bs20: { activationState: 0 }, bs30: { activationState: 0 } },
-      dcf: data.dcf || {
-        provisionState: 0,
-        ts10: { activationState: 0, fnum: '', noReplyTime: 15 },
-        ts60: { activationState: 0, fnum: '', noReplyTime: 15 },
-        bs20: { activationState: 0, fnum: '', noReplyTime: 15 },
-        bs30: { activationState: 0, fnum: '', noReplyTime: 15 }
-      }
+      cfu:   d.cfu   || defaultServiceStatus(),
+      cfb:   d.cfb   || defaultServiceStatus(),
+      cfnrc: d.cfnrc || defaultServiceStatus(),
+      cfnry: d.cfnry || defaultServiceStatus(),
+      caw:   d.caw   || defaultServiceStatus(),
+      dcf:   d.dcf   || defaultServiceStatus(),   // null from API = not provisioned
     },
+
+    // ── Location ──────────────────────────────────────────────────────────────
     locationData: {
-      vlrAddress: data.locationData?.vlrAddress || 'UNKNOWN',
-      mscNumber: data.locationData?.mscNumber || 'UNKNOWN',
-      sgsnNumber: data.locationData?.sgsnNumber || 'UNKNOWN'
+      vlrAddress:  strOr(d.locationData?.vlrAddress,  'UNKNOWN'),
+      mscNumber:   strOr(d.locationData?.mscNumber,   'UNKNOWN'),
+      sgsnNumber:  strOr(d.locationData?.sgsnNumber,  'UNKNOWN'),
+      locState:    d.locationData?.locState ?? null,
     },
-    vlrData: data.vlrData || undefined,
-    smsSpam: data.smsSpam || undefined,
-    mdeuee: data.mdeuee?.toString() || undefined,
-    ts11: data.ts11 || 0,
-    ts21: data.ts21 || 0,
-    ts22: data.ts22 || 0,
-    ts62: data.ts62 || 0
+    vlrData: str(d.vlrData),
+
+    // ── Caller ID ─────────────────────────────────────────────────────────────
+    callerId,
+
+    // ── Supplementary services ────────────────────────────────────────────────
+    supplementary,
+
+    // ── Service state ─────────────────────────────────────────────────────────
+    serviceState,
+
+    // ── Teleservices ──────────────────────────────────────────────────────────
+    ts11: num(d.ts11),   // Telephony (basic voice)
+    ts21: num(d.ts21),   // Incoming SMS
+    ts22: num(d.ts22),   // Outgoing SMS
+    ts62: num(d.ts62),   // Call transfer
+
+    // ── VAS / misc ────────────────────────────────────────────────────────────
+    smsSpam: d.smsSpam || undefined,
+    mdeuee:  str(d.mdeuee),
+    nam:     d.nam || undefined,
+    obo:     d.obo ?? undefined,
+    obi:     d.obi ?? undefined,
   };
 }
 
+// ─── HSS + HLR GPRS → BrowsingProfile ────────────────────────────────────────
 /**
- * Transform HSS and HLR GPRS data to BrowsingProfile interface
+ * Transform HSS getResponseEPSMultiSC and HLR GPRS block to BrowsingProfile.
+ * Maps every parameter from the HSS profile reference.
  */
-export function transformHSSToBrowsingProfile(hssData: any, hlrData: any): BrowsingProfile | null {
+export function transformHSSToBrowsingProfile(
+  hssData: any,
+  hlrData: any,
+): BrowsingProfile | null {
   const hss = hssData?.moAttributes?.getResponseEPSMultiSC;
   const hlr = hlrData?.moAttributes?.getResponseSubscription;
 
@@ -67,31 +196,50 @@ export function transformHSSToBrowsingProfile(hssData: any, hlrData: any): Brows
     return null;
   }
 
-  const gprsData = hlr?.gprs || {};
+  const g = hlr?.gprs || {};
 
+  // ── GPRS / HLR data block ──────────────────────────────────────────────────
+  const gprs: GPRSProfile = {
+    pdpid:    strOr(g.pdpid, '0'),      // Primary PDP context ID
+    apnid:    strOr(g.apnid, '0'),      // APN identifier
+    pdpty:    strOr(g.pdpty, 'IPV4'),   // PDP type: IPV4 | IPV6 | IPV4V6
+    eqosid:   str(g.eqosid),            // Enhanced QoS profile ID
+    vpaa:     strOr(g.vpaa, '0'),       // Visitor PLMN address allowed
+    epdpind:  g.epdpind != null ? num(g.epdpind) : undefined,  // EPC/LTE capable SIM
+    mc4so:    g.mc4so != null ? num(g.mc4so) : undefined,      // GPRS CAMEL phase 4
+  };
+
+  // ── HSS EPS subscription block ────────────────────────────────────────────
   return {
-    gprs: {
-      pdpid: gprsData.pdpid?.toString() || '0',
-      apnid: gprsData.apnid?.toString() || '0',
-      pdpty: gprsData.pdpty || 'IPV4',
-      eqosid: gprsData.eqosid?.toString() || undefined,
-      vpaa: gprsData.vpaa?.toString() || '0'
-    },
+    gprs,
     hss: {
-      epsProfileId: hss?.epsProfileId?.toString() || '0',
-      epsRoamingAllowed: hss?.epsRoamingAllowed || false,
-      epsIndividualDefaultContextId: hss?.epsIndividualDefaultContextId?.toString() || '0',
-      epsUserIpV4Address: hss?.epsUserIpV4Address || '',
-      mmeAddress: hss?.mmeAddress || '',
-      epsLocationState: hss?.epsLocationState || 'UNKNOWN',
-      epsImeiSv: hss?.epsImeiSv || undefined
-    }
+      epsProfileId:                  strOr(hss?.epsProfileId, '0'),
+      epsOdb:                        strOr(hss?.epsOdb, 'NONE'),
+      epsRoamingAllowed:             hss?.epsRoamingAllowed === true,
+      epsRoamingRestriction:         hss?.epsRoamingRestriction === true,
+      epsIndividualDefaultContextId: strOr(hss?.epsIndividualDefaultContextId, '0'),
+      epsIndividualContextIds:       Array.isArray(hss?.epsIndividualContextId)
+                                       ? hss.epsIndividualContextId
+                                       : (hss?.epsIndividualContextId != null
+                                           ? [num(hss.epsIndividualContextId)]
+                                           : []),
+      epsUserIpV4Address:            strOr(hss?.epsUserIpV4Address, ''),
+      mmeAddress:                    strOr(hss?.mmeAddress, ''),
+      epsMmeRealm:                   strOr(hss?.epsMmeRealm, ''),
+      epsLocationState:              strOr(hss?.epsLocationState, 'UNKNOWN'),
+      epsLastUpdateLocationDate:     str(hss?.epsLastUpdateLocationDate),
+      epsImeiSv:                     str(hss?.epsImeiSv),
+      epsDynamicPdnInformation:      str(hss?.epsDynamicPdnInformation),
+      epsUeSrVccCap:                 hss?.epsUeSrVccCap != null
+                                       ? num(hss.epsUeSrVccCap)
+                                       : undefined,
+      epsSessionTransferNumber:      hss?.epsSessionTransferNumber ?? null,
+      epsExtendedAccessRestriction:  hss?.epsExtendedAccessRestriction ?? null,
+    },
   };
 }
 
-/**
- * Transform VoLTE profile from complex nested structure to simplified interface
- */
+// ─── VoLTE profile ────────────────────────────────────────────────────────────
 export function transformVoLTEProfile(volteData: any, msisdn: string): VoLTEProfile | null {
   if (!volteData?.moAttributes?.getResponseSubscription) {
     return null;
@@ -100,9 +248,8 @@ export function transformVoLTEProfile(volteData: any, msisdn: string): VoLTEProf
   const data = volteData.moAttributes.getResponseSubscription;
   const services = data.services || {};
   const cdivService = services.communicationDiversion?.userConfiguration;
-  const cdivRules = cdivService?.ruleSet?.rules || [];
+  const cdivRules: any[] = cdivService?.ruleSet?.rules || [];
 
-  // Extract condition states from rules
   const getConditionState = (ruleId: string): string => {
     const rule = cdivRules.find((r: any) => r.id === ruleId);
     return rule?.conditions?.ruleDeactivated === false ? 'activated' : 'deactivated';
@@ -110,165 +257,125 @@ export function transformVoLTEProfile(volteData: any, msisdn: string): VoLTEProf
 
   return {
     publicId: data.publicId || `sip:+${msisdn}@ims.mnc030.mcc621.3gppnetwork.org`,
-    concurrencyControl: data.concurrencyControl || 0,
+    concurrencyControl: num(data.concurrencyControl),
     cdiv: {
       activated: cdivService?.active || false,
-      userNoReplyTimer: 'activated', // Default value
+      userNoReplyTimer: 'activated',
       conditions: {
-        anonymousCondition: 'activated',
-        busyCondition: getConditionState('cfb'),
-        identityCondition: 'activated',
-        mediaCondition: 'activated',
+        anonymousCondition:     'activated',
+        busyCondition:          getConditionState('cfb'),
+        identityCondition:      'activated',
+        mediaCondition:         'activated',
         notRegisteredCondition: getConditionState('cfnl'),
-        noAnswerCondition: getConditionState('cfnr'),
-        presenceStatusCondition: 'activated',
-        validityCondition: 'activated',
-        notReachableCondition: getConditionState('cfnrc'),
-        unconditionalCondition: getConditionState('cfu2')
-      }
-    }
+        noAnswerCondition:      getConditionState('cfnr'),
+        presenceStatusCondition:'activated',
+        validityCondition:      'activated',
+        notReachableCondition:  getConditionState('cfnrc'),
+        unconditionalCondition: getConditionState('cfu2'),
+      },
+    },
   };
 }
 
-/**
- * Transform offers from account details
- */
+// ─── Account → Offers ─────────────────────────────────────────────────────────
 export function transformAccountDetailToOffers(accountData: any): Offer[] {
-  const offers = accountData?.moAttributes?.getAccountDetailResponse?.accountDetails?.offerInformation;
-  
-  if (!Array.isArray(offers)) {
-    return [];
-  }
+  const offers =
+    accountData?.moAttributes?.getAccountDetailResponse?.accountDetails?.offerInformation;
+
+  if (!Array.isArray(offers)) return [];
 
   return offers.map((offer: any) => ({
-    offerID: parseInt(offer.offerID) || 0,
-    offerType: offer.offerType || 0,
-    startDate: offer.startDate || '',
-    expiryDate: offer.expiryDate || ''
+    offerID:    parseInt(offer.offerID) || 0,
+    offerType:  num(offer.offerType),
+    startDate:  offer.startDate || '',
+    expiryDate: offer.expiryDate || '',
   }));
 }
 
-/**
- * Transform balances from account details
- */
+// ─── Account → Main Account Balance ──────────────────────────────────────────
 export function transformAccountDetailToMABalance(accountData: any): Balance | null {
   const accDetails = accountData?.moAttributes?.getAccountDetailResponse;
-  
-  if (!accDetails) {
-    return null;
-  }
+  if (!accDetails) return null;
 
-  const balanceData = accDetails.balanceAndDate || accDetails.accountDetails?.balanceAndDate;
+  const balanceData =
+    accDetails.balanceAndDate || accDetails.accountDetails?.balanceAndDate;
 
   return {
-    subscriberNumber: accDetails.subscriberNumber || '',
-    serviceClassCurrent: balanceData?.serviceClassCurrent || 0,
-    currency1: balanceData?.currency1 || 'NGN',
-    accountValue1: balanceData?.accountValue1 || 0,
-    expiryDate: balanceData?.expiryDate || ''
+    subscriberNumber:    strOr(accDetails.subscriberNumber, ''),
+    serviceClassCurrent: num(balanceData?.serviceClassCurrent),
+    currency1:           strOr(balanceData?.currency1, 'NGN'),
+    accountValue1:       num(balanceData?.accountValue1),
+    expiryDate:          strOr(balanceData?.expiryDate, ''),
   };
 }
 
-/**
- * Transform dedicated accounts from account details
- */
+// ─── Account → Dedicated Account Balances ────────────────────────────────────
 export function transformAccountDetailToDABalances(accountData: any): DedicatedAccount[] {
-  const dedicatedAcc = accountData?.moAttributes?.getAccountDetailResponse?.balanceAndDate?.dedicatedAccountInformation;
-  
-  if (!Array.isArray(dedicatedAcc)) {
-    return [];
-  }
+  const dedicatedAcc =
+    accountData?.moAttributes?.getAccountDetailResponse?.balanceAndDate
+      ?.dedicatedAccountInformation;
+
+  if (!Array.isArray(dedicatedAcc)) return [];
 
   return dedicatedAcc.map((da: any) => ({
-      dedicatedAccountID: da.dedicatedAccountID?.toString() || '0',
-      dedicatedAccountValue1: da.dedicatedAccountValue1 || 0,
-      expiryDate: da.expiryDate || '',
-      startDate: da.startDate || undefined,
-      dedicatedAccountActiveValue1: da.dedicatedAccountActiveValue1 || undefined,
-      dedicatedAccountUnitType: da.dedicatedAccountUnitType || undefined,
-      description: undefined // Will be populated by DA mapping service
+    dedicatedAccountID:          strOr(da.dedicatedAccountID, '0'),
+    dedicatedAccountValue1:      num(da.dedicatedAccountValue1),
+    expiryDate:                  strOr(da.expiryDate, ''),
+    startDate:                   str(da.startDate),
+    dedicatedAccountActiveValue1:da.dedicatedAccountActiveValue1 != null
+                                   ? num(da.dedicatedAccountActiveValue1)
+                                   : undefined,
+    dedicatedAccountUnitType:    da.dedicatedAccountUnitType != null
+                                   ? num(da.dedicatedAccountUnitType)
+                                   : undefined,
+    description: undefined, // Populated by DA mapping service
   }));
 }
 
-/**
- * Transform raw CDR API response to CDRRecord array
- */
+// ─── CDR records ──────────────────────────────────────────────────────────────
 export function transformCDRToCDRRecords(cdrData: any): CDRRecord[] {
-  if (!Array.isArray(cdrData)) {
-    return [];
-  }
+  if (!Array.isArray(cdrData)) return [];
 
   return cdrData.map((record: any) => ({
-    record_type: record.record_type || '',
-    number_called: record.number_called || '',
-    event_dt: record.event_dt || 0,
-    call_duration_qty: record.call_duration_qty || '0',
-    charged_amount: record.charged_amount || '0',
-    balance_after_amt: record.balance_after_amt || '0',
-    balance_before_amt: record.balance_before_amt || '0',
-    discount_amt: record.discount_amt || '0',
-    da_amount: record.da_amount || '0',
-    da_details: Array.isArray(record.da_details) ? record.da_details.map((da: any) => ({
-      account_id: da.account_id || '',
-      amount_before: da.amount_before || 0,
-      amount_after: da.amount_after || 0,
-      amount_charged: da.amount_charged || 0
-    })) : [],
-    country: record.country || '',
-    operator: record.operator || '',
-    bytes_received_qty: record.bytes_received_qty || 0,
-    bytes_sent_qty: record.bytes_sent_qty || 0
+    record_type:         strOr(record.record_type, ''),
+    number_called:       strOr(record.number_called, ''),
+    event_dt:            num(record.event_dt),
+    call_duration_qty:   strOr(record.call_duration_qty, '0'),
+    charged_amount:      strOr(record.charged_amount, '0'),
+    balance_after_amt:   strOr(record.balance_after_amt, '0'),
+    balance_before_amt:  strOr(record.balance_before_amt, '0'),
+    discount_amt:        strOr(record.discount_amt, '0'),
+    da_amount:           strOr(record.da_amount, '0'),
+    da_details: Array.isArray(record.da_details)
+      ? record.da_details.map((da: any) => ({
+          account_id:     strOr(da.account_id, ''),
+          amount_before:  num(da.amount_before),
+          amount_after:   num(da.amount_after),
+          amount_charged: num(da.amount_charged),
+        }))
+      : [],
+    country:           strOr(record.country, ''),
+    operator:          strOr(record.operator, ''),
+    bytes_received_qty: num(record.bytes_received_qty),
+    bytes_sent_qty:     num(record.bytes_sent_qty),
   }));
 }
 
-/**
- * Extract diagnostics information
- */
+// ─── Diagnostics ─────────────────────────────────────────────────────────────
 export function extractDiagnostics(diagnosticsData: any): any[] {
-  if (!diagnosticsData) {
-    return [];
-  }
+  if (!diagnosticsData) return [];
 
   const diagnostics: any[] = [];
 
-  // Add voice diagnostics
-  if (diagnosticsData.voiceDiagnostics) {
-    Object.entries(diagnosticsData.voiceDiagnostics).forEach(([key, value]) => {
-      if (value) {
-        diagnostics.push({
-          category: 'voice',
-          key,
-          message: value
-        });
-      }
+  const push = (category: string, entries: Record<string, any>) => {
+    Object.entries(entries).forEach(([key, value]) => {
+      if (value) diagnostics.push({ category, key, message: value });
     });
-  }
+  };
 
-  // Add browsing diagnostics
-  if (diagnosticsData.browsingDiagnostics) {
-    Object.entries(diagnosticsData.browsingDiagnostics).forEach(([key, value]) => {
-      if (value) {
-        diagnostics.push({
-          category: 'browsing',
-          key,
-          message: value
-        });
-      }
-    });
-  }
-
-  // Add offer diagnostics
-  if (diagnosticsData.offerDiagnostics) {
-    Object.entries(diagnosticsData.offerDiagnostics).forEach(([key, value]) => {
-      if (value) {
-        diagnostics.push({
-          category: 'offer',
-          key,
-          message: value
-        });
-      }
-    });
-  }
+  if (diagnosticsData.voiceDiagnostics)   push('voice',   diagnosticsData.voiceDiagnostics);
+  if (diagnosticsData.browsingDiagnostics) push('browsing', diagnosticsData.browsingDiagnostics);
+  if (diagnosticsData.offerDiagnostics)   push('offer',   diagnosticsData.offerDiagnostics);
 
   return diagnostics;
 }
