@@ -138,8 +138,11 @@ export interface VoiceProfile {
   smsSpam?: { active: string };  // SMS spam filter state
   mdeuee?: string;               // Mobile data enable/usage flag (11 = enabled)
   nam?: { prov: number };        // Number Portability / NAM provisioning
-  obo?: any;                     // Outgoing Barring Override
-  obi?: any;                     // Outgoing Barring Indicator
+  obo?: number;                 // Outgoing Barring Override
+  obi?: number;                 // Outgoing Barring Indicator
+  obssm?: number;               // Outgoing Barring Supplementary Service Map
+  obp?: number;                 // Outgoing Barring Profile
+  tick?: number;                // Terminating Incoming Call Key
 
   [key: string]: any; // Safety escape for any unlisted HLR fields
 }

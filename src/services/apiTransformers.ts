@@ -175,8 +175,12 @@ export function transformHLRToVoiceProfile(hlrData: any): VoiceProfile | null {
     smsSpam: d.smsSpam || undefined,
     mdeuee:  str(d.mdeuee),
     nam:     d.nam || undefined,
-    obo:     d.obo ?? undefined,
-    obi:     d.obi ?? undefined,
+    // "obo":1,"obi":1,"tick":217,"obssm":1,"obp":1
+    obo:     num(d.obo),      // Outgoing Barring Override
+    obi:     num(d.obi),      // Outgoing Barring Indicator
+    obssm:   num(d.obssm),    // Outgoing Barring Supplementary Service Map
+    obp:     num(d.obp),      // Outgoing Barring Profile
+    tick:    num(d.tick),     // Terminating Incoming Call Key
   };
 }
 
