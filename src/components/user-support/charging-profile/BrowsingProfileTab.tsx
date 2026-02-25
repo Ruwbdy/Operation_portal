@@ -167,10 +167,6 @@ export default function BrowsingProfileTab({ profile, msisdn, onSuccess, onError
           className="bg-white text-black px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-all disabled:opacity-50 shadow-lg border-2 border-gray-200 hover:border-[#FFCC00] flex items-center gap-2">
           <Wifi size={13} />{isProcessing ? 'Processing...' : 'Reset Browsing — IoT'}
         </button>
-        <button onClick={onRefresh} disabled={isProcessing}
-          className="bg-white text-black px-4 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-all disabled:opacity-50 shadow border border-gray-200 hover:border-gray-400 flex items-center gap-2">
-          <RefreshCw size={13} />Refresh
-        </button>
       </div>
 
       {/* 1. GPRS / HLR Data Config */}

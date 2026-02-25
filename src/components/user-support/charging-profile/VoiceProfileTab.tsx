@@ -39,6 +39,10 @@ function YesNo({ v }: { v: number | undefined }) {
     : <span className="text-[11px] font-black text-gray-400">NO</span>;
 }
 
+function isNo(v?: number) {
+  return v !== 1; // TS/BS are NO when value ≠ 1
+}
+
 function Raw({ v, mono = false }: { v: any; mono?: boolean }) {
   if (v == null || v === '') return <span className="text-gray-300 italic text-[11px] font-normal">N/A</span>;
   return <span className={`text-[13px] font-black text-slate-700 ${mono ? 'font-#' : ''}`}>{String(v)}</span>;
@@ -178,6 +182,7 @@ export default function VoiceProfileTab({ profile, msisdn, onSuccess, onError, o
     + (profile.obp === 1 ? 1 : 0);
   const forwardingAlerts = ['cfu', 'cfb', 'cfnrc', 'cfnry'].filter(k => (cf as any)[k]?.ts10?.activationState === 1).length
     + (cf.dcf?.ts10?.activationState === 1 ? 1 : 0);
+  // alert count for TS and BS here
 
   return (
     <div className="space-y-4">
@@ -188,14 +193,14 @@ export default function VoiceProfileTab({ profile, msisdn, onSuccess, onError, o
           className="bg-black text-[#FFCC00] px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-900 transition-all disabled:opacity-50 shadow-lg border-2 border-transparent hover:border-[#FFCC00] flex items-center gap-2">
           <Phone size={13} />{isProcessing ? 'Processing...' : 'Reset Call Profile'}
         </button>
-        <button onClick={handleResetCSP} disabled={isProcessing}
+        {/* <button onClick={handleResetCSP} disabled={isProcessing}
           className="bg-white text-black px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-all disabled:opacity-50 shadow-lg border-2 border-gray-200 hover:border-[#FFCC00] flex items-center gap-2">
           <Shield size={13} />{isProcessing ? 'Processing...' : 'Reset CSP'}
-        </button>
-        <button onClick={onRefresh} disabled={isProcessing}
+        </button> */}
+        {/* <button onClick={onRefresh} disabled={isProcessing}
           className="bg-white text-black px-4 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-all disabled:opacity-50 shadow border border-gray-200 hover:border-gray-400 flex items-center gap-2">
           <RefreshCw size={13} />Refresh
-        </button>
+        </button> */}
       </div>
 
       {/* 1. Identity & Authentication */}
@@ -234,7 +239,7 @@ export default function VoiceProfileTab({ profile, msisdn, onSuccess, onError, o
           { code: 'BOIEXH', label: 'Bar Outgoing Intl ex-Home', svc: cb.boiexh, meaning: 'Blocks international calls including to the home country network.' },
           { code: 'BICRO',  label: 'Bar Incoming Roaming',      svc: cb.bicro,  meaning: 'Prevents incoming calls while subscriber is roaming abroad.' },
         ] as const).map(({ code, label, svc, meaning }) => {
-          const active = svc.ts20?.activationState === 1 || svc.bs20?.activationState === 1;
+          const active = svc.ts10?.activationState === 1 || svc.ts20?.activationState === 1 || svc.ts60?.activationState === 1 || svc.bs20?.activationState === 1 || svc.bs30?.activationState === 1;
           return (
             <Card key={code} code={code} description={label}
               value={<ActiveBadge active={active} alertWhenActive />}
@@ -310,29 +315,43 @@ export default function VoiceProfileTab({ profile, msisdn, onSuccess, onError, o
       <Section title="Teleservices & Bearer Services" icon={<Shield size={15} className="text-indigo-600" />} accent="bg-indigo-50">
         <Card code="TS11" description="Telephony (Basic Voice)"
           value={<YesNo v={profile.ts11} />}
-          meaning="Allows subscriber to make and receive standard circuit-switched voice calls." />
+          meaning="Allows subscriber to make and receive standard voice calls."
+          alert={isNo(profile.ts11)}
+        />
         <Card code="TS21" description="Short Message MT"
           value={<YesNo v={profile.ts21} />}
-          meaning="Permits reception of SMS messages terminated to this subscriber." />
+          meaning="Allows subscriber to receive SMS messages."
+          alert={isNo(profile.ts21)}
+        />
         <Card code="TS22" description="Short Message MO"
           value={<YesNo v={profile.ts22} />}
-          meaning="Permits subscriber to originate and send SMS messages." />
+          meaning="Allows subscriber to send SMS messages."
+          alert={isNo(profile.ts22)}
+        />
         <Card code="TS62" description="Call Transfer"
           value={<YesNo v={profile.ts62} />}
-          meaning="Subscriber can transfer an active call to a third party mid-conversation." />
-        {ss && <>
-          <Card code="BS26" description="2G Data Bearer"
-            value={<YesNo v={ss.bs26} />}
-            meaning="Enables GPRS/EDGE 2G data bearer services for this subscription." />
-          <Card code="BS3G" description="3G Bearer Service"
-            value={<YesNo v={ss.bs3g} />}
-            meaning="Enables UMTS/HSPA 3G data bearer services and higher-speed packet data access." />
-        </>}
+          meaning="Subscriber can transfer an active call."
+          alert={isNo(profile.ts62)}
+        />
+        {ss && (
+          <>
+            <Card code="BS26" description="2G Data Bearer"
+              value={<YesNo v={ss.bs26} />}
+              meaning="Enables GPRS/EDGE 2G data bearer services."
+              alert={isNo(ss.bs26)}
+            />
+            <Card code="BS3G" description="3G Bearer Service"
+              value={<YesNo v={ss.bs3g} />}
+              meaning="Enables UMTS/HSPA 3G packet data access."
+              alert={isNo(ss.bs3g)}
+            />
+          </>
+        )}
       </Section>
 
       {/* 6. Caller ID */}
       {ci && (
-        <Section title="Caller ID Services" icon={<Phone size={15} className="text-cyan-600" />} accent="bg-cyan-50">
+        <Section title="Caller ID Services" icon={<Phone size={15} className="text-cyan-600" />} accent="bg-cyan-50" defaultOpen={false}>
           <Card code="CLIP" description="Calling Line ID Presentation"
             value={<span className={`text-[11px] font-black ${ci.clip === 1 ? 'text-green-600' : 'text-gray-400'}`}>{ci.clip === 1 ? 'SHOW CALLER ID' : 'RESTRICTED'}</span>}
             meaning={ci.clip === 1 ? 'Caller\'s number is presented to the called party when this subscriber calls.' : 'CLIP not active — caller ID presentation is restricted.'} />
