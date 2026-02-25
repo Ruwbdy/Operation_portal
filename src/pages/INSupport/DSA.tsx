@@ -5,27 +5,31 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Toast from '../../components/common/Toast';
 import BatchJobUpload from '../../components/in-support/BatchJobUpload';
 
-type JobType = 'REPLAY_SIM_REG';
-
 interface Job {
-  id: JobType;
+  id: string;
   label: string;
   description: string;
-  filesNeeded: number;
+  expectedColumns: string[];
 }
 
 const JOBS: Job[] = [
   {
-    id: 'REPLAY_SIM_REG',
-    label: 'SIM Registration Replayer',
-    description: 'Replay and audit SIM registration transactions for compliance and troubleshooting',
-    filesNeeded: 1
+    id: 'DSA_FINAL_RECON',
+    label: 'DSA Final Response Reconciliation',
+    description: 'Reconcile DSA final response records against expected outcomes for each transaction.',
+    expectedColumns: ['msisdn', 'transaction_id']
+  },
+  {
+    id: 'DCLM_FINAL_RECON',
+    label: 'DCLM Final Response Reconciliation',
+    description: 'Reconcile DCLM final response records against expected provisioning outcomes.',
+    expectedColumns: ['msisdn', 'transaction_id']
   }
 ];
 
 export default function DSA() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activeJob, setActiveJob] = useState<JobType | null>(null);
+  const [activeJob, setActiveJob] = useState<Job | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
   const [errorToast, setErrorToast] = useState<string | null>(null);
@@ -33,10 +37,10 @@ export default function DSA() {
   const handleExecuteJob = async (files: File[]) => {
     setIsProcessing(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      setSuccessToast(`Job executed successfully: ${files.length} file(s) processed`);
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      setSuccessToast(`Job executed successfully`);
       setActiveJob(null);
-    } catch (error) {
+    } catch {
       setErrorToast('Failed to execute batch job');
     } finally {
       setIsProcessing(false);
@@ -46,16 +50,11 @@ export default function DSA() {
   return (
     <div className="flex min-h-screen bg-[#F8F9FA] selection:bg-[#FFCC00] selection:text-black font-sans">
       <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[300] flex flex-col items-center space-y-4 pointer-events-none">
-        {errorToast && (
-          <Toast type="error" message={errorToast} onClose={() => setErrorToast(null)} />
-        )}
-        {successToast && (
-          <Toast type="success" message={successToast} onClose={() => setSuccessToast(null)} />
-        )}
+        {errorToast && <Toast type="error" message={errorToast} onClose={() => setErrorToast(null)} />}
+        {successToast && <Toast type="success" message={successToast} onClose={() => setSuccessToast(null)} />}
       </div>
 
       {isProcessing && <LoadingSpinner message="Executing Batch Job..." />}
-
       <Sidebar isOpen={isSidebarOpen} />
 
       {!isSidebarOpen && (
@@ -80,49 +79,36 @@ export default function DSA() {
                 </button>
               )}
               <div className="flex flex-col min-w-0">
-                <span className="text-gray-400 text-[8px] font-black uppercase tracking-[0.2em]">
-                  IN Support Module
-                </span>
-                <div className="flex items-center space-x-2">
-                  <span className="bg-black text-[#FFCC00] text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest">
-                    Active
-                  </span>
-                </div>
+                <span className="text-gray-400 text-[8px] font-black uppercase tracking-[0.2em]">IN Support Module</span>
+                <span className="bg-black text-[#FFCC00] text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest w-fit mt-1">Active</span>
               </div>
             </div>
-            <h1 className="text-4xl lg:text-5xl font-black text-black tracking-tighter uppercase leading-none italic">
-              IN-DSA
-            </h1>
+            <h1 className="text-4xl lg:text-5xl font-black text-black tracking-tighter uppercase leading-none italic">IN‑DSA</h1>
             <p className="text-sm font-bold text-gray-500 leading-relaxed max-w-2xl">
-              Digital Service Architecture automation module for final response workflows and SIM registration replay operations.
+              Digital Service Architecture reconciliation — match final response records for DSA and DCLM provisioning workflows.
             </p>
           </div>
         </header>
 
         {activeJob === null ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
             {JOBS.map((job) => (
               <button
                 key={job.id}
-                onClick={() => setActiveJob(job.id)}
+                onClick={() => setActiveJob(job)}
                 className="bg-white p-8 rounded-[2rem] shadow-xl border-2 border-gray-100 hover:border-[#FFCC00] transition-all text-left group"
               >
                 <div className="bg-black p-4 rounded-xl w-fit mb-6 group-hover:scale-110 transition-transform">
                   <Zap size={24} className="text-[#FFCC00]" />
                 </div>
-                <h3 className="text-sm font-black text-black uppercase tracking-wide mb-3">
-                  {job.label}
-                </h3>
-                <p className="text-xs font-bold text-gray-500 leading-relaxed mb-4">
-                  {job.description}
-                </p>
-                <div className="flex items-center space-x-2">
-                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">
-                    Files needed:
-                  </span>
-                  <span className="bg-[#FFCC00] text-black text-[9px] font-black px-2 py-1 rounded uppercase">
-                    {job.filesNeeded}
-                  </span>
+                <h3 className="text-sm font-black text-black uppercase tracking-wide mb-3">{job.label}</h3>
+                <p className="text-xs font-bold text-gray-500 leading-relaxed mb-5">{job.description}</p>
+                <div className="flex flex-wrap gap-2">
+                  {job.expectedColumns.map(col => (
+                    <span key={col} className="bg-gray-100 text-gray-600 text-[8px] font-black px-2 py-1 rounded uppercase tracking-wider">
+                      {col}
+                    </span>
+                  ))}
                 </div>
               </button>
             ))}
@@ -136,9 +122,10 @@ export default function DSA() {
               ← Back to Job Selection
             </button>
             <BatchJobUpload
-              jobType={activeJob}
-              jobLabel={JOBS.find(j => j.id === activeJob)?.label || ''}
-              filesNeeded={JOBS.find(j => j.id === activeJob)?.filesNeeded || 1}
+              jobType={activeJob.id}
+              jobLabel={activeJob.label}
+              filesNeeded={1}
+              expectedColumns={activeJob.expectedColumns}
               onExecute={handleExecuteJob}
               isProcessing={isProcessing}
             />

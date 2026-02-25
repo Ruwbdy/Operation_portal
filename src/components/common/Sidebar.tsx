@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  TowerControl as Tower, 
-  History, 
+import {
+  TowerControl as Tower,
+  History,
   User,
   Layers,
   LogOut
@@ -40,10 +40,9 @@ const NAV_ITEMS: NavItem[] = [
     icon: <Layers size={16} />,
     label: 'IN Support',
     children: [
-      { path: '/in-support/dclm', label: 'IN-DCLM' },
-      { path: '/in-support/service-desk', label: 'IN-Service Desk' },
       { path: '/in-support/dsa', label: 'IN-DSA' },
-      { path: '/in-support/enterprise', label: 'IN-Enterprise' }
+      { path: '/in-support/service-desk', label: 'IN-Service Desk' },
+      { path: '/in-support/ops', label: 'IN-Ops' }
     ]
   }
 ];
@@ -58,11 +57,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
   };
 
   const handleLogout = () => {
-    // Clear authentication
     localStorage.removeItem('mtn_in_auth');
     localStorage.removeItem('mtn_in_user');
-    
-    // Navigate to login
     navigate('/login');
   };
 
@@ -111,7 +107,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                 <div className="ml-auto w-1.5 h-1.5 bg-black rounded-full animate-pulse"></div>
               )}
             </button>
-            
+
             {item.children && isActive(item.path) && (
               <div className="ml-8 mt-2 space-y-1">
                 {item.children.map((child) => (
@@ -133,7 +129,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         ))}
       </nav>
 
-      {/* Logout Button */}
+      {/* Logout */}
       <div className="p-6 border-t border-white/5">
         <button
           onClick={handleLogout}

@@ -5,45 +5,43 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Toast from '../../components/common/Toast';
 import BatchJobUpload from '../../components/in-support/BatchJobUpload';
 
-type JobType = 'CALL_PROFILE' | 'CREDIT_LIMIT' | 'DELETE_AIR' | 'DEACT_POSTPAID';
-
 interface Job {
-  id: JobType;
+  id: string;
   label: string;
   description: string;
-  filesNeeded: number;
+  expectedColumns: string[];
 }
 
 const JOBS: Job[] = [
   {
-    id: 'CALL_PROFILE',
+    id: 'MIGRATE_SC',
+    label: 'Migrate Service Class',
+    description: 'Bulk migrate subscribers to a new service class.',
+    expectedColumns: ['msisdn', 'new_sc']
+  },
+  {
+    id: 'RESET_CALL_PROFILE',
     label: 'Reset Call Profile',
-    description: 'Bulk reset of call profiles for resolving network signaling issues',
-    filesNeeded: 1
+    description: 'Bulk reset of call profiles to resolve network signaling issues.',
+    expectedColumns: ['msisdn']
   },
   {
-    id: 'CREDIT_LIMIT',
-    label: 'Resolve Credit Limit Issue',
-    description: 'Batch resolution of credit limit problems for subscribers',
-    filesNeeded: 1
+    id: 'ADD_CUG_ID',
+    label: 'Add CUG ID',
+    description: 'Add subscribers to a Closed User Group.',
+    expectedColumns: ['msisdn', 'cug_id']
   },
   {
-    id: 'DELETE_AIR',
-    label: 'Automation AIR Delete',
-    description: 'Automated deletion of AIR records for cleanup operations',
-    filesNeeded: 1
-  },
-  {
-    id: 'DEACT_POSTPAID',
-    label: 'Deactivate PostPaid Hub',
-    description: 'Bulk deactivation of postpaid hub services',
-    filesNeeded: 1
+    id: 'REMOVE_CUG_ID',
+    label: 'Remove CUG ID',
+    description: 'Remove subscribers from a Closed User Group.',
+    expectedColumns: ['msisdn', 'cug_id']
   }
 ];
 
 export default function ServiceDesk() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activeJob, setActiveJob] = useState<JobType | null>(null);
+  const [activeJob, setActiveJob] = useState<Job | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
   const [errorToast, setErrorToast] = useState<string | null>(null);
@@ -51,10 +49,10 @@ export default function ServiceDesk() {
   const handleExecuteJob = async (files: File[]) => {
     setIsProcessing(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      setSuccessToast(`Job executed successfully: ${files.length} file(s) processed`);
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      setSuccessToast('Job executed successfully');
       setActiveJob(null);
-    } catch (error) {
+    } catch {
       setErrorToast('Failed to execute batch job');
     } finally {
       setIsProcessing(false);
@@ -64,16 +62,11 @@ export default function ServiceDesk() {
   return (
     <div className="flex min-h-screen bg-[#F8F9FA] selection:bg-[#FFCC00] selection:text-black font-sans">
       <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[300] flex flex-col items-center space-y-4 pointer-events-none">
-        {errorToast && (
-          <Toast type="error" message={errorToast} onClose={() => setErrorToast(null)} />
-        )}
-        {successToast && (
-          <Toast type="success" message={successToast} onClose={() => setSuccessToast(null)} />
-        )}
+        {errorToast && <Toast type="error" message={errorToast} onClose={() => setErrorToast(null)} />}
+        {successToast && <Toast type="success" message={successToast} onClose={() => setSuccessToast(null)} />}
       </div>
 
       {isProcessing && <LoadingSpinner message="Executing Batch Job..." />}
-
       <Sidebar isOpen={isSidebarOpen} />
 
       {!isSidebarOpen && (
@@ -98,49 +91,36 @@ export default function ServiceDesk() {
                 </button>
               )}
               <div className="flex flex-col min-w-0">
-                <span className="text-gray-400 text-[8px] font-black uppercase tracking-[0.2em]">
-                  IN Support Module
-                </span>
-                <div className="flex items-center space-x-2">
-                  <span className="bg-black text-[#FFCC00] text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest">
-                    Active
-                  </span>
-                </div>
+                <span className="text-gray-400 text-[8px] font-black uppercase tracking-[0.2em]">IN Support Module</span>
+                <span className="bg-black text-[#FFCC00] text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest w-fit mt-1">Active</span>
               </div>
             </div>
-            <h1 className="text-4xl lg:text-5xl font-black text-black tracking-tighter uppercase leading-none italic">
-              IN-Service Desk
-            </h1>
+            <h1 className="text-4xl lg:text-5xl font-black text-black tracking-tighter uppercase leading-none italic">IN‑Service Desk</h1>
             <p className="text-sm font-bold text-gray-500 leading-relaxed max-w-2xl">
-              Batch profile reset automation for resolving call issues, credit limit problems, AIR deletions, and postpaid hub deactivations.
+              Batch automation for service class migration, call profile resets, and Closed User Group management.
             </p>
           </div>
         </header>
 
         {activeJob === null ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
             {JOBS.map((job) => (
               <button
                 key={job.id}
-                onClick={() => setActiveJob(job.id)}
+                onClick={() => setActiveJob(job)}
                 className="bg-white p-8 rounded-[2rem] shadow-xl border-2 border-gray-100 hover:border-[#FFCC00] transition-all text-left group"
               >
                 <div className="bg-black p-4 rounded-xl w-fit mb-6 group-hover:scale-110 transition-transform">
                   <Wrench size={24} className="text-[#FFCC00]" />
                 </div>
-                <h3 className="text-sm font-black text-black uppercase tracking-wide mb-3">
-                  {job.label}
-                </h3>
-                <p className="text-xs font-bold text-gray-500 leading-relaxed mb-4">
-                  {job.description}
-                </p>
-                <div className="flex items-center space-x-2">
-                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">
-                    Files needed:
-                  </span>
-                  <span className="bg-[#FFCC00] text-black text-[9px] font-black px-2 py-1 rounded uppercase">
-                    {job.filesNeeded}
-                  </span>
+                <h3 className="text-sm font-black text-black uppercase tracking-wide mb-3">{job.label}</h3>
+                <p className="text-xs font-bold text-gray-500 leading-relaxed mb-5">{job.description}</p>
+                <div className="flex flex-wrap gap-2">
+                  {job.expectedColumns.map(col => (
+                    <span key={col} className="bg-gray-100 text-gray-600 text-[8px] font-black px-2 py-1 rounded uppercase tracking-wider">
+                      {col}
+                    </span>
+                  ))}
                 </div>
               </button>
             ))}
@@ -154,9 +134,10 @@ export default function ServiceDesk() {
               ← Back to Job Selection
             </button>
             <BatchJobUpload
-              jobType={activeJob}
-              jobLabel={JOBS.find(j => j.id === activeJob)?.label || ''}
-              filesNeeded={JOBS.find(j => j.id === activeJob)?.filesNeeded || 1}
+              jobType={activeJob.id}
+              jobLabel={activeJob.label}
+              filesNeeded={1}
+              expectedColumns={activeJob.expectedColumns}
               onExecute={handleExecuteJob}
               isProcessing={isProcessing}
             />
