@@ -107,6 +107,7 @@ export function buildFulfilmentTrace(row: BundleFulfilmentRow): FulfilmentTrace 
     productId: cis.product_id,
     offerId: cis.offer_id,
     action: cis.action,
+    transactionCategory: cis.transaction_category || '',
     channel: cis.channel_name,
     chargeAmount: cis.charging_amount,
     cisStatus: cisOk ? 'ok' : 'fail',

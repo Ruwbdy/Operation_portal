@@ -47,12 +47,13 @@ function defaultServiceStatus() {
  * Transform HLR getResponseSubscription to VoiceProfile.
  * Maps every parameter documented in the HLR profile reference.
  */
-export function transformHLRToVoiceProfile(hlrData: any): VoiceProfile | null {
+export function transformHLRToVoiceProfile(hlrData: any, accountData?: any): VoiceProfile | null {
   if (!hlrData?.moAttributes?.getResponseSubscription) {
     return null;
   }
 
   const d = hlrData.moAttributes.getResponseSubscription;
+  const accDetail = accountData?.moAttributes?.getAccountDetailResponse?.accountDetails;
 
   // ── CAMEL / IN profile ──────────────────────────────────────────────────────
   const camel: CamelProfile | undefined = d.camel ? {
@@ -124,6 +125,10 @@ export function transformHLRToVoiceProfile(hlrData: any): VoiceProfile | null {
     pwd:         strOr(d.pwd, ''),
     oick:        str(d.oick),
     csp:         strOr(d.csp, ''),
+    firstIVRCallFlag:            accDetail?.firstIVRCallFlag != null ? num(accDetail.firstIVRCallFlag) : undefined,
+    languageIDCurrent:           accDetail?.languageIDCurrent != null ? num(accDetail.languageIDCurrent) : undefined,
+    ussdEndOfCallNotificationID: accDetail?.ussdEndOfCallNotificationID != null ? num(accDetail.ussdEndOfCallNotificationID) : undefined,
+    accountGroupID:              accDetail?.accountGroupID != null ? num(accDetail.accountGroupID) : undefined,
 
     // ── CAMEL / IN ────────────────────────────────────────────────────────────
     camel,
@@ -377,9 +382,24 @@ export function extractDiagnostics(diagnosticsData: any): any[] {
     });
   };
 
-  if (diagnosticsData.voiceDiagnostics)   push('voice',   diagnosticsData.voiceDiagnostics);
+  //if (diagnosticsData.volteDiagnostics)    push('volte',    diagnosticsData.volteDiagnostics);
+  if (diagnosticsData.voiceDiagnostics)    push('voice',    diagnosticsData.voiceDiagnostics);
   if (diagnosticsData.browsingDiagnostics) push('browsing', diagnosticsData.browsingDiagnostics);
-  if (diagnosticsData.offerDiagnostics)   push('offer',   diagnosticsData.offerDiagnostics);
+  if (diagnosticsData.offerDiagnostics)    push('offer',    diagnosticsData.offerDiagnostics);
+
+  // If VoLTE is active, override the CSP voice diagnostic to positive
+  const volteActive = diagnostics.some(
+    d => d.category === 'volte' &&
+         typeof d.message === 'string' &&
+         d.message.toLowerCase().includes('activated')
+  );
+
+  if (volteActive) {
+    const cspEntry = diagnostics.find(d => d.category === 'voice' && d.key === 'csp');
+    if (cspEntry) {
+      cspEntry.message = 'Customer on Volte CSP';
+    }
+  }
 
   return diagnostics;
 }

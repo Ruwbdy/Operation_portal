@@ -13,6 +13,8 @@ export default function DiagnosticsPanel({ diagnostics }: DiagnosticsPanelProps)
 
   const getCategoryColor = (category: string) => {
     switch (category) {
+      case 'volte':
+        return 'bg-purple-50 border-purple-200 text-purple-700';
       case 'voice':
         return 'bg-blue-50 border-blue-200 text-blue-700';
       case 'browsing':
@@ -26,6 +28,8 @@ export default function DiagnosticsPanel({ diagnostics }: DiagnosticsPanelProps)
 
   const getCategoryIcon = (category: string) => {
     switch (category) { 
+      case 'volte':
+        return <CheckCircle size={16} />;
       case 'voice':
         return <AlertTriangle size={16} />;
       case 'browsing':
@@ -39,6 +43,8 @@ export default function DiagnosticsPanel({ diagnostics }: DiagnosticsPanelProps)
 
   const getCategoryLabel = (category: string) => {
     switch (category) {
+      case 'volte':
+        return 'VoLTE';
       case 'voice':
         return 'Voice';
       case 'browsing':

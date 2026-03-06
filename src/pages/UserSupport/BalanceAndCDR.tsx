@@ -165,6 +165,7 @@ export default function BalanceAndCDR() {
 
   const tabs = [
     { id: 'balance' as CDRTabType, label: 'MA & DA Balances', icon: <Wallet size={14} />, color: 'text-green-600', count: 0 },
+    { id: 'all' as CDRTabType, label: 'All Records', icon: <FileText size={14} />, color: 'text-indigo-600', count: categorizedCDR?.all.length || 0 },
     { id: 'voice' as CDRTabType, label: 'Voice Record', icon: <Phone size={14} />, color: 'text-blue-600', count: categorizedCDR?.voice.length || 0 },
     { id: 'data' as CDRTabType, label: 'Data & DA Record', icon: <Globe size={14} />, color: 'text-purple-600', count: categorizedCDR?.data.length || 0 },
     { id: 'sms' as CDRTabType, label: 'SMS Record', icon: <MessageSquare size={14} />, color: 'text-cyan-600', count: categorizedCDR?.sms.length || 0 },
@@ -318,6 +319,12 @@ export default function BalanceAndCDR() {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             {activeTab === 'balance' && balance && (
               <BalanceTab balance={balance} dabalances={dabalances} />
+            )}
+            {activeTab === 'all' && categorizedCDR && summaries && (
+              <>
+                <CDRSummary summary={summaries.all} type="all" />
+                <CDRTable records={categorizedCDR.all} type="all" />
+              </>
             )}
             {activeTab === 'voice' && categorizedCDR && summaries && (
               <>

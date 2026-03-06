@@ -60,7 +60,7 @@ export async function fetchChargingProfile(
 
     // Transform the raw API response to our frontend interfaces
     const transformedData: ChargingProfileResponse = {
-      voice: transformHLRToVoiceProfile(rawData.hlrProfile),
+      voice: transformHLRToVoiceProfile(rawData.hlrProfile, rawData.accountDetails),
       browsing: transformHSSToBrowsingProfile(rawData.hssProfile, rawData.hlrProfile),
       volte: transformVoLTEProfile(rawData.volteProfile, msisdn),
       offers: transformAccountDetailToOffers(rawData.accountDetails),

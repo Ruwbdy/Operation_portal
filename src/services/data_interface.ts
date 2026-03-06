@@ -87,6 +87,10 @@ export interface VoiceProfile {
   pwd: string;            // Supplementary service password (default: 0000)
   oick?: string;          // Outgoing Call Key
   csp: string;            // Customer Service Profile number
+  firstIVRCallFlag?: number;
+  languageIDCurrent?: number;
+  ussdEndOfCallNotificationID?: number;
+  accountGroupID?: number;
 
   // ── CAMEL / IN ─────────────────────────────────────────────────────────────
   camel?: CamelProfile;
@@ -278,7 +282,7 @@ export interface CategorizedCDR {
   other: CDRRecord[];
 }
 
-export type CDRTabType = 'balance' | 'voice' | 'data' | 'sms' | 'credit' | 'daAdjustment' | 'other';
+export type CDRTabType = 'balance' | 'all' |'voice' | 'data' | 'sms' | 'credit' | 'daAdjustment' | 'other';
 
 export interface CDRApiResponse {
   APIStatus: {

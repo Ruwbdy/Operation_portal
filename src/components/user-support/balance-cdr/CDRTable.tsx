@@ -89,6 +89,62 @@ export default function CDRTable({ records, type }: CDRTableProps) {
       { key: 'balance_after_amt', label: 'MA Bal After', sortable: true, filterable: true, minWidth: '70px' }
     ];
 
+    if (type === 'all') {
+      return [
+        ...baseColumns.slice(0, 2),
+        { key: 'record_type', label: 'Type', sortable: true, filterable: true, minWidth: '110px' },
+        { key: 'call_duration_qty', label: 'Duration (s)', sortable: true, filterable: true, minWidth: '110px' },
+        ...baseColumns.slice(2),
+        { key: 'discount_amount', label: 'Discount', sortable: true, filterable: true, minWidth: '70px' },
+        { 
+          key: 'da_account_id', 
+          label: 'DA ID', 
+          sortable: true, 
+          filterable: true, 
+          minWidth: '40px',
+          accessor: (r) => r.da_details?.[0]?.account_id ?? '-'
+        },
+        { 
+          key: 'da_description', 
+          label: 'DA Description', 
+          sortable: false, 
+          filterable: true, 
+          minWidth: '170px',
+          accessor: (r) => {
+            const daId = r.da_details?.[0]?.account_id;
+            return daId ? getDADescription(daId) : '-';
+          }
+        },
+        { 
+          key: 'da_amount_before', 
+          label: 'DA Amt Before', 
+          sortable: true, 
+          filterable: true, 
+          minWidth: '70px',
+          accessor: (r) => r.da_details?.[0]?.amount_before ?? 0
+        },
+        { 
+          key: 'da_amount_after', 
+          label: 'DA Amt After', 
+          sortable: true, 
+          filterable: true, 
+          minWidth: '70px',
+          accessor: (r) => r.da_details?.[0]?.amount_after ?? 0
+        },
+        { 
+          key: 'da_amount_charged', 
+          label: 'DA Amt Chg', 
+          sortable: true, 
+          filterable: true, 
+          minWidth: '70px',
+          accessor: (r) => r.da_details?.[0]?.amount_charged ?? 0
+        },
+        { key: 'bytes_received_qty', label: 'Bytes RX', sortable: true, filterable: false, minWidth: '50px' },
+        { key: 'bytes_sent_qty', label: 'Bytes TX', sortable: true, filterable: false, minWidth: '50px' },
+        { key: 'country', label: 'Country', sortable: true, filterable: true, minWidth: '50px' },
+      ];
+    }
+
     if (type === 'voice') {
       return [
         ...baseColumns.slice(0, 2),

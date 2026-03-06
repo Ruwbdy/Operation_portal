@@ -106,6 +106,7 @@ export interface FulfilmentTrace {
   productId: number;
   offerId: string;
   action: string;
+  transactionCategory: string;
   channel: string;
   chargeAmount: string;
   cisStatus: 'ok' | 'fail';

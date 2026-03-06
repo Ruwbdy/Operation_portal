@@ -2,6 +2,7 @@ import React from 'react';
 import { Wallet, TrendingUp, Calendar } from 'lucide-react';
 import { formatTelecomDate } from '../../../utils/dateFormatter';
 import type { Balance, DedicatedAccount } from '../../../services/data_interface';
+import { formatDAAmount, getDADescription, isDataDA } from '../../../services/daMapping';
 
 interface BalanceTabProps {
   balance: Balance;
@@ -128,12 +129,12 @@ export default function BalanceTab({ balance, dabalances }: BalanceTabProps) {
                   </td>
                   <td className="px-8 py-5">
                     <span className="text-sm font-bold text-black">
-                      {da.dedicatedAccountValue1}
+                      {formatDAAmount(da.dedicatedAccountID, (da.dedicatedAccountValue1/100))}
                     </span>
                   </td>
                   <td className="px-8 py-5">
                     <span className="text-sm font-bold text-gray-600">
-                      {da.dedicatedAccountActiveValue1 || '0.00'}
+                      {formatDAAmount(da.dedicatedAccountID, (da.dedicatedAccountActiveValue1/100))}
                     </span>
                   </td>
                   <td className="px-8 py-5">
