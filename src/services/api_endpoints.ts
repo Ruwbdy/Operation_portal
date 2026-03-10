@@ -1,8 +1,11 @@
 // Centralized API Endpoint Definitions
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9041';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://10.1.79.43:9042';
 
 export const API_ENDPOINTS = {
+  // Authentication
+  LOGIN: `${API_BASE}/login`,
+
   // Consolidated Data Retrieval
   GET_CHARGING_PROFILE: `${API_BASE}/get-charging-profile`,
   GET_DATA_PROFILE: `${API_BASE}/get-data-profile`,
@@ -18,11 +21,11 @@ export const API_ENDPOINTS = {
   DEACTIVATE_VOLTE: `${API_BASE}/deactivate-volte`,
   DELETE_VOLTE: `${API_BASE}/delete-volte`,
 
-  // Service Management (Future)
+  // Service Management
   SET_SERVICE_CLASS: `${API_BASE}/set-service-class`,
   ADD_OFFER: `${API_BASE}/add-offer`,
 
-  // Bundle Fulfilment — SSE stream (event:CIS, event:SDP, event:CCN)
+  // Bundle Fulfilment — SSE stream
   FETCH_SUBSCRIBER_DATA: `${API_BASE}/fetch-subscriber-data`,
 
   // Batch Jobs (POST with file upload)

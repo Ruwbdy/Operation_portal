@@ -1,8 +1,6 @@
-// Import types from data_interface for response structures
+// API Request/Response Type Definitions
 import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Diagnostics, Balance, DedicatedAccount, CDRRecord } from './data_interface';
 
-
-// API Request/Response Type Definitions
 export interface ApiError {
   message: string;
   code?: number;
@@ -14,11 +12,6 @@ export interface ApiResponse<T> {
   data?: T;
   error?: ApiError;
 }
-
-export const AUTH_CREDENTIALS = {
-  username: 'Osazuwa',
-  password: 'Osazuwa@123456'
-};
 
 export interface BatchJobRequest {
   jobType: string;

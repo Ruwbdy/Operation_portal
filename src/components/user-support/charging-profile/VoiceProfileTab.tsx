@@ -321,6 +321,9 @@ export default function VoiceProfileTab({ profile, msisdn, onSuccess, onError, o
         <Card code="VLR DATA" description="Raw VLR Routing String"
           value={<Raw v={profile.vlrData} mono />}
           meaning="Raw VLR data string used internally for signalling routing between the HLR and serving MSC/VLR." />
+        <Card code="LOC State" description=""
+          value={<Raw v={profile.locState} mono />}
+          meaning="" />
       </Section>
 
       {/* 5. Teleservices */}

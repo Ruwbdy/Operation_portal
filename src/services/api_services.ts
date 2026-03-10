@@ -1,5 +1,6 @@
-// API Service - Handles all API calls and data transformation
+// API Service - Handles all API calls using Bearer token authentication
 import { API_ENDPOINTS } from './api_endpoints';
+import { getAuthHeader } from './auth_service';
 import {
   transformHLRToVoiceProfile,
   transformHSSToBrowsingProfile,
@@ -10,20 +11,20 @@ import {
   transformCDRToCDRRecords,
   extractDiagnostics
 } from './apiTransformers';
-import type { 
-  ApiError, 
-  ApiResponse, 
-  ChargingProfileResponse, 
+import type {
+  ApiError,
+  ApiResponse,
+  ChargingProfileResponse,
   DataProfileResponse,
   BatchJobRequest,
-  BatchJobResponse 
+  BatchJobResponse
 } from './api_definitions';
-import { AUTH_CREDENTIALS } from './api_definitions';
 
 // Re-export types for convenience
 export type { ApiError, ApiResponse, BatchJobRequest, BatchJobResponse };
 
-// Helper function to build URL with query parameters
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function buildUrl(baseUrl: string, params: Record<string, string>): string {
   const url = new URL(baseUrl);
   Object.entries(params).forEach(([key, value]) => {
@@ -32,24 +33,25 @@ function buildUrl(baseUrl: string, params: Record<string, string>): string {
   return url.toString();
 }
 
-// Fetch Charging Profile
+/** Standard headers for all authenticated requests */
+function authHeaders(): HeadersInit {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': getAuthHeader(),
+  };
+}
+
+// ─── Charging Profile ─────────────────────────────────────────────────────────
+
 export async function fetchChargingProfile(
-  msisdn: string,
-  username: string = AUTH_CREDENTIALS.username,
-  password: string = AUTH_CREDENTIALS.password
+  msisdn: string
 ): Promise<ApiResponse<ChargingProfileResponse>> {
   try {
-    const url = buildUrl(API_ENDPOINTS.GET_CHARGING_PROFILE, {
-      username,
-      password,
-      msisdn
-    });
+    const url = buildUrl(API_ENDPOINTS.GET_CHARGING_PROFILE, { msisdn });
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: authHeaders(),
     });
 
     if (!response.ok) {
@@ -58,53 +60,40 @@ export async function fetchChargingProfile(
 
     const rawData = await response.json();
 
-    // Transform the raw API response to our frontend interfaces
     const transformedData: ChargingProfileResponse = {
       voice: transformHLRToVoiceProfile(rawData.hlrProfile, rawData.accountDetails),
       browsing: transformHSSToBrowsingProfile(rawData.hssProfile, rawData.hlrProfile),
       volte: transformVoLTEProfile(rawData.volteProfile, msisdn),
       offers: transformAccountDetailToOffers(rawData.accountDetails),
-      diagnostics: extractDiagnostics(rawData.diagnostics)
+      diagnostics: extractDiagnostics(rawData.diagnostics),
     };
 
-    return {
-      success: true,
-      data: transformedData
-    };
+    return { success: true, data: transformedData };
   } catch (error) {
     console.error('Error fetching charging profile:', error);
     return {
       success: false,
       error: {
         message: error instanceof Error ? error.message : 'Failed to fetch charging profile',
-        code: 500
-      }
+        code: 500,
+      },
     };
   }
 }
 
-// Fetch Data Profile (Balances + CDR)
+// ─── Data Profile (Balance + CDR) ─────────────────────────────────────────────
+
 export async function fetchDataProfile(
   msisdn: string,
   startDate: string,
-  endDate: string,
-  username: string = AUTH_CREDENTIALS.username,
-  password: string = AUTH_CREDENTIALS.password
+  endDate: string
 ): Promise<ApiResponse<DataProfileResponse>> {
   try {
-    const url = buildUrl(API_ENDPOINTS.GET_DATA_PROFILE, {
-      username,
-      password,
-      msisdn,
-      startDate,
-      endDate
-    });
+    const url = buildUrl(API_ENDPOINTS.GET_DATA_PROFILE, { msisdn, startDate, endDate });
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: authHeaders(),
     });
 
     if (!response.ok) {
@@ -113,11 +102,8 @@ export async function fetchDataProfile(
 
     const rawData = await response.json();
 
-    // Transform balances if present
     const balance = transformAccountDetailToMABalance(rawData.accountDetails);
     const dabalances = transformAccountDetailToDABalances(rawData.accountDetails);
-    
-    // Transform CDR records using the new transformer
     const cdrRecords = transformCDRToCDRRecords(rawData.cdrRecords?.records || []);
 
     return {
@@ -125,8 +111,8 @@ export async function fetchDataProfile(
       data: {
         balance: balance || undefined,
         dabalances: dabalances || undefined,
-        cdrRecords: cdrRecords
-      }
+        cdrRecords,
+      },
     };
   } catch (error) {
     console.error('Error fetching data profile:', error);
@@ -134,30 +120,21 @@ export async function fetchDataProfile(
       success: false,
       error: {
         message: error instanceof Error ? error.message : 'Failed to fetch data profile',
-        code: 500
-      }
+        code: 500,
+      },
     };
   }
 }
 
-// Reset Call Profile
-export async function resetCallProfile(
-  msisdn: string,
-  username: string = AUTH_CREDENTIALS.username,
-  password: string = AUTH_CREDENTIALS.password
-): Promise<ApiResponse<any>> {
+// ─── Reset Call Profile ───────────────────────────────────────────────────────
+
+export async function resetCallProfile(msisdn: string): Promise<ApiResponse<any>> {
   try {
-    const url = buildUrl(API_ENDPOINTS.RESET_CALL_PROFILE, {
-      username,
-      password,
-      msisdn
-    });
+    const url = buildUrl(API_ENDPOINTS.RESET_CALL_PROFILE, { msisdn });
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: authHeaders(),
     });
 
     if (!response.ok) {
@@ -166,21 +143,20 @@ export async function resetCallProfile(
 
     const data = await response.json();
 
-    // Collect actions taken (passed: false with action-taken: true means success with action)
     const actionsTaken = Object.entries(data)
-      .filter(([key, value]: [string, any]) => value['action-taken'] === true)
+      .filter(([, value]: [string, any]) => value['action-taken'] === true)
       .map(([key, value]: [string, any]) => ({ check: key, action: value.action }));
-    
-    // All responses are successful - either no action needed or actions successfully taken
+
     return {
       success: true,
       data: {
         rawResponse: data,
         actionsTaken,
-        message: actionsTaken.length > 0 
-          ? `Actions completed: ${actionsTaken.map(a => a.action).join('; ')}` 
-          : 'Profile check completed - no issues found'
-      }
+        message:
+          actionsTaken.length > 0
+            ? `Actions completed: ${actionsTaken.map((a) => a.action).join('; ')}`
+            : 'Profile check completed - no issues found',
+      },
     };
   } catch (error) {
     console.error('Error resetting call profile:', error);
@@ -188,32 +164,21 @@ export async function resetCallProfile(
       success: false,
       error: {
         message: error instanceof Error ? error.message : 'Failed to reset call profile',
-        code: 500
-      }
+        code: 500,
+      },
     };
   }
 }
 
-// Reset APN (Browsing Profile)
-export async function resetAPN(
-  msisdn: string,
-  isIOT: boolean,
-  username: string = AUTH_CREDENTIALS.username,
-  password: string = AUTH_CREDENTIALS.password
-): Promise<ApiResponse<any>> {
+// ─── Reset APN ────────────────────────────────────────────────────────────────
+
+export async function resetAPN(msisdn: string, isIOT: boolean): Promise<ApiResponse<any>> {
   try {
-    const url = buildUrl(API_ENDPOINTS.RESET_APN, {
-      username,
-      password,
-      msisdn,
-      isIOT: isIOT.toString()
-    });
+    const url = buildUrl(API_ENDPOINTS.RESET_APN, { msisdn, isIOT: isIOT.toString() });
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: authHeaders(),
     });
 
     if (!response.ok) {
@@ -222,7 +187,6 @@ export async function resetAPN(
 
     const data = await response.json();
 
-    // Check responseCode - 0 means success
     if (data.responseCode !== 0) {
       throw new Error(data.description || 'APN reset failed');
     }
@@ -231,8 +195,8 @@ export async function resetAPN(
       success: true,
       data: {
         message: data.description || 'APN Reset Completed',
-        responseCode: data.responseCode
-      }
+        responseCode: data.responseCode,
+      },
     };
   } catch (error) {
     console.error('Error resetting APN:', error);
@@ -240,30 +204,21 @@ export async function resetAPN(
       success: false,
       error: {
         message: error instanceof Error ? error.message : 'Failed to reset APN',
-        code: 500
-      }
+        code: 500,
+      },
     };
   }
 }
 
-// Activate VoLTE
-export async function activateVoLTE(
-  msisdn: string,
-  username: string = AUTH_CREDENTIALS.username,
-  password: string = AUTH_CREDENTIALS.password
-): Promise<ApiResponse<any>> {
+// ─── Activate VoLTE ───────────────────────────────────────────────────────────
+
+export async function activateVoLTE(msisdn: string): Promise<ApiResponse<any>> {
   try {
-    const url = buildUrl(API_ENDPOINTS.ACTIVATE_VOLTE, {
-      username,
-      password,
-      msisdn
-    });
+    const url = buildUrl(API_ENDPOINTS.ACTIVATE_VOLTE, { msisdn });
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: authHeaders(),
     });
 
     if (!response.ok) {
@@ -272,8 +227,7 @@ export async function activateVoLTE(
 
     const data = await response.json();
 
-    // Check responseCode - "0" means success, "9999" means already active (treat as failure)
-    if (data.responseCode !== "0" && data.responseCode !== 0) {
+    if (data.responseCode !== '0' && data.responseCode !== 0) {
       throw new Error(data.description || 'VoLTE activation failed');
     }
 
@@ -281,8 +235,8 @@ export async function activateVoLTE(
       success: true,
       data: {
         message: data.description || 'VoLTE activated successfully',
-        responseCode: data.responseCode
-      }
+        responseCode: data.responseCode,
+      },
     };
   } catch (error) {
     console.error('Error activating VoLTE:', error);
@@ -290,30 +244,21 @@ export async function activateVoLTE(
       success: false,
       error: {
         message: error instanceof Error ? error.message : 'Failed to activate VoLTE',
-        code: 500
-      }
+        code: 500,
+      },
     };
   }
 }
 
-// Deactivate VoLTE
-export async function deactivateVoLTE(
-  msisdn: string,
-  username: string = AUTH_CREDENTIALS.username,
-  password: string = AUTH_CREDENTIALS.password
-): Promise<ApiResponse<any>> {
+// ─── Deactivate VoLTE ─────────────────────────────────────────────────────────
+
+export async function deactivateVoLTE(msisdn: string): Promise<ApiResponse<any>> {
   try {
-    const url = buildUrl(API_ENDPOINTS.DEACTIVATE_VOLTE, {
-      username,
-      password,
-      msisdn
-    });
+    const url = buildUrl(API_ENDPOINTS.DEACTIVATE_VOLTE, { msisdn });
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: authHeaders(),
     });
 
     if (!response.ok) {
@@ -322,7 +267,6 @@ export async function deactivateVoLTE(
 
     const data = await response.json();
 
-    // Check responseCode - 0 means success
     if (data.responseCode !== 0) {
       throw new Error(data.description || 'VoLTE deactivation failed');
     }
@@ -331,8 +275,8 @@ export async function deactivateVoLTE(
       success: true,
       data: {
         message: data.description || 'VoLTE deactivated successfully',
-        responseCode: data.responseCode
-      }
+        responseCode: data.responseCode,
+      },
     };
   } catch (error) {
     console.error('Error deactivating VoLTE:', error);
@@ -340,30 +284,21 @@ export async function deactivateVoLTE(
       success: false,
       error: {
         message: error instanceof Error ? error.message : 'Failed to deactivate VoLTE',
-        code: 500
-      }
+        code: 500,
+      },
     };
   }
 }
 
-// Delete VoLTE
-export async function deleteVoLTE(
-  msisdn: string,
-  username: string = AUTH_CREDENTIALS.username,
-  password: string = AUTH_CREDENTIALS.password
-): Promise<ApiResponse<any>> {
+// ─── Delete VoLTE ─────────────────────────────────────────────────────────────
+
+export async function deleteVoLTE(msisdn: string): Promise<ApiResponse<any>> {
   try {
-    const url = buildUrl(API_ENDPOINTS.DELETE_VOLTE, {
-      username,
-      password,
-      msisdn
-    });
+    const url = buildUrl(API_ENDPOINTS.DELETE_VOLTE, { msisdn });
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: authHeaders(),
     });
 
     if (!response.ok) {
@@ -372,7 +307,6 @@ export async function deleteVoLTE(
 
     const data = await response.json();
 
-    // Check responseCode - 0 means success (assuming same pattern as other VoLTE endpoints)
     if (data.responseCode !== undefined && data.responseCode !== 0) {
       throw new Error(data.description || 'VoLTE deletion failed');
     }
@@ -381,8 +315,8 @@ export async function deleteVoLTE(
       success: true,
       data: {
         message: data.description || 'VoLTE profile deleted successfully',
-        responseCode: data.responseCode
-      }
+        responseCode: data.responseCode,
+      },
     };
   } catch (error) {
     console.error('Error deleting VoLTE:', error);
@@ -390,8 +324,8 @@ export async function deleteVoLTE(
       success: false,
       error: {
         message: error instanceof Error ? error.message : 'Failed to delete VoLTE profile',
-        code: 500
-      }
+        code: 500,
+      },
     };
   }
 }

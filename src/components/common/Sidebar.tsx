@@ -7,6 +7,7 @@ import {
   Layers,
   LogOut
 } from 'lucide-react';
+import { clearAuth, getUsername } from '../../services/auth_service';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -57,14 +58,13 @@ export default function Sidebar({ isOpen }: SidebarProps) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('mtn_in_auth');
-    localStorage.removeItem('mtn_in_user');
+    clearAuth();
     navigate('/login');
   };
 
   if (!isOpen) return null;
 
-  const username = localStorage.getItem('mtn_in_user') || 'Osazuwa';
+  const username = getUsername() || 'Operator';
 
   return (
     <aside className="bg-black flex flex-col h-screen sticky top-0 z-50 transition-all duration-500 ease-in-out w-72">
