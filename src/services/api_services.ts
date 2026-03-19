@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 // API Service - Handles all API calls using Bearer token authentication
 import { API_ENDPOINTS } from './api_endpoints';
 import { getAuthHeader } from './auth_service';
@@ -65,12 +66,12 @@ export async function fetchChargingProfile(
     log.debug('fetchChargingProfile — raw response', rawData);
 
     const transformedData: ChargingProfileResponse = {
-      voice: transformHLRToVoiceProfile(rawData.hlrProfile, rawData.accountDetails),
-      browsing: transformHSSToBrowsingProfile(rawData.hssProfile, rawData.hlrProfile),
-      volte: transformVoLTEProfile(rawData.volteProfile, msisdn),
-      offers: transformAccountDetailToOffers(rawData.accountDetails),
-      diagnostics: extractDiagnostics(rawData.diagnostics),
-    };
+    voice:       transformHLRToVoiceProfile(rawData.hlrProfile, rawData.accountDetails) ?? undefined,
+    browsing:    transformHSSToBrowsingProfile(rawData.hssProfile, rawData.hlrProfile) ?? undefined,
+    volte:       transformVoLTEProfile(rawData.volteProfile, msisdn) ?? undefined,
+    offers:      transformAccountDetailToOffers(rawData.accountDetails),
+    diagnostics: extractDiagnostics(rawData.diagnostics),
+  };
 
     log.info('fetchChargingProfile — transform complete');
     return { success: true, data: transformedData };
