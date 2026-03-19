@@ -1,0 +1,55 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+jobs:
+  build-test-package:
+    name: Build, Test, and Package Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      # -----------------------
+      # Checkout repository
+      # -----------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -----------------------
+      # Use Node.js
+      # -----------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # -----------------------
+      # Install dependencies
+      # -----------------------
+      - name: Install dependencies
+        run: npm ci
+
+      # -----------------------
+      # Run tests
+      # -----------------------
+      - name: Run tests
+        run: npm test -- --watch=false
+
+      # -----------------------
+      # Build production bundle
+      # -----------------------
+      - name: Build project
+        run: npm run build
+
+      # -----------------------
+      # Upload build artifact
+      # -----------------------
+      - name: Upload build folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: build
+          if-no-files-found: error
