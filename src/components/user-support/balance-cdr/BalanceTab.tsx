@@ -134,7 +134,7 @@ export default function BalanceTab({ balance, dabalances }: BalanceTabProps) {
                   </td>
                   <td className="px-8 py-5">
                     <span className="text-sm font-bold text-gray-600">
-                      {formatDAAmount(da.dedicatedAccountID, (da.dedicatedAccountActiveValue1/100))}
+                      {formatDAAmount(da.dedicatedAccountID, ((da.dedicatedAccountActiveValue1 ?? 0) / 100))}
                     </span>
                   </td>
                   <td className="px-8 py-5">

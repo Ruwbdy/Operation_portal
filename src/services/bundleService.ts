@@ -1,6 +1,8 @@
 // Bundle Fulfilment SSE Service
 // Handles the SSE stream, parsing, and joining of CIS/CCN/SDP events
 import { API_ENDPOINTS } from './api_endpoints';
+import { getAuthHeader } from './auth_service';
+import { createLogger } from './logger';
 import type {
   CISRecord,
   CCNRecord,
@@ -9,6 +11,8 @@ import type {
   FulfilmentTrace,
   FulfilmentStatus,
 } from './bundle_data_interfaces';
+
+const log = createLogger('BundleService');
 
 // ─── Join Helpers ─────────────────────────────────────────────────────────────
 
@@ -38,7 +42,6 @@ export function mergeCCNIntoRows(
   if (existing) {
     existing.ccn = record;
   } else {
-    // CCN arrived before CIS — store with partial row
     rows.set(key, { correlationId: key, cis: null, ccn: record, sdp: null, sdpExpiry: null });
   }
 }
@@ -48,7 +51,10 @@ export function mergeSDPIntoRows(
   record: SDPRecord
 ): void {
   const key = record.orig_transaction_id;
-  if (!key) return; // SDP records without a transaction ID can't be joined
+  if (!key) {
+    log.warn('mergeSDPIntoRows — record missing orig_transaction_id, skipping', record);
+    return;
+  }
   const existing = rows.get(key);
   const isExpiry = record.pam_event_type === '5';
   if (existing) {
@@ -70,7 +76,6 @@ export function mergeSDPIntoRows(
 export function buildFulfilmentTrace(row: BundleFulfilmentRow): FulfilmentTrace | null {
   const { cis, ccn, sdp } = row;
 
-  // Only trace Subscription actions from CIS
   if (!cis || cis.action !== 'Subscription') return null;
 
   const cisOk = cis.status === 'SUCCESS';
@@ -85,15 +90,11 @@ export function buildFulfilmentTrace(row: BundleFulfilmentRow): FulfilmentTrace 
   } else if (cisOk && !ccnOk && !sdpOk) {
     fulfilmentStatus = 'FAILED';
   } else if (!cisOk && ccnOk) {
-    // CCN debited the subscriber even though CIS returned failure —
-    // subscriber lost money but received no bundle. Requires manual reversal.
     fulfilmentStatus = 'GHOST_DEBIT';
   } else {
-    // CIS failed, no CCN, no SDP — clean rejection, nothing charged
     fulfilmentStatus = 'CIS_FAILED';
   }
 
-  // Parse SDP DA details
   const sdpDaIds = sdp?.da_account_id
     ? sdp.da_account_id.split(':').filter(Boolean)
     : [];
@@ -165,14 +166,35 @@ export function streamBundleData(
   const url = `${API_ENDPOINTS.FETCH_SUBSCRIBER_DATA}?msisdn=${msisdn}&startDate=${startDate}&endDate=${endDate}`;
   const controller = new AbortController();
 
+  log.info(`Opening SSE stream — msisdn: ${msisdn}, range: ${startDate}→${endDate}`);
+  log.debug(`SSE URL: ${url}`);
+
   (async () => {
+    let authHeader: string;
+    try {
+      authHeader = getAuthHeader();
+    } catch (authErr) {
+      const msg = authErr instanceof Error ? authErr.message : 'Authentication error';
+      log.error(`SSE request blocked — ${msg}`);
+      callbacks.onError(msg);
+      callbacks.onPhaseChange('error');
+      return;
+    }
+
     try {
       const response = await fetch(url, {
         signal: controller.signal,
-        headers: { Accept: 'text/event-stream' },
+        headers: {
+          'Accept': 'text/event-stream',
+          'Authorization': authHeader,
+        },
       });
 
+      log.info(`SSE response status: ${response.status} ${response.statusText}`);
+
       if (!response.ok) {
+        const body = await response.text().catch(() => '');
+        log.error(`SSE request failed — HTTP ${response.status}`, body || '(no body)');
         callbacks.onError(`HTTP ${response.status}: ${response.statusText}`);
         callbacks.onPhaseChange('error');
         return;
@@ -184,12 +206,14 @@ export function streamBundleData(
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {
+          log.debug('SSE reader done — stream ended by server');
+          break;
+        }
         buffer += decoder.decode(value, { stream: true });
 
-        // Process complete SSE messages (double newline delimited)
         const messages = buffer.split('\n\n');
-        buffer = messages.pop() || ''; // keep incomplete tail
+        buffer = messages.pop() || '';
 
         for (const msg of messages) {
           if (!msg.trim()) continue;
@@ -207,31 +231,44 @@ export function streamBundleData(
           try {
             const parsed = JSON.parse(dataLine);
             if (eventName === 'CIS') {
+              log.info(`SSE event: CIS — ${parsed.length} record(s)`);
               callbacks.onPhaseChange('cis');
               callbacks.onCIS(parsed as CISRecord[]);
             } else if (eventName === 'CCN') {
+              log.info(`SSE event: CCN — ${parsed.length} record(s)`);
               callbacks.onPhaseChange('ccn');
               callbacks.onCCN(parsed as CCNRecord[]);
             } else if (eventName === 'SDP') {
+              log.info(`SSE event: SDP — ${parsed.length} record(s)`);
               callbacks.onPhaseChange('sdp');
               callbacks.onSDP(parsed as SDPRecord[]);
+            } else {
+              log.warn(`SSE event: unknown type "${eventName}" — ignoring`);
             }
           } catch (parseErr) {
-            console.warn('SSE parse error:', parseErr);
+            log.warn(`SSE parse error on event "${eventName}"`, parseErr);
           }
         }
       }
 
+      log.info('SSE stream complete');
       callbacks.onPhaseChange('complete');
       callbacks.onComplete();
     } catch (err: any) {
-      if (err.name === 'AbortError') return;
+      if (err.name === 'AbortError') {
+        log.debug('SSE stream aborted by client');
+        return;
+      }
+      log.error('SSE stream exception', err);
       callbacks.onError(err.message || 'Stream failed');
       callbacks.onPhaseChange('error');
     }
   })();
 
-  return () => controller.abort();
+  return () => {
+    log.debug('SSE stream abort requested');
+    controller.abort();
+  };
 }
 
 // ─── CCN DA Parser ────────────────────────────────────────────────────────────
@@ -252,15 +289,15 @@ export function parseCCNDas(das: string): CCNDASummary[] {
   if (!das) return [];
   return das.split(';').map(segment => {
     const hashIdx = segment.indexOf('#');
-    const daId = hashIdx >= 0 ? segment.substring(0, hashIdx) : '?';
-    const rest = hashIdx >= 0 ? segment.substring(hashIdx + 1) : segment;
+    const daId = hashIdx >= 0 ? segment.slice(0, hashIdx) : '';
+    const rest = hashIdx >= 0 ? segment.slice(hashIdx + 1) : segment;
     const parts = rest.split('~');
     return {
       daId,
-      balBefore: parts[1] || '0',
-      balAfter: parts[2] || '0',
-      charged: parts[3] || '0',
-      currency: parts[4] || 'M',
+      balBefore: parts[1] ?? '',
+      balAfter:  parts[2] ?? '',
+      charged:   parts[3] ?? '',
+      currency:  parts[4] ?? '',
     };
   });
 }

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { initializeDAMapping } from './services/daMapping';
+import { ROLES } from './services/auth_service';
 
 // Lazy load pages for better performance
 const Login = lazy(() => import('./pages/Login'));
@@ -24,7 +25,6 @@ interface ErrorBoundaryState {
 
 class AppErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   public state: ErrorBoundaryState;
-  public props: ErrorBoundaryProps;
 
   constructor(props: ErrorBoundaryProps) {
     super(props);
@@ -76,10 +76,19 @@ export default function App() {
           <Route path="/user-support/balance-cdr" element={<ProtectedRoute><BalanceAndCDR /></ProtectedRoute>} />
           <Route path="/user-support/data-bundle" element={<ProtectedRoute><DataBundle /></ProtectedRoute>} />
 
-          {/* IN Support */}
-          <Route path="/in-support/dsa" element={<ProtectedRoute><DSA /></ProtectedRoute>} />
-          <Route path="/in-support/service-desk" element={<ProtectedRoute><ServiceDesk /></ProtectedRoute>} />
-          <Route path="/in-support/ops" element={<ProtectedRoute><InOps /></ProtectedRoute>} />
+          {/* IN Support — restricted to ROLE_IN_SUPPORT */}
+          <Route
+            path="/in-support/dsa"
+            element={<ProtectedRoute requiredRole={ROLES.IN_SUPPORT}><DSA /></ProtectedRoute>}
+          />
+          <Route
+            path="/in-support/service-desk"
+            element={<ProtectedRoute requiredRole={ROLES.IN_SUPPORT}><ServiceDesk /></ProtectedRoute>}
+          />
+          <Route
+            path="/in-support/ops"
+            element={<ProtectedRoute requiredRole={ROLES.IN_SUPPORT}><InOps /></ProtectedRoute>}
+          />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -382,7 +382,7 @@ export function extractDiagnostics(diagnosticsData: any): any[] {
     });
   };
 
-  //if (diagnosticsData.volteDiagnostics)    push('volte',    diagnosticsData.volteDiagnostics);
+  if (diagnosticsData.volteDiagnostics)    push('volte',    diagnosticsData.volteDiagnostics);
   if (diagnosticsData.voiceDiagnostics)    push('voice',    diagnosticsData.voiceDiagnostics);
   if (diagnosticsData.browsingDiagnostics) push('browsing', diagnosticsData.browsingDiagnostics);
   if (diagnosticsData.offerDiagnostics)    push('offer',    diagnosticsData.offerDiagnostics);

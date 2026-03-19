@@ -7,7 +7,7 @@ import {
   Layers,
   LogOut
 } from 'lucide-react';
-import { clearAuth, getUsername } from '../../services/auth_service';
+import { clearAuth, getUsername, hasRole, ROLES } from '../../services/auth_service';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -17,6 +17,7 @@ interface NavItem {
   path: string;
   icon: React.ReactNode;
   label: string;
+  requiredRole?: string;
   children?: { path: string; label: string }[];
 }
 
@@ -40,6 +41,7 @@ const NAV_ITEMS: NavItem[] = [
     path: '/in-support',
     icon: <Layers size={16} />,
     label: 'IN Support',
+    requiredRole: ROLES.IN_SUPPORT,
     children: [
       { path: '/in-support/dsa', label: 'IN-DSA' },
       { path: '/in-support/service-desk', label: 'IN-Service Desk' },
@@ -66,6 +68,11 @@ export default function Sidebar({ isOpen }: SidebarProps) {
 
   const username = getUsername() || 'Operator';
 
+  // Filter nav items by role
+  const visibleNavItems = NAV_ITEMS.filter(
+    item => !item.requiredRole || hasRole(item.requiredRole)
+  );
+
   return (
     <aside className="bg-black flex flex-col h-screen sticky top-0 z-50 transition-all duration-500 ease-in-out w-72">
       <div className="p-10 text-center">
@@ -83,7 +90,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       </div>
 
       <nav className="flex-1 px-6 space-y-2 mt-4 overflow-y-auto">
-        {NAV_ITEMS.map((item) => (
+        {visibleNavItems.map((item) => (
           <div key={item.path}>
             <button
               onClick={() => navigate(item.children ? item.children[0].path : item.path)}
@@ -109,8 +116,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
             </button>
 
             {item.children && isActive(item.path) && (
-              <div className="ml-8 mt-2 space-y-1">
-                {item.children.map((child) => (
+              <div className="ml-8 mt-1 space-y-1">
+                {item.children.map(child => (
                   <button
                     key={child.path}
                     onClick={() => navigate(child.path)}
