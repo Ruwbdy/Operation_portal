@@ -1,5 +1,8 @@
 // Auth Service - Handles login and token management
 import { API_ENDPOINTS } from './api_endpoints';
+import { createLogger } from './logger';
+
+const log = createLogger('AuthService');
 
 const TOKEN_KEY = 'mtn_in_token';
 const TOKEN_EXPIRY_KEY = 'mtn_in_token_expiry';
@@ -43,6 +46,7 @@ export async function login(
   username: string,
   password: string
 ): Promise<{ success: boolean; error?: string }> {
+  log.info(`Login attempt for user: ${username}`);
   try {
     const response = await fetch(API_ENDPOINTS.LOGIN, {
       method: 'POST',
@@ -54,28 +58,29 @@ export async function login(
 
     if (!response.ok) {
       const errorText = await response.text();
+      log.error(`Login failed — HTTP ${response.status}`, errorText);
       throw new Error(errorText || `Login failed with status ${response.status}`);
     }
 
     const data: LoginResponse = await response.json();
 
     if (!data.token) {
+      log.error('Login response missing token', data);
       throw new Error('No token received from server');
     }
 
-    // Determine role — front-end fallback until API ships `role`
     const role = deriveRole(username, data.role);
-
-    // Store token, expiry, username and role
     const expiryTime = Date.now() + data.expireInMins * 60 * 1000;
+
     localStorage.setItem(TOKEN_KEY, data.token);
     localStorage.setItem(TOKEN_EXPIRY_KEY, expiryTime.toString());
     localStorage.setItem(USER_KEY, username);
     localStorage.setItem(ROLE_KEY, role);
 
+    log.info(`Login successful — user: ${username}, role: ${role}, expires in ${data.expireInMins}m`);
     return { success: true };
   } catch (error) {
-    console.error('Login error:', error);
+    log.error('Login exception', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Login failed. Please try again.',
@@ -90,13 +95,20 @@ export function getToken(): string | null {
   const token = localStorage.getItem(TOKEN_KEY);
   const expiry = localStorage.getItem(TOKEN_EXPIRY_KEY);
 
-  if (!token || !expiry) return null;
+  if (!token || !expiry) {
+    log.debug('getToken — no token or expiry found in storage');
+    return null;
+  }
 
   if (Date.now() > parseInt(expiry, 10)) {
+    log.warn('getToken — token expired, clearing auth state');
     clearAuth();
     return null;
   }
 
+  const remainingMs = parseInt(expiry, 10) - Date.now();
+  const remainingMins = Math.round(remainingMs / 60000);
+  log.debug(`getToken — valid token found, expires in ~${remainingMins}m`);
   return token;
 }
 
@@ -133,6 +145,7 @@ export function getUsername(): string | null {
  * Clears all auth state (logout).
  */
 export function clearAuth(): void {
+  log.info('clearAuth — session cleared');
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(TOKEN_EXPIRY_KEY);
   localStorage.removeItem(USER_KEY);
@@ -144,6 +157,9 @@ export function clearAuth(): void {
  */
 export function getAuthHeader(): string {
   const token = getToken();
-  if (!token) throw new Error('Not authenticated. Please log in again.');
+  if (!token) {
+    log.error('getAuthHeader — no valid token, user must re-authenticate');
+    throw new Error('Not authenticated. Please log in again.');
+  }
   return `Bearer ${token}`;
 }
