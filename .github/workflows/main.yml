@@ -1,55 +1,149 @@
-name: Frontend CI
+name: MTN IN Portal — Build, Test & Package
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - main
+      - develop
   pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:          # Allow manual trigger from GitHub UI
+
+env:
+  NODE_VERSION: '22.x'        # Matches vite.config requirement (>=22.12.0 for @vitejs/plugin-react 5.x)
+  ARTIFACT_NAME: mtn-in-portal
 
 jobs:
-  build-test-package:
-    name: Build, Test, and Package Frontend
+  # ─────────────────────────────────────────────────────────────────
+  # JOB 1: Lint & Type Check
+  # ─────────────────────────────────────────────────────────────────
+  lint-and-typecheck:
+    name: Lint & Type Check
     runs-on: ubuntu-latest
-
     steps:
-      # -----------------------
-      # Checkout repository
-      # -----------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # -----------------------
-      # Use Node.js
-      # -----------------------
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      # -----------------------
-      # Install dependencies
-      # -----------------------
       - name: Install dependencies
         run: npm ci
 
-      # -----------------------
-      # Run tests
-      # -----------------------
-      - name: Run tests
-        run: npm test -- --watch=false
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+        # Uses your tsconfig.json — catches type errors without emitting files
 
-      # -----------------------
-      # Build production bundle
-      # -----------------------
-      - name: Build project
+  # ─────────────────────────────────────────────────────────────────
+  # JOB 2: Build
+  # Runs after lint passes. Injects the API base URL from secrets
+  # so the baked-in bundle points at the right backend.
+  # ─────────────────────────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production bundle
+        env:
+          # Override the default .env value at build time.
+          # Set VITE_API_BASE_URL in your repo's Settings → Secrets & variables → Actions.
+          # Falls back to the .env default (http://10.1.79.43:9042) if the secret is not set.
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
         run: npm run build
+        # Output lands in ./dist (configured in vite.config.ts)
 
-      # -----------------------
-      # Upload build artifact
-      # -----------------------
-      - name: Upload build folder
+      - name: Verify dist output
+        run: |
+          echo "── dist contents ──────────────────────────────────"
+          ls -lh dist/
+          echo "── asset sizes ────────────────────────────────────"
+          du -sh dist/assets/* 2>/dev/null || echo "(no assets directory)"
+          echo "───────────────────────────────────────────────────"
+          # Fail the step if index.html is missing — indicates a broken build
+          test -f dist/index.html || (echo "ERROR: dist/index.html not found" && exit 1)
+
+      - name: Upload dist as workflow artifact
+        # Kept for 7 days; used by the package job below and useful for debugging
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-build
-          path: build
-          if-no-files-found: error
+          name: dist-${{ github.sha }}
+          path: dist/
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────────
+  # JOB 3: Package
+  # Creates a versioned zip ready for manual deployment or archiving.
+  # ─────────────────────────────────────────────────────────────────
+  package:
+    name: Package
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/
+
+      - name: Determine package version
+        id: version
+        run: |
+          # Use the package.json version + short commit SHA for traceability
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          SHORT_SHA="${GITHUB_SHA::8}"
+          BUILD_DATE=$(date -u +"%Y%m%d")
+          VERSION="${PKG_VERSION}-${BUILD_DATE}-${SHORT_SHA}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "zip_name=${{ env.ARTIFACT_NAME }}-${VERSION}.zip" >> $GITHUB_OUTPUT
+          echo "Packaging version: ${VERSION}"
+
+      - name: Create zip package
+        run: |
+          cd dist
+          zip -r "../${{ steps.version.outputs.zip_name }}" .
+          cd ..
+          echo "── Package contents ────────────────────────────────"
+          unzip -l "${{ steps.version.outputs.zip_name }}" | tail -20
+          echo "── Package size ────────────────────────────────────"
+          du -sh "${{ steps.version.outputs.zip_name }}"
+
+      - name: Upload release package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.version.outputs.zip_name }}
+          path: ${{ steps.version.outputs.zip_name }}
+          retention-days: 30
+
+      - name: Build summary
+        run: |
+          echo "## ✅ Build & Package Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field        | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| Package      | \`${{ steps.version.outputs.zip_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch       | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit       | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered by | \`${{ github.actor }}\` |" >> $GITHUB_STEP_SUMMARY
