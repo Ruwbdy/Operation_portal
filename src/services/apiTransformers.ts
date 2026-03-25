@@ -126,6 +126,7 @@ export function transformHLRToVoiceProfile(hlrData: any, accountData?: any): Voi
     oick:        str(d.oick),
     csp:         strOr(d.csp, ''),
     firstIVRCallFlag:            accDetail?.firstIVRCallFlag != null ? num(accDetail.firstIVRCallFlag) : undefined,
+    serviceClassCurrent:         accDetail?.serviceClassCurrent != null ? num(accDetail.serviceClassCurrent) : undefined,
     languageIDCurrent:           accDetail?.languageIDCurrent != null ? num(accDetail.languageIDCurrent) : undefined,
     ussdEndOfCallNotificationID: accDetail?.ussdEndOfCallNotificationID != null ? num(accDetail.ussdEndOfCallNotificationID) : undefined,
     accountGroupID:              accDetail?.accountGroupID != null ? num(accDetail.accountGroupID) : undefined,

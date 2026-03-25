@@ -18,7 +18,7 @@ export function parseCDRRecords(response: CDRApiResponse): {
     data: [],
     sms: [],
     credit: [],
-    daAdjustment: [],
+    adjustment: [],
     other: []
   };
   
@@ -34,7 +34,7 @@ export function parseCDRRecords(response: CDRApiResponse): {
     } else if (type.includes('credit') || type.includes('recharge') || type.includes('topup')) {
       categorized.credit.push(record);
     } else if (type.includes('adjustment') /*|| type.includes('da')*/) {
-      categorized.daAdjustment.push(record);
+      categorized.adjustment.push(record);
     } else {
       categorized.other.push(record);
     }
@@ -47,7 +47,7 @@ export function parseCDRRecords(response: CDRApiResponse): {
     data: calculateDataSummary(categorized.data),
     sms: calculateSummary(categorized.sms),
     credit: calculateCreditSummary(categorized.credit),
-    daAdjustment: calculateDAdjustmentSummary(categorized.daAdjustment),
+    adjustment: calculateAdjustmentSummary(categorized.adjustment),
     other: calculateSummary(categorized.other)
   };
   
@@ -128,9 +128,9 @@ function calculateCreditSummary(records: CDRRecord[]): CDRSummary {
 }
 
 /**
- * Calculate DA adjustment summary
+ * Calculate adjustment summary
  */
-function calculateDAdjustmentSummary(records: CDRRecord[]): CDRSummary {
+function calculateAdjustmentSummary(records: CDRRecord[]): CDRSummary {
   const baseSummary = calculateSummary(records);
   
   const netChange = baseSummary.endingBalance - baseSummary.startingBalance;

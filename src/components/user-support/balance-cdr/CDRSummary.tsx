@@ -147,8 +147,8 @@ export default function CDRSummary({ summary, type }: CDRSummaryProps) {
             </div>
           )}
 
-          {/* DA Adjustment-specific: Net Change */}
-          {type === 'daAdjustment' && summary.netChange !== undefined && (
+          {/* Adjustment-specific: Net Change */}
+          {type === 'adjustment' && summary.netChange !== undefined && (
             <div>
               <div className="flex items-center space-x-2 mb-2">
                 <Activity size={14} className={summary.netChange >= 0 ? 'text-green-500' : 'text-red-500'} />

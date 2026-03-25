@@ -134,7 +134,7 @@ export default function BalanceAndCDR() {
           data: [],
           sms: [],
           credit: [],
-          daAdjustment: [],
+          adjustment: [],
           other: []
         });
         setSummaries({
@@ -143,7 +143,7 @@ export default function BalanceAndCDR() {
           data: { totalTransactions: 0, startingBalance: 0, endingBalance: 0, totalCharged: 0 },
           sms: { totalTransactions: 0, startingBalance: 0, endingBalance: 0, totalCharged: 0 },
           credit: { totalTransactions: 0, startingBalance: 0, endingBalance: 0, totalCharged: 0 },
-          daAdjustment: { totalTransactions: 0, startingBalance: 0, endingBalance: 0, totalCharged: 0 },
+          adjustment: { totalTransactions: 0, startingBalance: 0, endingBalance: 0, totalCharged: 0 },
           other: { totalTransactions: 0, startingBalance: 0, endingBalance: 0, totalCharged: 0 }
         });
       }
@@ -171,7 +171,7 @@ export default function BalanceAndCDR() {
     { id: 'sms' as CDRTabType, label: 'SMS Record', icon: <MessageSquare size={14} />, color: 'text-cyan-600', count: categorizedCDR?.sms.length || 0 },
     { id: 'credit' as CDRTabType, label: 'Credit & Recharge', icon: <CreditCard size={14} />, color: 'text-amber-600', count: categorizedCDR?.credit.length || 0 },
     { id: 'other' as CDRTabType, label: 'Debit and Others', icon: <FileText size={14} />, color: 'text-gray-600', count: categorizedCDR?.other.length || 0 },
-    { id: 'daAdjustment' as CDRTabType, label: 'DA Adjustment', icon: <TrendingUp size={14} />, color: 'text-pink-600', count: categorizedCDR?.daAdjustment.length || 0 }
+    { id: 'adjustment' as CDRTabType, label: 'Adjustments', icon: <TrendingUp size={14} />, color: 'text-pink-600', count: categorizedCDR?.adjustment.length || 0 }
   ];
 
   const hasData = balance !== null || dabalances.length > 0 || categorizedCDR !== null;
@@ -350,10 +350,10 @@ export default function BalanceAndCDR() {
                 <CDRTable records={categorizedCDR.credit} type="credit" />
               </>
             )}
-            {activeTab === 'daAdjustment' && categorizedCDR && summaries && (
+            {activeTab === 'adjustment' && categorizedCDR && summaries && (
               <>
-                <CDRSummary summary={summaries.daAdjustment} type="daAdjustment" />
-                <CDRTable records={categorizedCDR.daAdjustment} type="daAdjustment" />
+                <CDRSummary summary={summaries.adjustment} type="adjustment" />
+                <CDRTable records={categorizedCDR.adjustment} type="adjustment" />
               </>
             )}
             {activeTab === 'other' && categorizedCDR && summaries && (

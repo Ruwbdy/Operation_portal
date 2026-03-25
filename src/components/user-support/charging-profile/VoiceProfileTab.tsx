@@ -223,11 +223,17 @@ export default function VoiceProfileTab({ profile, msisdn, onSuccess, onError, o
         <Card code="TICK" description="Terminating Incoming Call Key"
           value={<Raw v={profile.tick} mono />}
           meaning="TICK is a routing key / template identifier used to manage incoming call treatment. It does for incoming calls what OICK does for outgoing calls." />  
+        <Card code="SC" description="Service Class"
+          value={<Raw v={profile.serviceClassCurrent} mono />}
+          meaning="The service class to which the subscriber belongs. Used for determining available services and pricing." />
         {ss && (
           <Card code="STYPE" description="Subscriber Type"
             value={<span className={`text-[11px] font-black ${ss.stype === 1 ? 'text-orange-600' : ss.stype === 2 ? 'text-blue-600' : 'text-gray-600'}`}>{ss.stype === 1 ? 'PREPAID' : ss.stype === 2 ? 'POSTPAID' : `TYPE ${ss.stype}`}</span>}
             meaning={ss.stype === 1 ? 'Prepaid subscriber — balance deducted in real-time per usage event via the Online Charging System.' : ss.stype === 2 ? 'Postpaid subscriber — usage accumulated and billed on a monthly invoice.' : 'Subscriber billing and service type.'} />
         )}
+        <Card code="ACCT GRP" description="Account Group ID"
+          value={<Raw v={profile.accountGroupID} mono />}
+          meaning="Subscriber's account group assignment. Used for shared balance and family plan grouping." />
         <Card code="LANG" description="Language ID"
           value={<Raw v={profile.languageIDCurrent} mono />}
           meaning="Subscriber's preferred language setting on the platform. Used for IVR and USSD menu language selection." />
@@ -237,9 +243,7 @@ export default function VoiceProfileTab({ profile, msisdn, onSuccess, onError, o
         <Card code="USSD EOCN" description="USSD End of Call Notification"
           value={<Raw v={profile.ussdEndOfCallNotificationID} mono />}
           meaning="Controls whether a USSD notification is sent at the end of a call session. 0 = disabled." />
-        <Card code="ACCT GRP" description="Account Group ID"
-          value={<Raw v={profile.accountGroupID} mono />}
-          meaning="Subscriber's account group assignment. Used for shared balance and family plan grouping." />
+        
       </Section>
 
       {/* 2. Call Barring */}

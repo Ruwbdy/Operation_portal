@@ -272,7 +272,7 @@ export default function CDRTable({ records, type }: CDRTableProps) {
       ];
     }
 
-    // Default columns for credit, daAdjustment, other
+    // Default columns for credit, adjustment, other
     return [...baseColumns.slice(0, 2),
         { key: 'record_type', label: 'Type', sortable: true, filterable: true, minWidth: '110px' },
         ...baseColumns.slice(2),

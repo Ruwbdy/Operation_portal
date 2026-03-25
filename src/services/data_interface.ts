@@ -88,6 +88,7 @@ export interface VoiceProfile {
   oick?: string;          // Outgoing Call Key
   csp: string;            // Customer Service Profile number
   firstIVRCallFlag?: number;
+  serviceClassCurrent?: number;
   languageIDCurrent?: number;
   ussdEndOfCallNotificationID?: number;
   accountGroupID?: number;
@@ -278,11 +279,11 @@ export interface CategorizedCDR {
   data: CDRRecord[];
   sms: CDRRecord[];
   credit: CDRRecord[];
-  daAdjustment: CDRRecord[];
+  adjustment: CDRRecord[];
   other: CDRRecord[];
 }
 
-export type CDRTabType = 'balance' | 'all' |'voice' | 'data' | 'sms' | 'credit' | 'daAdjustment' | 'other';
+export type CDRTabType = 'balance' | 'all' |'voice' | 'data' | 'sms' | 'credit' | 'adjustment' | 'other';
 
 export interface CDRApiResponse {
   APIStatus: {
