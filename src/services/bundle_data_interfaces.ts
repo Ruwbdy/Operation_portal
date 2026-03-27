@@ -91,15 +91,19 @@ export interface BundleFulfilmentRow {
   sdpExpiry: SDPRecord | null;   // pam_event_type=5 (debit/expiry) record
 }
 
-// ─── Fulfilment Trace ─────────────────────────────────────────────────────────
+// ─── Fulfilment Status ────────────────────────────────────────────────────────
 
 export type FulfilmentStatus =
-  | 'FULFILLED'    // CIS ✓ · CCN ✓ · SDP ✓  — fully delivered
-  | 'PARTIAL'      // CIS ✓ · CCN ✓ · SDP ✗  — debited, bundle not provisioned
-  | 'FAILED'       // CIS ✓ · CCN ✗ · SDP ✗  — no debit, no bundle
-  | 'CIS_FAILED'   // CIS ✗ · CCN ✗ · SDP ✗  — rejected at CIS, nothing charged
-  | 'GHOST_DEBIT'; // CIS ✗ · CCN ✓ · SDP ✗  — CIS failed BUT CCN still debited — subscriber lost money, got no bundle
-  // 'LOAN'
+  | 'FULFILLED'      // CIS ✓  · PAM ✓ with real DA amounts  — fully delivered
+  | 'LOAN_RECOVERY'  // CIS loan_flag=1 or loan category     — expected debit, no bundle
+  | 'DATA_GIFTING'   // CIS succeeded but beneficiary MSISDN differs, so no PAM record expected
+  | 'PAM_ISSUE'      // CIS ✓  · PAM row exists but zero/empty DA amounts — provisioning anomaly
+  | 'GHOST_DEBIT'    // Ambiguous CIS error · CCN confirms debit · no PAM  — subscriber charged, nothing delivered
+  | 'PENDING_CCN'    // Ambiguous CIS error · no PAM · CCN not yet received — awaiting debit confirmation
+  | 'FAILED'         // Clean CIS rejection (no charge reached AIR) · no PAM
+  | 'CIS_FAILED';    // CIS status=FAILURE with no other category matching
+
+// ─── Fulfilment Trace ─────────────────────────────────────────────────────────
 
 export interface FulfilmentTrace {
   correlationId: string;
@@ -110,18 +114,27 @@ export interface FulfilmentTrace {
   transactionCategory: string;
   channel: string;
   chargeAmount: string;
+
+  // CIS
   cisStatus: 'ok' | 'fail';
   cisFailureReason?: string;
-  ccnStatus: 'ok' | 'missing';
+  downstreamErrorCode?: string;  // extracted responseCode from failure_reason
+  isLoanRecovery: boolean;
+
+  // CCN — secondary arbiter, only consulted when PAM is absent and error is ambiguous
+  ccnStatus: 'ok' | 'missing' | 'pending'; // pending = PENDING_CCN state, waiting for CCN
   ccnDebit?: string;
   ccnBalBefore?: string;
   ccnBalAfter?: string;
-  sdpStatus: 'ok' | 'missing';
+
+  // PAM (SDP pam_event_type=1)
+  pamStatus: 'ok' | 'missing' | 'issue'; // issue = row exists but no real DA credit amounts
   sdpDaIds?: string[];
   sdpDaAmounts?: string[];
   sdpParamValue?: string;
+
   fulfilmentStatus: FulfilmentStatus;
-  timestamp: string; // human-readable
+  timestamp: string;
   rawTimestamp: number;
 }
 
@@ -131,7 +144,7 @@ export interface BundleStreamState {
   cisRecords: CISRecord[];
   ccnRecords: CCNRecord[];
   sdpRecords: SDPRecord[];
-  rows: Map<string, BundleFulfilmentRow>;   // keyed by correlationId
+  rows: Map<string, BundleFulfilmentRow>;
   isStreaming: boolean;
   streamPhase: 'idle' | 'connecting' | 'cis' | 'ccn' | 'sdp' | 'complete' | 'error';
   error?: string;

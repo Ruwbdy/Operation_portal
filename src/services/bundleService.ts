@@ -14,12 +14,81 @@ import type {
 
 const log = createLogger('BundleService');
 
-// ─── Join Helpers ─────────────────────────────────────────────────────────────
+// ─── Response Code Classification ────────────────────────────────────────────
+//
+// AMBIGUOUS codes: request reached AIR/charging platform but outcome is unclear.
+// Charge may or may not have been applied. CCN must arbitrate.
+//
+//   104  Temporary blocked
+//   126  Account not active
+//   140  Invalid old Service Class
+//   191  PAM service id out of range / did not exist
+//
+// All other codes are treated as CLEAN REJECTIONS:
+//   -200  External system down (never reached charge platform)
+//   102   Subscriber not found
+//   9001  Ineligible (business rule rejection)
+//   4010  DIAMETER_END_USER_SERVICE_DENIED
+//   4012  DIAMETER_CREDIT_LIMIT_REACHED
+//   etc.
+
+const AMBIGUOUS_RESPONSE_CODES = new Set(['104', '126', '140', '191']);
 
 /**
- * Build or update a BundleFulfilmentRow from incoming records.
- * Keyed by correlationId. Merges in-place.
+ * Extract the numeric responseCode from a CIS failure_reason string.
+ * Format: "responseCode=<code>;Desc=...;External Node=..."
  */
+export function extractResponseCode(failureReason: string | undefined | null): string | undefined {
+  if (!failureReason) return undefined;
+  const match = failureReason.match(/responseCode=(-?\d+)/);
+  return match ? match[1] : undefined;
+}
+
+/**
+ * Returns true if the failure_reason contains an ambiguous AIR-level response
+ * code where the charge status is unknown and CCN must confirm.
+ */
+function isAmbiguousError(failureReason: string | undefined | null): boolean {
+  const code = extractResponseCode(failureReason);
+  return code ? AMBIGUOUS_RESPONSE_CODES.has(code) : false;
+}
+
+
+// ─── Data Gifting ──────────────────────────────────────────
+function isDataGifting(cis: CISRecord): boolean {
+ if (String(cis.msisdn) !== String(cis.beneficiary_msisdn)) return true;
+  return false;
+}
+
+// ─── Loan Detection ───────────────────────────────────────────────────────────
+
+function isLoanRecovery(cis: CISRecord): boolean {
+  if (cis.loan_flag === '1') return true;
+  const cat = (cis.transaction_category || '').toUpperCase();
+  return cat.includes('LOAN') || cat.includes('XTRATIME');
+}
+
+// ─── PAM Amount Validation ────────────────────────────────────────────────────
+
+/**
+ * Returns true if the PAM (SDP credit) record actually contains
+ * non-zero DA credit amounts. A row with empty/zero adj_amount
+ * indicates the provisioning event fired but nothing was credited.
+ */
+function pamHasRealAmounts(sdp: SDPRecord): boolean {
+  if (!sdp.da_account_id) return false;
+  const daIds = sdp.da_account_id.split(':').filter(Boolean);
+  if (daIds.length === 0) return false;
+  if (!sdp.adj_amount) return false;
+  const amounts = sdp.adj_amount.split(':').filter(Boolean);
+  return amounts.some(a => {
+    const n = parseFloat(a);
+    return !isNaN(n) && n !== 0;
+  });
+}
+
+// ─── Join Helpers ─────────────────────────────────────────────────────────────
+
 export function mergeCISIntoRows(
   rows: Map<string, BundleFulfilmentRow>,
   record: CISRecord
@@ -76,25 +145,64 @@ export function mergeSDPIntoRows(
 export function buildFulfilmentTrace(row: BundleFulfilmentRow): FulfilmentTrace | null {
   const { cis, ccn, sdp } = row;
 
+  // Only build traces for Subscription actions
   if (!cis || cis.action !== 'Subscription') return null;
 
-  const cisOk = cis.status === 'SUCCESS';
-  const ccnOk = !!ccn;
-  const sdpOk = !!sdp;
+  const cisSuccess   = cis.status === 'SUCCESS';
+  const pamExists    = !!sdp;
+  const pamOk        = pamExists && pamHasRealAmounts(sdp!);
+  const pamIssue     = pamExists && !pamOk;
+  const ccnPresent   = !!ccn;
+  const loanRecovery = isLoanRecovery(cis);
+  const dataGifting  = isDataGifting(cis);
+  const ambiguous    = !cisSuccess && isAmbiguousError(cis.failure_reason);
+  const errorCode    = extractResponseCode(cis.failure_reason);
 
+  // ── Determine fulfilment status ─────────────────────────────────────────────
   let fulfilmentStatus: FulfilmentStatus;
-  if (cisOk && ccnOk && sdpOk) {
+
+  if (loanRecovery) {
+    // Loan recovery takes priority — expected debit, no bundle delivery
+    fulfilmentStatus = 'LOAN_RECOVERY';
+
+  } else if (cisSuccess && pamOk) {
+    // Happy path: CIS charged, PAM credited DA accounts with real amounts
     fulfilmentStatus = 'FULFILLED';
-  } else if (cisOk && ccnOk && !sdpOk) {
-    fulfilmentStatus = 'PARTIAL';
-  } else if (cisOk && !ccnOk && !sdpOk) {
+
+  } else if (cisSuccess && pamIssue) {
+    // CIS succeeded but PAM event has no DA amounts — provisioning anomaly
+    fulfilmentStatus = 'PAM_ISSUE';
+
+  } else if (cisSuccess && dataGifting) {
+    // Data gifting — CIS succeeded but beneficiary MSISDN differs, so no PAM record expected
+    fulfilmentStatus = 'DATA_GIFTING';
+
+  } else if ((cisSuccess || ambiguous) && !pamExists && !dataGifting) {
+    // Charge may have gone through (CIS success or ambiguous AIR error) but no PAM record.
+    // CCN is the arbiter: if it confirms a debit → GHOST_DEBIT, else → PENDING_CCN
+    fulfilmentStatus = ccnPresent ? 'GHOST_DEBIT' : 'PENDING_CCN';
+
+  } else if (!cisSuccess && !ambiguous && !pamExists) {
+    // Clean rejection — charge never reached AIR or was cleanly refused
     fulfilmentStatus = 'FAILED';
-  } else if (!cisOk && ccnOk) {
-    fulfilmentStatus = 'GHOST_DEBIT';
+
   } else {
     fulfilmentStatus = 'CIS_FAILED';
   }
 
+  // ── Derive PAM status ───────────────────────────────────────────────────────
+  let pamStatus: 'ok' | 'missing' | 'issue';
+  if (!pamExists)    pamStatus = 'missing';
+  else if (pamOk)    pamStatus = 'ok';
+  else               pamStatus = 'issue';
+
+  // ── Derive CCN status ───────────────────────────────────────────────────────
+  let ccnStatus: 'ok' | 'missing' | 'pending';
+  if (ccnPresent)                             ccnStatus = 'ok';
+  else if (fulfilmentStatus === 'PENDING_CCN') ccnStatus = 'pending';
+  else                                        ccnStatus = 'missing';
+
+  // ── DA IDs and amounts from PAM record ─────────────────────────────────────
   const sdpDaIds = sdp?.da_account_id
     ? sdp.da_account_id.split(':').filter(Boolean)
     : [];
@@ -111,31 +219,33 @@ export function buildFulfilmentTrace(row: BundleFulfilmentRow): FulfilmentTrace 
     transactionCategory: cis.transaction_category || '',
     channel: cis.channel_name,
     chargeAmount: cis.charging_amount,
-    cisStatus: cisOk ? 'ok' : 'fail',
-    cisFailureReason: !cisOk ? cis.failure_reason : undefined,
-    ccnStatus: ccnOk ? 'ok' : 'missing',
-    ccnDebit: ccn?.ma_balance_change_enrich,
+
+    cisStatus: cisSuccess ? 'ok' : 'fail',
+    cisFailureReason: !cisSuccess ? cis.failure_reason : undefined,
+    downstreamErrorCode: errorCode,
+    isLoanRecovery: loanRecovery,
+
+    ccnStatus,
+    ccnDebit:     ccn?.ma_balance_change_enrich,
     ccnBalBefore: ccn?.ma_balancebeforeevent_enrich,
-    ccnBalAfter: ccn?.ma_balanceaftertheevent_enrich,
-    sdpStatus: sdpOk ? 'ok' : 'missing',
+    ccnBalAfter:  ccn?.ma_balanceaftertheevent_enrich,
+
+    pamStatus,
     sdpDaIds,
     sdpDaAmounts,
     sdpParamValue: sdp?.parameter_value || undefined,
+
     fulfilmentStatus,
-    timestamp: formatCISTimestamp(cis.transaction_date_time),
+    timestamp:    formatCISTimestamp(cis.transaction_date_time),
     rawTimestamp: cis.transaction_date_time,
   };
 }
 
 function formatCISTimestamp(epochMs: number): string {
   try {
-    const d = new Date(epochMs);
-    return d.toLocaleString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(epochMs).toLocaleString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
     });
   } catch {
     return String(epochMs);
@@ -167,7 +277,6 @@ export function streamBundleData(
   const controller = new AbortController();
 
   log.info(`Opening SSE stream — msisdn: ${msisdn}, range: ${startDate}→${endDate}`);
-  log.debug(`SSE URL: ${url}`);
 
   (async () => {
     let authHeader: string;
@@ -184,10 +293,7 @@ export function streamBundleData(
     try {
       const response = await fetch(url, {
         signal: controller.signal,
-        headers: {
-          'Accept': 'text/event-stream',
-          'Authorization': authHeader,
-        },
+        headers: { 'Accept': 'text/event-stream', 'Authorization': authHeader },
       });
 
       log.info(`SSE response status: ${response.status} ${response.statusText}`);
@@ -206,10 +312,7 @@ export function streamBundleData(
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) {
-          log.debug('SSE reader done — stream ended by server');
-          break;
-        }
+        if (done) { log.debug('SSE reader done'); break; }
         buffer += decoder.decode(value, { stream: true });
 
         const messages = buffer.split('\n\n');
@@ -219,11 +322,11 @@ export function streamBundleData(
           if (!msg.trim()) continue;
           const lines = msg.split('\n');
           let eventName = '';
-          let dataLine = '';
+          let dataLine  = '';
 
           for (const line of lines) {
             if (line.startsWith('event:')) eventName = line.slice(6).trim();
-            if (line.startsWith('data:')) dataLine = line.slice(5).trim();
+            if (line.startsWith('data:'))  dataLine  = line.slice(5).trim();
           }
 
           if (!eventName || !dataLine) continue;
@@ -255,20 +358,14 @@ export function streamBundleData(
       callbacks.onPhaseChange('complete');
       callbacks.onComplete();
     } catch (err: any) {
-      if (err.name === 'AbortError') {
-        log.debug('SSE stream aborted by client');
-        return;
-      }
+      if (err.name === 'AbortError') { log.debug('SSE stream aborted'); return; }
       log.error('SSE stream exception', err);
       callbacks.onError(err.message || 'Stream failed');
       callbacks.onPhaseChange('error');
     }
   })();
 
-  return () => {
-    log.debug('SSE stream abort requested');
-    controller.abort();
-  };
+  return () => { log.debug('SSE stream abort requested'); controller.abort(); };
 }
 
 // ─── CCN DA Parser ────────────────────────────────────────────────────────────

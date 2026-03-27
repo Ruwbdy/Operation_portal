@@ -43,7 +43,6 @@ function todayLocal(): string {
 }
 
 function addDays(dateStr: string, days: number): string {
-  // Parse as local-time components to avoid UTC-midnight shift across timezones
   const [y, m, d] = dateStr.split('-').map(Number);
   return fmtDate(new Date(y, m - 1, d + days));
 }
@@ -72,6 +71,8 @@ export default function DataBundle() {
 
   const abortRef = useRef<(() => void) | null>(null);
 
+  // Rebuild traces from current row state.
+  // Called after every merge — PENDING_CCN rows auto-resolve when CCN arrives.
   const rebuildState = useCallback(() => {
     const newMap = new Map(rowsRef.current);
     setRows(newMap);
@@ -84,26 +85,19 @@ export default function DataBundle() {
 
   // ─── Date Handlers ──────────────────────────────────────────────────────────
 
-  // Reactively clamp endDate whenever startDate changes — this is the primary
-  // enforcement point. onChange alone isn't sufficient because the browser
-  // calendar can commit a value before React has re-rendered the `max` attr.
   useEffect(() => {
     const maxEnd = addDays(startDate, 2);
     if (endDate < startDate) setEndDate(startDate);
     else if (endDate > maxEnd) setEndDate(maxEnd);
   }, [startDate]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleStartDateChange = (val: string) => {
-    setStartDate(val);
-    // useEffect above handles endDate clamping reactively
-  };
+  const handleStartDateChange = (val: string) => setStartDate(val);
 
   const handleEndDateChange = (val: string) => {
     const maxEnd = addDays(startDate, 2);
-    // Always clamp regardless of how the value arrived (picker or keyboard)
-    if (val < startDate) setEndDate(startDate);
-    else if (val > maxEnd) setEndDate(maxEnd);
-    else setEndDate(val);
+    if (val < startDate)     setEndDate(startDate);
+    else if (val > maxEnd)   setEndDate(maxEnd);
+    else                     setEndDate(val);
   };
 
   // ─── Search Handler ─────────────────────────────────────────────────────────
@@ -138,8 +132,8 @@ export default function DataBundle() {
     setSdpCount(null);
 
     const norm = msisdnValidation.normalized!;
-    const sd = startDate.replace(/-/g, '');
-    const ed = endDate.replace(/-/g, '');
+    const sd   = startDate.replace(/-/g, '');
+    const ed   = endDate.replace(/-/g, '');
 
     abortRef.current = streamBundleData(norm, sd, ed, {
       onCIS: (records) => {
@@ -148,6 +142,8 @@ export default function DataBundle() {
         rebuildState();
       },
       onCCN: (records) => {
+        // CCN merges in and triggers rebuildState —
+        // any PENDING_CCN traces will automatically flip to GHOST_DEBIT or FAILED
         records.forEach(r => mergeCCNIntoRows(rowsRef.current, r));
         setCcnCount(records.length);
         rebuildState();
@@ -158,11 +154,8 @@ export default function DataBundle() {
         rebuildState();
       },
       onPhaseChange: (phase) => setStreamPhase(phase),
-      onError: (msg) => { setErrorToast(msg); setStreamPhase('error'); },
-      onComplete: () => {
-        setStreamPhase('complete');
-        setSuccessToast('Stream complete');
-      },
+      onError:    (msg)  => { setErrorToast(msg); setStreamPhase('error'); },
+      onComplete: ()     => { setStreamPhase('complete'); setSuccessToast('Stream complete'); },
     });
   };
 
@@ -174,6 +167,8 @@ export default function DataBundle() {
     streamPhase === 'cis' ||
     streamPhase === 'ccn' ||
     streamPhase === 'sdp';
+
+  const pendingCount = traces.filter(t => t.fulfilmentStatus === 'PENDING_CCN').length;
 
   const sortedRows = Array.from(rows.values()).sort((a, b) => {
     const ta = a.cis?.transaction_date_time ?? 0;
@@ -222,6 +217,13 @@ export default function DataBundle() {
                 <div className="flex items-center space-x-2">
                   <span className="bg-black text-[#FFCC00] text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest">Active</span>
                   <StreamingBadge phase={streamPhase} />
+                  {/* Live indicator for pending CCN traces */}
+                  {pendingCount > 0 && streamPhase === 'complete' && (
+                    <span className="flex items-center gap-1 text-[8px] font-black text-yellow-600 uppercase tracking-widest bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded-full">
+                      <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse" />
+                      {pendingCount} Pending CCN
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -229,7 +231,8 @@ export default function DataBundle() {
               Bundle Fulfilment
             </h1>
             <p className="text-sm font-bold text-gray-400 max-w-xl">
-              Real-time trace of CIS → CCN → SDP for each subscription event. Diagnose where in the fulfilment chain an issue occurred.
+              Subscription history (CIS) traced against bundle provisioning (PAM CDR).
+              CCN consulted as arbiter when PAM is absent and charge status is ambiguous.
             </p>
           </div>
         </header>
@@ -239,7 +242,6 @@ export default function DataBundle() {
           <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-              {/* MSISDN */}
               <div>
                 <label className="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">MSISDN</label>
                 <input
@@ -252,11 +254,8 @@ export default function DataBundle() {
                 />
               </div>
 
-              {/* Start Date */}
               <div>
-                <label className="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">
-                  Start Date
-                </label>
+                <label className="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Start Date</label>
                 <input
                   type="date"
                   value={startDate}
@@ -265,7 +264,6 @@ export default function DataBundle() {
                 />
               </div>
 
-              {/* End Date */}
               <div>
                 <label className="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">
                   End Date{' '}
@@ -304,7 +302,7 @@ export default function DataBundle() {
           </div>
         </div>
 
-        {/* Event receipt status — visible from first search until session reset */}
+        {/* Event receipt status */}
         {streamPhase !== 'idle' && (
           <EventStatusBar
             streamPhase={streamPhase}
@@ -348,16 +346,16 @@ export default function DataBundle() {
                 {traces.length === 0 ? (
                   <div className="bg-white p-12 rounded-3xl border border-gray-100 text-center">
                     <Clock size={40} className="text-gray-200 mx-auto mb-4" />
-                    <p className="text-sm font-bold text-gray-400">No subscription events found — only non-subscription actions loaded</p>
+                    <p className="text-sm font-bold text-gray-400">
+                      No subscription events found in the loaded CIS records
+                    </p>
                   </div>
                 ) : (
                   traces.map(t => <TraceCard key={t.correlationId} trace={t} />)
                 )}
               </div>
             )}
-            {activeView === 'table' && (
-              <RawDataTable rows={sortedRows} />
-            )}
+            {activeView === 'table' && <RawDataTable rows={sortedRows} />}
           </div>
         )}
 
@@ -368,9 +366,12 @@ export default function DataBundle() {
               <div className="bg-gray-50 w-24 h-24 rounded-2xl mx-auto mb-8 flex items-center justify-center">
                 <Package size={48} className="text-gray-200" />
               </div>
-              <h2 className="text-2xl font-black text-black uppercase tracking-tight mb-4 italic">Enter Subscriber Details</h2>
+              <h2 className="text-2xl font-black text-black uppercase tracking-tight mb-4 italic">
+                Enter Subscriber Details
+              </h2>
               <p className="text-gray-400 text-sm font-bold leading-relaxed">
-                Enter an MSISDN and date range to stream real-time CIS, CCN, and SDP bundle fulfilment records.
+                Enter an MSISDN and date range to stream CIS subscription history and PAM bundle
+                fulfilment records. CCN is fetched as a secondary arbiter for unresolved traces.
               </p>
             </div>
           </div>
@@ -380,8 +381,10 @@ export default function DataBundle() {
           <div className="max-w-2xl mx-auto">
             <div className="bg-white p-16 rounded-[2.5rem] shadow-xl border border-[#FFCC00] text-center">
               <Wifi size={48} className="text-[#FFCC00] mx-auto mb-6 animate-pulse" />
-              <h2 className="text-xl font-black text-black uppercase tracking-tight mb-2 italic">Streaming Data…</h2>
-              <p className="text-gray-400 text-sm font-bold">Waiting for CIS · CCN · SDP events</p>
+              <h2 className="text-xl font-black text-black uppercase tracking-tight mb-2 italic">
+                Streaming Data…
+              </h2>
+              <p className="text-gray-400 text-sm font-bold">Waiting for CIS · PAM · CCN events</p>
             </div>
           </div>
         )}
