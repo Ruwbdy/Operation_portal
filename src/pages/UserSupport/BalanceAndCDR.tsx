@@ -41,8 +41,8 @@ export default function BalanceAndCDR() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [msisdn, setMsisdn] = useState('');
   
-  // Pre-populate: start = 7 days ago, end = today (local)
-  const [startDate, setStartDate] = useState<string>(daysAgoLocal(7));
+  // Pre-populate: start = 3 days ago, end = today (local)
+  const [startDate, setStartDate] = useState<string>(daysAgoLocal(3));
   const [endDate, setEndDate] = useState<string>(todayLocal());
 
 

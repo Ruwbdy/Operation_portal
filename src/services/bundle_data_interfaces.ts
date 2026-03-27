@@ -99,6 +99,7 @@ export type FulfilmentStatus =
   | 'FAILED'       // CIS ✓ · CCN ✗ · SDP ✗  — no debit, no bundle
   | 'CIS_FAILED'   // CIS ✗ · CCN ✗ · SDP ✗  — rejected at CIS, nothing charged
   | 'GHOST_DEBIT'; // CIS ✗ · CCN ✓ · SDP ✗  — CIS failed BUT CCN still debited — subscriber lost money, got no bundle
+  // 'LOAN'
 
 export interface FulfilmentTrace {
   correlationId: string;

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   PanelLeftClose,
   PanelLeftOpen,
@@ -31,14 +31,22 @@ import {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function fmtDate(d: Date) {
+function fmtDate(d: Date): string {
   const y  = d.getFullYear();
   const m  = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${dd}`;
 }
 
-function todayLocal() { return fmtDate(new Date()); }
+function todayLocal(): string {
+  return fmtDate(new Date());
+}
+
+function addDays(dateStr: string, days: number): string {
+  // Parse as local-time components to avoid UTC-midnight shift across timezones
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return fmtDate(new Date(y, m - 1, d + days));
+}
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -55,7 +63,7 @@ export default function DataBundle() {
   const rowsRef = useRef<Map<string, BundleFulfilmentRow>>(new Map());
 
   // Per-event receipt tracking
-  const [cisCount, setCisCount] = useState<number | null>(null); // null = not yet received
+  const [cisCount, setCisCount] = useState<number | null>(null);
   const [ccnCount, setCcnCount] = useState<number | null>(null);
   const [sdpCount, setSdpCount] = useState<number | null>(null);
 
@@ -74,11 +82,50 @@ export default function DataBundle() {
     setTraces(newTraces);
   }, []);
 
+  // ─── Date Handlers ──────────────────────────────────────────────────────────
+
+  // Reactively clamp endDate whenever startDate changes — this is the primary
+  // enforcement point. onChange alone isn't sufficient because the browser
+  // calendar can commit a value before React has re-rendered the `max` attr.
+  useEffect(() => {
+    const maxEnd = addDays(startDate, 2);
+    if (endDate < startDate) setEndDate(startDate);
+    else if (endDate > maxEnd) setEndDate(maxEnd);
+  }, [startDate]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleStartDateChange = (val: string) => {
+    setStartDate(val);
+    // useEffect above handles endDate clamping reactively
+  };
+
+  const handleEndDateChange = (val: string) => {
+    const maxEnd = addDays(startDate, 2);
+    // Always clamp regardless of how the value arrived (picker or keyboard)
+    if (val < startDate) setEndDate(startDate);
+    else if (val > maxEnd) setEndDate(maxEnd);
+    else setEndDate(val);
+  };
+
+  // ─── Search Handler ─────────────────────────────────────────────────────────
+
   const handleSearch = () => {
     const msisdnValidation = validateMSISDN(msisdn);
-    if (!msisdnValidation.valid) { setErrorToast(msisdnValidation.error || 'Invalid MSISDN'); return; }
+    if (!msisdnValidation.valid) {
+      setErrorToast(msisdnValidation.error || 'Invalid MSISDN');
+      return;
+    }
+
     const dateValidation = validateDateRange(startDate, endDate);
-    if (!dateValidation.valid) { setErrorToast(dateValidation.error || 'Invalid date range'); return; }
+    if (!dateValidation.valid) {
+      setErrorToast(dateValidation.error || 'Invalid date range');
+      return;
+    }
+
+    const daysDiff = (new Date(endDate).getTime() - new Date(startDate).getTime()) / 86_400_000;
+    if (daysDiff > 2) {
+      setErrorToast('Date range cannot exceed 2 days');
+      return;
+    }
 
     // Reset state
     if (abortRef.current) abortRef.current();
@@ -119,12 +166,22 @@ export default function DataBundle() {
     });
   };
 
+  // ─── Derived ────────────────────────────────────────────────────────────────
+
   const hasData = rows.size > 0;
+  const isStreaming =
+    streamPhase === 'connecting' ||
+    streamPhase === 'cis' ||
+    streamPhase === 'ccn' ||
+    streamPhase === 'sdp';
+
   const sortedRows = Array.from(rows.values()).sort((a, b) => {
     const ta = a.cis?.transaction_date_time ?? 0;
     const tb = b.cis?.transaction_date_time ?? 0;
     return tb - ta;
   });
+
+  // ─── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="flex min-h-screen bg-[#F8F9FA] selection:bg-[#FFCC00] selection:text-black font-sans">
@@ -181,6 +238,8 @@ export default function DataBundle() {
         <div className="max-w-4xl mb-10">
           <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+              {/* MSISDN */}
               <div>
                 <label className="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">MSISDN</label>
                 <input
@@ -192,31 +251,45 @@ export default function DataBundle() {
                   className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-black font-bold text-sm focus:outline-none focus:border-[#FFCC00] transition-colors placeholder:text-gray-300"
                 />
               </div>
+
+              {/* Start Date */}
               <div>
-                <label className="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Start Date</label>
+                <label className="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">
+                  Start Date
+                </label>
                 <input
                   type="date"
                   value={startDate}
-                  onChange={e => setStartDate(e.target.value)}
+                  onChange={e => handleStartDateChange(e.target.value)}
                   className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-black font-bold text-sm focus:outline-none focus:border-[#FFCC00] transition-colors"
                 />
               </div>
+
+              {/* End Date */}
               <div>
-                <label className="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">End Date</label>
+                <label className="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">
+                  End Date{' '}
+                  <span className="text-gray-300 normal-case tracking-normal font-bold">(max 2 days)</span>
+                </label>
                 <input
                   type="date"
                   value={endDate}
-                  onChange={e => setEndDate(e.target.value)}
+                  min={startDate}
+                  max={addDays(startDate, 2)}
+                  onChange={e => handleEndDateChange(e.target.value)}
+                  onBlur={e => handleEndDateChange(e.target.value)}
                   className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-black font-bold text-sm focus:outline-none focus:border-[#FFCC00] transition-colors"
                 />
               </div>
+
             </div>
+
             <button
               onClick={handleSearch}
-              disabled={streamPhase === 'connecting' || streamPhase === 'cis' || streamPhase === 'ccn' || streamPhase === 'sdp'}
+              disabled={isStreaming}
               className="w-full mt-6 px-8 py-4 bg-black text-[#FFCC00] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-900 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg"
             >
-              {streamPhase !== 'idle' && streamPhase !== 'complete' && streamPhase !== 'error' ? (
+              {isStreaming ? (
                 <>
                   <Wifi size={16} className="animate-pulse" />
                   <span>Streaming…</span>
@@ -253,9 +326,11 @@ export default function DataBundle() {
             ].map(v => (
               <button
                 key={v.id}
-                onClick={() => setActiveView(v.id as any)}
+                onClick={() => setActiveView(v.id as 'trace' | 'table')}
                 className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all ${
-                  activeView === v.id ? 'bg-black text-[#FFCC00] shadow' : 'text-gray-400 hover:text-black hover:bg-gray-50'
+                  activeView === v.id
+                    ? 'bg-black text-[#FFCC00] shadow'
+                    : 'text-gray-400 hover:text-black hover:bg-gray-50'
                 }`}
               >
                 <span className={activeView === v.id ? 'text-[#FFCC00]' : 'text-gray-400'}>{v.icon}</span>
@@ -301,7 +376,7 @@ export default function DataBundle() {
           </div>
         )}
 
-        {!hasData && streamPhase !== 'idle' && streamPhase !== 'complete' && streamPhase !== 'error' && (
+        {!hasData && isStreaming && (
           <div className="max-w-2xl mx-auto">
             <div className="bg-white p-16 rounded-[2.5rem] shadow-xl border border-[#FFCC00] text-center">
               <Wifi size={48} className="text-[#FFCC00] mx-auto mb-6 animate-pulse" />
