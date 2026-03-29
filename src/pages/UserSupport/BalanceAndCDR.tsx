@@ -8,10 +8,10 @@ import CDRTable from '../../components/user-support/balance-cdr/CDRTable';
 import CDRSummary from '../../components/user-support/balance-cdr/CDRSummary';
 import DAAnalysis from '../../components/user-support/balance-cdr/DAAnalysis';
 import { validateMSISDN, validateDateRange } from '../../utils/validators';
-import { parseCDRRecords } from '../../services/cdrParser';
-import { fetchDataProfile } from '../../services/api_services';
-import { initializeDAMapping, getDADescription } from '../../services/daMapping';
-import type { Balance, DedicatedAccount, CDRTabType, CategorizedCDR, CDRSummary as CDRSummaryType } from '../../services/data_interface';
+import { parseCDRRecords } from '../../services/balance/cdr.parser';
+import { fetchDataProfile } from '../../services/balance/balance.api';
+import { initializeDAMapping, getDADescription } from '../../services/da/da.mapping';
+import type { Balance, DedicatedAccount, CDRTabType, CategorizedCDR, CDRSummary as CDRSummaryType } from '../../types';
 
 
 // --- Add these helpers ---

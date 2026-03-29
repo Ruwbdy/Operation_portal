@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TowerControl as Tower, Lock, User, Eye, EyeOff } from 'lucide-react';
 import Toast from '../components/common/Toast';
-import { login } from '../services/auth_service';
+import { login } from '../services/auth.service';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -14,17 +14,13 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!username || !password) {
       setErrorToast('Please enter both username and password');
       return;
     }
-
     setIsLoading(true);
-
     try {
       const result = await login(username, password);
-
       if (result.success) {
         navigate('/');
       } else {
@@ -38,31 +34,20 @@ export default function Login() {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleLogin(e as any);
-    }
+    if (e.key === 'Enter') handleLogin(e as any);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center p-6 selection:bg-[#FFCC00] selection:text-black font-sans">
-      {/* Toast Notifications */}
       <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[300] flex flex-col items-center space-y-4 pointer-events-none">
-        {errorToast && (
-          <Toast type="error" message={errorToast} onClose={() => setErrorToast(null)} />
-        )}
+        {errorToast && <Toast type="error" message={errorToast} onClose={() => setErrorToast(null)} />}
       </div>
-
-      {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#FFCC00]/5 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#FFCC00]/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
-
-      {/* Login Card */}
       <div className="relative w-full max-w-md">
         <div className="bg-white rounded-[3rem] shadow-2xl p-12 border-4 border-[#FFCC00] animate-in fade-in zoom-in duration-500">
-
-          {/* Logo */}
           <div className="flex flex-col items-center mb-10">
             <div className="w-20 h-20 bg-black rounded-3xl flex items-center justify-center mb-4 shadow-lg">
               <Tower size={40} className="text-[#FFCC00]" />
@@ -70,10 +55,7 @@ export default function Login() {
             <h1 className="text-2xl font-black text-black tracking-tight">MTN IN Portal</h1>
             <p className="text-sm text-gray-500 mt-1 font-medium">Intelligent Network Operations</p>
           </div>
-
-          {/* Form */}
           <form onSubmit={handleLogin} className="space-y-5">
-            {/* Username */}
             <div className="relative">
               <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                 <User size={18} className="text-gray-400" />
@@ -88,8 +70,6 @@ export default function Login() {
                 autoComplete="username"
               />
             </div>
-
-            {/* Password */}
             <div className="relative">
               <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                 <Lock size={18} className="text-gray-400" />
@@ -111,8 +91,6 @@ export default function Login() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-
-            {/* Submit */}
             <button
               type="submit"
               disabled={isLoading}
@@ -126,12 +104,9 @@ export default function Login() {
                   </svg>
                   Authenticating...
                 </span>
-              ) : (
-                'Sign In'
-              )}
+              ) : 'Sign In'}
             </button>
           </form>
-
           <p className="text-center text-xs text-gray-400 mt-8 font-medium">
             MTN Nigeria · Intelligent Network Support
           </p>

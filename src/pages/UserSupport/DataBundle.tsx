@@ -17,17 +17,9 @@ import StatsBar from '../../components/user-support/data-bundle/StatsBar';
 import EventStatusBar from '../../components/user-support/data-bundle/EventStatusBar';
 import TraceCard from '../../components/user-support/data-bundle/TraceCard';
 import RawDataTable from '../../components/user-support/data-bundle/RawDataTable';
-import type {
-  BundleFulfilmentRow,
-  FulfilmentTrace,
-} from '../../services/bundle_data_interfaces';
-import {
-  streamBundleData,
-  mergeCISIntoRows,
-  mergeCCNIntoRows,
-  mergeSDPIntoRows,
-  buildFulfilmentTrace,
-} from '../../services/bundleService';
+import type { BundleFulfilmentRow, FulfilmentTrace } from '../../types';
+import { streamBundleData } from '../../services/bundle/bundle.stream';
+import { mergeCISIntoRows, mergeCCNIntoRows, mergeSDPIntoRows, buildFulfilmentTrace} from '../../services/bundle/bundle.logic';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

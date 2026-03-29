@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { TrendingUp, Calendar, Database, Filter, BarChart3, X, Maximize2 } from 'lucide-react';
 import { formatCDRDateTime } from '../../../utils/dateFormatter';
-import { formatDAAmount, getDADescription, getAllDAIds, isDataDA } from '../../../services/daMapping';
-import type { CDRRecord } from '../../../services/data_interface';
+import { formatDAAmount, getDADescription, getAllDAIds, isDataDA } from '../../../services/da/da.mapping';
+import type { CDRRecord } from '../../../types';
 
 interface DAAnalysisProps {
   records: CDRRecord[];

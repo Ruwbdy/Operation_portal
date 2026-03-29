@@ -2,10 +2,9 @@ import React, { Component, ReactNode, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ProtectedRoute from './components/common/ProtectedRoute';
-import { initializeDAMapping } from './services/daMapping';
-import { ROLES } from './services/auth_service';
+import { initializeDAMapping } from './services/da/da.mapping';
+import { ROLES } from './services/auth.service';
 
-// Lazy load pages for better performance
 const Login = lazy(() => import('./pages/Login'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const ChargingProfile = lazy(() => import('./pages/UserSupport/ChargingProfile'));
@@ -15,26 +14,16 @@ const ServiceDesk = lazy(() => import('./pages/INSupport/ServiceDesk'));
 const DSA = lazy(() => import('./pages/INSupport/DSA'));
 const InOps = lazy(() => import('./pages/INSupport/InOps'));
 
-interface ErrorBoundaryProps {
-  children?: ReactNode;
-}
-
-interface ErrorBoundaryState {
-  hasError: boolean;
-}
+interface ErrorBoundaryProps { children?: ReactNode }
+interface ErrorBoundaryState { hasError: boolean }
 
 class AppErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   public state: ErrorBoundaryState;
-
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
+  static getDerivedStateFromError() { return { hasError: true }; }
   render() {
     if (this.state.hasError) {
       return (
@@ -65,32 +54,14 @@ export default function App() {
     <AppErrorBoundary>
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
-          {/* Public */}
           <Route path="/login" element={<Login />} />
-
-          {/* Dashboard */}
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-
-          {/* User Support */}
           <Route path="/user-support/charging-profile" element={<ProtectedRoute><ChargingProfile /></ProtectedRoute>} />
           <Route path="/user-support/balance-cdr" element={<ProtectedRoute><BalanceAndCDR /></ProtectedRoute>} />
           <Route path="/user-support/data-bundle" element={<ProtectedRoute><DataBundle /></ProtectedRoute>} />
-
-          {/* IN Support — restricted to ROLE_IN_SUPPORT */}
-          <Route
-            path="/in-support/dsa"
-            element={<ProtectedRoute requiredRole={ROLES.IN_SUPPORT}><DSA /></ProtectedRoute>}
-          />
-          <Route
-            path="/in-support/service-desk"
-            element={<ProtectedRoute requiredRole={ROLES.IN_SUPPORT}><ServiceDesk /></ProtectedRoute>}
-          />
-          <Route
-            path="/in-support/ops"
-            element={<ProtectedRoute requiredRole={ROLES.IN_SUPPORT}><InOps /></ProtectedRoute>}
-          />
-
-          {/* Fallback */}
+          <Route path="/in-support/dsa" element={<ProtectedRoute requiredRole={ROLES.IN_SUPPORT}><DSA /></ProtectedRoute>} />
+          <Route path="/in-support/service-desk" element={<ProtectedRoute requiredRole={ROLES.IN_SUPPORT}><ServiceDesk /></ProtectedRoute>} />
+          <Route path="/in-support/ops" element={<ProtectedRoute requiredRole={ROLES.IN_SUPPORT}><InOps /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

@@ -9,8 +9,8 @@ import {
   Clock,
   Loader2,
 } from 'lucide-react';
-import { getDADescription, formatDAAmount } from '../../../services/daMapping';
-import type { FulfilmentTrace, FulfilmentStatus } from '../../../services/bundle_data_interfaces';
+import { getDADescription, formatDAAmount } from '../../../services/da/da.mapping';
+import type { FulfilmentTrace, FulfilmentStatus } from '../../../types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

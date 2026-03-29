@@ -1,5 +1,5 @@
 import React from 'react';
-import type { FulfilmentTrace } from '../../../services/bundle_data_interfaces';
+import type { FulfilmentTrace } from '../../../types';
 
 interface StatsBarProps {
   traces: FulfilmentTrace[];

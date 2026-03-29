@@ -4,7 +4,7 @@ import type {
   CISRecord,
   CCNRecord,
   SDPRecord,
-} from '../../../services/bundle_data_interfaces';
+} from '../../../types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

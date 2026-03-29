@@ -9,8 +9,8 @@ import VoLTEProfileTab from '../../components/user-support/charging-profile/Volt
 import OffersTab from '../../components/user-support/charging-profile/OffersTab';
 import DiagnosticsPanel from '../../components/user-support/charging-profile/DiagnosticsPanel';
 import { validateMSISDN } from '../../utils/validators';
-import { fetchChargingProfile } from '../../services/api_services';
-import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Diagnostics } from '../../services/data_interface';
+import { fetchChargingProfile } from '../../services/voice/voice.api';
+import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Diagnostics } from '../../types';
 
 type TabType = 'voice' | 'browsing' | 'volte' | 'offers';
 

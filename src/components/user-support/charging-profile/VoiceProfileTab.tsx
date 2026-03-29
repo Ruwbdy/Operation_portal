@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Phone, MapPin, Shield, PhoneForwarded, PhoneOff, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, Radio, Zap } from 'lucide-react';
-import { resetCallProfile } from '../../../services/api_services';
-import type { VoiceProfile } from '../../../services/data_interface';
+import { resetCallProfile } from '../../../services/voice/voice.api';
+import type { VoiceProfile } from '../../../types';
 
 interface VoiceProfileTabProps {
   profile: VoiceProfile;

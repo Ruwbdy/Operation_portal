@@ -1,47 +1,25 @@
 /// <reference types="vite/client" />
-// API Service - Handles all API calls using Bearer token authentication
-import { API_ENDPOINTS } from './api_endpoints';
-import { getAuthHeader } from './auth_service';
-import { createLogger } from './logger';
-import {
-  transformHLRToVoiceProfile,
-  transformHSSToBrowsingProfile,
-  transformVoLTEProfile,
-  transformAccountDetailToOffers,
-  transformAccountDetailToMABalance,
-  transformAccountDetailToDABalances,
-  transformCDRToCDRRecords,
-  extractDiagnostics
-} from './apiTransformers';
-import type {
-  ApiError,
-  ApiResponse,
-  ChargingProfileResponse,
-  DataProfileResponse,
-  BatchJobRequest,
-  BatchJobResponse
-} from './api_definitions';
+// Voice API — charging profile fetch + all voice/VoLTE actions
+import { API_ENDPOINTS } from '../endpoints';
+import { getAuthHeader } from '../auth.service';
+import { createLogger } from '../logger';
+import { transformHLRToVoiceProfile, transformVoLTEProfile, extractDiagnostics } from './voice.transformer';
+import { transformHSSToBrowsingProfile } from '../balance/balance.transformer';
+import { transformAccountDetailToOffers } from '../balance/balance.transformer';
+import type { ApiResponse, ChargingProfileResponse } from '../../types';
 
-// Re-export types for convenience
-export type { ApiError, ApiResponse, BatchJobRequest, BatchJobResponse };
-
-const log = createLogger('ApiService');
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+const log = createLogger('VoiceApi');
 
 function buildUrl(baseUrl: string, params: Record<string, string>): string {
   const url = new URL(baseUrl);
-  Object.entries(params).forEach(([key, value]) => {
-    url.searchParams.append(key, value);
-  });
+  Object.entries(params).forEach(([k, v]) => url.searchParams.append(k, v));
   return url.toString();
 }
 
-/** Standard headers for all authenticated requests */
 function authHeaders(): HeadersInit {
   return {
     'Content-Type': 'application/json',
-    'Authorization': getAuthHeader(),
+    Authorization: getAuthHeader(),
   };
 }
 
@@ -66,12 +44,12 @@ export async function fetchChargingProfile(
     log.debug('fetchChargingProfile — raw response', rawData);
 
     const transformedData: ChargingProfileResponse = {
-    voice:       transformHLRToVoiceProfile(rawData.hlrProfile, rawData.accountDetails) ?? undefined,
-    browsing:    transformHSSToBrowsingProfile(rawData.hssProfile, rawData.hlrProfile) ?? undefined,
-    volte:       transformVoLTEProfile(rawData.volteProfile, msisdn) ?? undefined,
-    offers:      transformAccountDetailToOffers(rawData.accountDetails),
-    diagnostics: extractDiagnostics(rawData.diagnostics),
-  };
+      voice: transformHLRToVoiceProfile(rawData.hlrProfile, rawData.accountDetails) ?? undefined,
+      browsing: transformHSSToBrowsingProfile(rawData.hssProfile, rawData.hlrProfile) ?? undefined,
+      volte: transformVoLTEProfile(rawData.volteProfile, msisdn) ?? undefined,
+      offers: transformAccountDetailToOffers(rawData.accountDetails),
+      diagnostics: extractDiagnostics(rawData.diagnostics),
+    };
 
     log.info('fetchChargingProfile — transform complete');
     return { success: true, data: transformedData };
@@ -80,54 +58,8 @@ export async function fetchChargingProfile(
     return {
       success: false,
       error: {
-        message: error instanceof Error ? error.message : 'Failed to fetch charging profile',
-        code: 500,
-      },
-    };
-  }
-}
-
-// ─── Data Profile (Balance + CDR) ─────────────────────────────────────────────
-
-export async function fetchDataProfile(
-  msisdn: string,
-  startDate: string,
-  endDate: string
-): Promise<ApiResponse<DataProfileResponse>> {
-  const url = buildUrl(API_ENDPOINTS.GET_DATA_PROFILE, { msisdn, startDate, endDate });
-  log.info(`fetchDataProfile — msisdn: ${msisdn}, range: ${startDate}→${endDate}`);
-  try {
-    const response = await fetch(url, { method: 'GET', headers: authHeaders() });
-    log.info(`fetchDataProfile — HTTP ${response.status}`);
-
-    if (!response.ok) {
-      const body = await response.text().catch(() => '');
-      log.error(`fetchDataProfile — HTTP ${response.status}`, body);
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const rawData = await response.json();
-    log.debug('fetchDataProfile — raw response', rawData);
-
-    const balance = transformAccountDetailToMABalance(rawData.accountDetails);
-    const dabalances = transformAccountDetailToDABalances(rawData.accountDetails);
-    const cdrRecords = transformCDRToCDRRecords(rawData.cdrRecords?.records || []);
-
-    log.info(`fetchDataProfile — transform complete, CDR records: ${cdrRecords.length}`);
-    return {
-      success: true,
-      data: {
-        balance: balance || undefined,
-        dabalances: dabalances || undefined,
-        cdrRecords,
-      },
-    };
-  } catch (error) {
-    log.error('fetchDataProfile — exception', error);
-    return {
-      success: false,
-      error: {
-        message: error instanceof Error ? error.message : 'Failed to fetch data profile',
+        message:
+          error instanceof Error ? error.message : 'Failed to fetch charging profile',
         code: 500,
       },
     };
@@ -156,7 +88,7 @@ export async function resetCallProfile(msisdn: string): Promise<ApiResponse<any>
       .filter(([, value]: [string, any]) => value['action-taken'] === true)
       .map(([key, value]: [string, any]) => ({ check: key, action: value.action }));
 
-    log.info(`resetCallProfile — actions taken: ${actionsTaken.length}`, actionsTaken.map(a => a.action));
+    log.info(`resetCallProfile — actions taken: ${actionsTaken.length}`);
     return {
       success: true,
       data: {
@@ -173,7 +105,8 @@ export async function resetCallProfile(msisdn: string): Promise<ApiResponse<any>
     return {
       success: false,
       error: {
-        message: error instanceof Error ? error.message : 'Failed to reset call profile',
+        message:
+          error instanceof Error ? error.message : 'Failed to reset call profile',
         code: 500,
       },
     };

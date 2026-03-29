@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Globe, Wifi, Server, Smartphone, RefreshCw, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
-import { resetAPN } from '../../../services/api_services';
+import { resetAPN } from '../../../services/voice/voice.api';
 import { formatTelecomDate } from '../../../utils/dateFormatter';
-import type { BrowsingProfile } from '../../../services/data_interface';
+import type { BrowsingProfile } from '../../../types';
 
 interface BrowsingProfileTabProps {
   profile: BrowsingProfile;

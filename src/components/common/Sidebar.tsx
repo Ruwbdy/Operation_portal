@@ -1,18 +1,9 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  TowerControl as Tower,
-  History,
-  User,
-  Layers,
-  LogOut
-} from 'lucide-react';
-import { clearAuth, getUsername, hasRole, ROLES } from '../../services/auth_service';
+import { TowerControl as Tower, History, User, Layers, LogOut } from 'lucide-react';
+import { clearAuth, getUsername, hasRole, ROLES } from '../../services/auth.service';
 
-interface SidebarProps {
-  isOpen: boolean;
-}
-
+interface SidebarProps { isOpen: boolean }
 interface NavItem {
   path: string;
   icon: React.ReactNode;
@@ -22,11 +13,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  {
-    path: '/',
-    icon: <History size={16} />,
-    label: 'Dashboard'
-  },
+  { path: '/', icon: <History size={16} />, label: 'Dashboard' },
   {
     path: '/user-support',
     icon: <User size={16} />,
@@ -34,8 +21,8 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { path: '/user-support/charging-profile', label: 'Charging Profile' },
       { path: '/user-support/balance-cdr', label: 'Balance & CDR' },
-      { path: '/user-support/data-bundle', label: 'Bundle Fulfilment' }
-    ]
+      { path: '/user-support/data-bundle', label: 'Bundle Fulfilment' },
+    ],
   },
   {
     path: '/in-support',
@@ -45,30 +32,23 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { path: '/in-support/dsa', label: 'IN-DSA' },
       { path: '/in-support/service-desk', label: 'IN-Service Desk' },
-      { path: '/in-support/ops', label: 'IN-Ops' }
-    ]
-  }
+      { path: '/in-support/ops', label: 'IN-Ops' },
+    ],
+  },
 ];
 
 export default function Sidebar({ isOpen }: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/';
-    return location.pathname.startsWith(path);
-  };
+  const isActive = (path: string) =>
+    path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
-  const handleLogout = () => {
-    clearAuth();
-    navigate('/login');
-  };
+  const handleLogout = () => { clearAuth(); navigate('/login'); };
 
   if (!isOpen) return null;
 
   const username = getUsername() || 'Operator';
-
-  // Filter nav items by role
   const visibleNavItems = NAV_ITEMS.filter(
     item => !item.requiredRole || hasRole(item.requiredRole)
   );
@@ -80,13 +60,9 @@ export default function Sidebar({ isOpen }: SidebarProps) {
           <div className="bg-[#FFCC00] p-1.5 rounded-lg shrink-0">
             <Tower className="w-5 h-5 text-black" />
           </div>
-          <span className="text-xl font-black text-[#FFCC00] tracking-tighter uppercase italic">
-            MTN IN
-          </span>
+          <span className="text-xl font-black text-[#FFCC00] tracking-tighter uppercase italic">MTN IN</span>
         </div>
-        <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.3em]">
-          Command Hub
-        </p>
+        <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.3em]">Command Hub</p>
       </div>
 
       <nav className="flex-1 px-6 space-y-2 mt-4 overflow-y-auto">
@@ -100,13 +76,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                   : 'text-gray-500 hover:text-white hover:bg-white/5'
               }`}
             >
-              <span
-                className={`${
-                  isActive(item.path)
-                    ? 'text-black'
-                    : 'text-gray-500 group-hover:text-[#FFCC00]'
-                } mr-3.5 transition-transform group-hover:scale-110 shrink-0`}
-              >
+              <span className={`${isActive(item.path) ? 'text-black' : 'text-gray-500 group-hover:text-[#FFCC00]'} mr-3.5 transition-transform group-hover:scale-110 shrink-0`}>
                 {item.icon}
               </span>
               <span className="tracking-widest uppercase leading-none">{item.label}</span>
@@ -114,7 +84,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                 <div className="ml-auto w-1.5 h-1.5 bg-black rounded-full animate-pulse"></div>
               )}
             </button>
-
             {item.children && isActive(item.path) && (
               <div className="ml-8 mt-1 space-y-1">
                 {item.children.map(child => (
@@ -136,7 +105,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         ))}
       </nav>
 
-      {/* Logout */}
       <div className="p-6 border-t border-white/5">
         <button
           onClick={handleLogout}
@@ -146,7 +114,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
           <span className="tracking-widest uppercase leading-none">Logout</span>
         </button>
       </div>
-
       <div className="p-8 border-t border-white/5 text-center">
         <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest italic">
           Node Op: {username}

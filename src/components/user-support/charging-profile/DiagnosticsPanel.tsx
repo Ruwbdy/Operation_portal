@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertTriangle, CheckCircle, Info } from 'lucide-react';
-import type { Diagnostics } from '../../../services/data_interface';
+import type { Diagnostics } from '../../../types';
 
 interface DiagnosticsPanelProps {
   diagnostics: Diagnostics[];

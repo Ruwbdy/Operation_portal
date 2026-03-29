@@ -1,4 +1,4 @@
-import { loadCSV } from '../utils/load_csv';
+import { loadCSV } from '../../utils/load_csv';
 
 export type BalanceType = 'voice' | 'data' | 'money' | 'sms' | 'bonus';
 
@@ -12,16 +12,13 @@ export interface DAMapping {
 const NAIRA_PER_GB = 524.29;
 let DA_MAPPING: DAMapping = {};
 
-/**
- * Initialize DA mapping from CSV
- */
 export async function initializeDAMapping(): Promise<void> {
   try {
     const rows = await loadCSV('/da_mapping.csv');
     DA_MAPPING = rows.reduce((map, row) => {
       map[row.da_id] = {
         description: row.description,
-        balanceType: row.balance_type as BalanceType
+        balanceType: row.balance_type as BalanceType,
       };
       return map;
     }, {} as DAMapping);
@@ -67,6 +64,6 @@ export function getAllDAIds(): string[] {
 
 export function getDAsByType(balanceType: BalanceType): string[] {
   return Object.keys(DA_MAPPING)
-    .filter(id => DA_MAPPING[id].balanceType === balanceType)
+    .filter((id) => DA_MAPPING[id].balanceType === balanceType)
     .sort((a, b) => parseInt(a) - parseInt(b));
 }
