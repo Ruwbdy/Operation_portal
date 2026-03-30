@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   CheckCircle2,
@@ -135,6 +136,7 @@ function PAMPanel({ trace }: { trace: FulfilmentTrace }) {
             <DataPair
               key={daId}
               label={`DA ${daId} · ${getDADescription(daId)}`}
+              // sdpDaAmounts now contains adj_amount parts (the credited amount)
               value={sdpDaAmounts?.[i]
                 ? formatDAAmount(daId, parseFloat(sdpDaAmounts[i]))
                 : '—'}
@@ -172,17 +174,21 @@ function CCNPanel({ trace }: { trace: FulfilmentTrace }) {
   const { ccnStatus, ccnDebit, ccnBalBefore, ccnBalAfter, fulfilmentStatus } = trace;
   const isPending = ccnStatus === 'pending';
   const isGhost   = fulfilmentStatus === 'GHOST_DEBIT';
+  // CCN received but no debit amount — subscriber was NOT charged
+  const isNoDebit = ccnStatus === 'ok' && (!ccnDebit || ccnDebit === 'NA' || parseFloat(String(ccnDebit)) === 0);
 
   const panelCls =
     isGhost    ? 'border-rose-300 bg-rose-50'       :
     isPending  ? 'border-yellow-300 bg-yellow-50/70' :
+    isNoDebit  ? 'border-gray-200 bg-gray-50'        :
     ccnStatus === 'ok' ? 'border-emerald-200 bg-emerald-50' :
                          'border-gray-200 bg-gray-50';
 
   return (
     <div className={`p-4 rounded-xl border-2 ${panelCls}`}>
       <div className="flex items-center space-x-2 mb-3">
-        {ccnStatus === 'ok' && <StepIcon ok />}
+        {ccnStatus === 'ok' && !isNoDebit && <StepIcon ok />}
+        {ccnStatus === 'ok' && isNoDebit  && <StepIcon missing />}
         {ccnStatus === 'missing' && <StepIcon missing />}
         {isPending && <Loader2 size={16} className="text-yellow-500 animate-spin shrink-0" />}
         <span className="text-[9px] font-black uppercase tracking-widest text-gray-700">
@@ -192,15 +198,27 @@ function CCNPanel({ trace }: { trace: FulfilmentTrace }) {
               Anomalous
             </span>
           )}
+          {isNoDebit && (
+            <span className="ml-2 text-[8px] font-black text-gray-500 bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded-full">
+              No Charge
+            </span>
+          )}
         </span>
       </div>
 
-      {ccnStatus === 'ok' && (
+      {ccnStatus === 'ok' && !isNoDebit && (
         <dl className="space-y-1.5">
-          <DataPair label="MA Debit"      value={fmtMoney(ccnDebit)} />
-          <DataPair label="Balance Before" value={fmtMoney(ccnBalBefore)} />
-          <DataPair label="Balance After"  value={fmtMoney(ccnBalAfter)} />
+          {/* totalcharge_money is the authoritative debit amount */}
+          <DataPair label="Total Charge (CCN)"  value={fmtMoney(ccnDebit)} />
+          <DataPair label="MA Balance Before"   value={fmtMoney(ccnBalBefore)} />
+          <DataPair label="MA Balance After"    value={fmtMoney(ccnBalAfter)} />
         </dl>
+      )}
+
+      {ccnStatus === 'ok' && isNoDebit && (
+        <p className="text-[9px] font-bold text-gray-500">
+          CCN record received but <span className="font-black">totalcharge_money</span> is zero — no debit was applied to this subscriber's account.
+        </p>
       )}
 
       {isPending && (
@@ -228,7 +246,7 @@ function GhostDebitBanner({ trace }: { trace: FulfilmentTrace }) {
       <div>
         <p className="text-[10px] font-black text-rose-700 uppercase tracking-wider mb-1">Ghost Debit Detected</p>
         <p className="text-[10px] font-bold text-rose-600 leading-relaxed">
-          CIS returned an error but CCN confirms a debit of{' '}
+          CIS returned an error but CCN confirms a charge of{' '}
           {trace.ccnDebit ? fmtMoney(trace.ccnDebit) : 'an unknown amount'} was applied — subscriber
           was charged with no bundle delivered.{' '}
           {isEVD

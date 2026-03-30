@@ -44,6 +44,13 @@ function pamHasRealAmounts(sdp: SDPRecord): boolean {
   });
 }
 
+function ccnHasRealDebit(ccn: CCNRecord): boolean {
+  const raw = ccn.totalcharge_money;
+  if (!raw || raw === 'NA' || raw === '') return false;
+  const n = parseFloat(String(raw));
+  return !isNaN(n) && n !== 0;
+}
+
 // ─── Join Helpers ─────────────────────────────────────────────────────────────
 
 export function mergeCISIntoRows(
@@ -108,6 +115,7 @@ export function buildFulfilmentTrace(row: BundleFulfilmentRow): FulfilmentTrace 
   const pamOk = pamExists && pamHasRealAmounts(sdp!);
   const pamIssue = pamExists && !pamOk;
   const ccnPresent = !!ccn;
+  const ccnDebited = ccnPresent && ccnHasRealDebit(ccn!);
   const loanRecovery = isLoanRecovery(cis);
   const dataGifting = isDataGifting(cis);
   const errorCode = extractResponseCode(cis.failure_reason);
@@ -143,8 +151,9 @@ export function buildFulfilmentTrace(row: BundleFulfilmentRow): FulfilmentTrace 
   const sdpDaIds = sdp?.da_account_id
     ? sdp.da_account_id.split(':').filter(Boolean)
     : [];
-  const sdpDaAmounts = sdp?.account_value_after
-    ? sdp.account_value_after.split(':').filter(Boolean)
+
+  const sdpDaAmounts = sdp?.adj_amount
+    ? sdp.adj_amount.split(':').filter(Boolean)
     : [];
 
   return {
@@ -161,7 +170,7 @@ export function buildFulfilmentTrace(row: BundleFulfilmentRow): FulfilmentTrace 
     downstreamErrorCode: errorCode,
     isLoanRecovery: loanRecovery,
     ccnStatus,
-    ccnDebit: ccn?.ma_balance_change_enrich,
+    ccnDebit: ccn?.totalcharge_money,
     ccnBalBefore: ccn?.ma_balancebeforeevent_enrich,
     ccnBalAfter: ccn?.ma_balanceaftertheevent_enrich,
     pamStatus,
