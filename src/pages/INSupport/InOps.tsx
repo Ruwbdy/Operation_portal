@@ -4,6 +4,9 @@ import Sidebar from '../../components/common/Sidebar';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Toast from '../../components/common/Toast';
 import BatchJobUpload from '../../components/in-support/BatchJobUpload';
+import SimRegWorkflow from '../../components/in-support/reconciliation/SimRegWorkflow';
+import SimSwapWorkflow from '../../components/in-support/reconciliation/SimSwapWorkflow';
+import PostPaidActWorkflow from '../../components/in-support/reconciliation/PostPaidActWorkflow';
 
 interface Job {
   id: string;
@@ -14,6 +17,7 @@ interface Job {
   filesNeeded?: number;
   fileLabels?: string[];
   hideTextInput?: boolean;
+  workflowComponent?: 'sim-reg' | 'sim-swap' | 'postpaid-act';
 }
 
 const BASH_JOBS: Job[] = [
@@ -32,7 +36,7 @@ const BASH_JOBS: Job[] = [
     section: 'bash'
   },
   {
-    id: 'ACTIVATE_SIM',
+    id: 'ACTIVATE_SIM_BASH',
     label: 'Activate SIM',
     description: 'Bulk activate subscriber SIMs.',
     expectedColumns: ['msisdn'],
@@ -58,30 +62,29 @@ const RECON_JOBS: Job[] = [
   {
     id: 'SIMREG_PENDING_PROV',
     label: 'SimReg Pending Provisioning',
-    description: 'Upload postpaid and/or prepaid SIM registration files pending provisioning.',
+    description: '4-step sequential workflow: Initiate → Activate → Process → Replay.',
     expectedColumns: [],
     section: 'recon',
-    filesNeeded: 2,
-    fileLabels: ['Postpaid File', 'Prepaid File'],
-    hideTextInput: true
+    hideTextInput: true,
+    workflowComponent: 'sim-reg',
   },
   {
     id: 'SIMSWAP_PENDING_PROV',
     label: 'SimSwap Pending Provisioning',
-    description: 'Upload SIM swap records pending provisioning.',
+    description: '2-step sequential workflow: Initiate → Process IMSI.',
     expectedColumns: [],
     section: 'recon',
-    filesNeeded: 1,
-    hideTextInput: true
+    hideTextInput: true,
+    workflowComponent: 'sim-swap',
   },
   {
     id: 'POSTPAID_ACT_PROV',
     label: 'Postpaid Act Provisioning',
-    description: 'Upload postpaid activation records for provisioning.',
+    description: '2 independent jobs: Act PreToPost and Credit Limit Change.',
     expectedColumns: [],
     section: 'recon',
-    filesNeeded: 1,
-    hideTextInput: true
+    hideTextInput: true,
+    workflowComponent: 'postpaid-act',
   },
   {
     id: 'POSTPAID_PENDING_ORDERS',
@@ -103,19 +106,24 @@ const RECON_JOBS: Job[] = [
   }
 ];
 
+type ActiveView =
+  | { type: 'list' }
+  | { type: 'bash-job'; job: Job }
+  | { type: 'workflow'; component: 'sim-reg' | 'sim-swap' | 'postpaid-act' };
+
 export default function InOps() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activeJob, setActiveJob] = useState<Job | null>(null);
+  const [activeView, setActiveView] = useState<ActiveView>({ type: 'list' });
   const [isProcessing, setIsProcessing] = useState(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
   const [errorToast, setErrorToast] = useState<string | null>(null);
 
-  const handleExecuteJob = async (files: File[]) => {
+  const handleExecuteJob = async (_files: File[]) => {
     setIsProcessing(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 2500));
       setSuccessToast('Job executed successfully');
-      setActiveJob(null);
+      setActiveView({ type: 'list' });
     } catch {
       setErrorToast('Failed to execute batch job');
     } finally {
@@ -123,9 +131,17 @@ export default function InOps() {
     }
   };
 
+  const handleJobClick = (job: Job) => {
+    if (job.workflowComponent) {
+      setActiveView({ type: 'workflow', component: job.workflowComponent });
+    } else {
+      setActiveView({ type: 'bash-job', job });
+    }
+  };
+
   const JobCard = ({ job }: { job: Job }) => (
     <button
-      onClick={() => setActiveJob(job)}
+      onClick={() => handleJobClick(job)}
       className="bg-white p-8 rounded-[2rem] shadow-xl border-2 border-gray-100 hover:border-[#FFCC00] transition-all text-left group"
     >
       <div className={`p-4 rounded-xl w-fit mb-6 group-hover:scale-110 transition-transform ${
@@ -138,6 +154,7 @@ export default function InOps() {
       </div>
       <h3 className="text-sm font-black text-black uppercase tracking-wide mb-3">{job.label}</h3>
       <p className="text-xs font-bold text-gray-500 leading-relaxed mb-5">{job.description}</p>
+
       {job.expectedColumns.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
           {job.expectedColumns.map(col => (
@@ -147,7 +164,16 @@ export default function InOps() {
           ))}
         </div>
       )}
-      {job.section === 'recon' && (
+
+      {job.workflowComponent && (
+        <span className="text-[8px] font-black text-[#FFCC00] uppercase tracking-wider bg-black px-2 py-1 rounded">
+          {job.workflowComponent === 'sim-reg'      ? '4-Step Workflow' :
+           job.workflowComponent === 'sim-swap'     ? '2-Step Workflow' :
+           job.workflowComponent === 'postpaid-act' ? '2 Independent Jobs' : ''}
+        </span>
+      )}
+
+      {job.section === 'recon' && !job.workflowComponent && (
         <span className="text-[8px] font-black text-amber-600 uppercase tracking-wider bg-amber-50 px-2 py-1 rounded">
           File upload only
         </span>
@@ -198,9 +224,9 @@ export default function InOps() {
           </div>
         </header>
 
-        {activeJob === null ? (
+        {/* ── Job List ── */}
+        {activeView.type === 'list' && (
           <div className="space-y-12">
-            {/* General Bash Jobs */}
             <section>
               <div className="flex items-center space-x-3 mb-6">
                 <div className="bg-black p-2 rounded-lg">
@@ -214,7 +240,6 @@ export default function InOps() {
               </div>
             </section>
 
-            {/* Pending Reconciliation Jobs */}
             <section>
               <div className="flex items-center space-x-3 mb-6">
                 <div className="bg-gray-800 p-2 rounded-lg">
@@ -228,23 +253,57 @@ export default function InOps() {
               </div>
             </section>
           </div>
-        ) : (
+        )}
+
+        {/* ── Bash Job Upload ── */}
+        {activeView.type === 'bash-job' && (
           <div className="max-w-2xl">
             <button
-              onClick={() => setActiveJob(null)}
+              onClick={() => setActiveView({ type: 'list' })}
               className="mb-6 text-xs font-black text-gray-400 uppercase tracking-wider hover:text-black transition-colors"
             >
               ← Back to Job Selection
             </button>
             <BatchJobUpload
-              jobType={activeJob.id}
-              jobLabel={activeJob.label}
-              filesNeeded={activeJob.filesNeeded ?? 1}
-              expectedColumns={activeJob.expectedColumns}
-              fileLabels={activeJob.fileLabels}
-              hideTextInput={activeJob.hideTextInput}
+              jobType={activeView.job.id}
+              jobLabel={activeView.job.label}
+              filesNeeded={activeView.job.filesNeeded ?? 1}
+              expectedColumns={activeView.job.expectedColumns}
+              fileLabels={activeView.job.fileLabels}
+              hideTextInput={activeView.job.hideTextInput}
               onExecute={handleExecuteJob}
               isProcessing={isProcessing}
+            />
+          </div>
+        )}
+
+        {/* ── Workflow Views ── */}
+        {activeView.type === 'workflow' && activeView.component === 'sim-reg' && (
+          <div className="max-w-3xl">
+            <SimRegWorkflow
+              onBack={() => setActiveView({ type: 'list' })}
+              onSuccess={msg => setSuccessToast(msg)}
+              onError={msg => setErrorToast(msg)}
+            />
+          </div>
+        )}
+
+        {activeView.type === 'workflow' && activeView.component === 'sim-swap' && (
+          <div className="max-w-3xl">
+            <SimSwapWorkflow
+              onBack={() => setActiveView({ type: 'list' })}
+              onSuccess={msg => setSuccessToast(msg)}
+              onError={msg => setErrorToast(msg)}
+            />
+          </div>
+        )}
+
+        {activeView.type === 'workflow' && activeView.component === 'postpaid-act' && (
+          <div className="max-w-3xl">
+            <PostPaidActWorkflow
+              onBack={() => setActiveView({ type: 'list' })}
+              onSuccess={msg => setSuccessToast(msg)}
+              onError={msg => setErrorToast(msg)}
             />
           </div>
         )}

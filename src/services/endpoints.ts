@@ -30,4 +30,20 @@ export const API_ENDPOINTS = {
 
   // Batch Jobs (POST with file upload)
   BATCH_JOB: `${API_BASE}/jobs/execute`,
+  
+  ACTIVATE_SIM: `${API_BASE}/activate-sim`,
+
+  // ── Sim Registration ────────────────────────────────────────────────────────
+  INITIATE_SIM_REG: `${API_BASE}/initiate-sim-reg`,
+  
+  PROCESS_SIM_REG: `${API_BASE}/process-sim-reg`,
+  REPLAY_SIM_REG: `${API_BASE}/replay-sim-reg`,
+
+  // ── Sim Swap ────────────────────────────────────────────────────────────────
+  INITIATE_SIM_SWAP: `${API_BASE}/initiate-sim-swap`,
+  PROCESS_SIM_SWAP_IMSI: `${API_BASE}/process-sim-swap-imsi`,
+
+  // ── Postpaid Activation ─────────────────────────────────────────────────────
+  PROCESS_PRE_TO_POST: `${API_BASE}/process-pre-to-post`,
+  PROCESS_CREDIT_LIMITS: `${API_BASE}/process-credit-limits`,
 };

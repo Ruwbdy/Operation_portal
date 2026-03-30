@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatCDRDateTime } from '../../../utils/dateFormatter';
-import { formatBytes } from '../../../services/cdrParser';
+import { formatBytes } from '../../../services/balance/cdr.parser';
 import { getDADescription, formatDAAmount } from '../../../services/da/da.mapping';
 import type { CDRRecord, CDRTabType } from '../../../types';
 
