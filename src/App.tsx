@@ -1,28 +1,32 @@
 import React, { Component, ReactNode, lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import { PageStoreProvider } from './store/pageStore';
 import { initializeDAMapping } from './services/da/da.mapping';
 import { ROLES } from './services/auth.service';
+import { isAuthenticated, hasRole } from './services/auth.service';
 
+// Pages that should stay mounted to preserve state & in-flight requests
+// are imported eagerly (not lazy) so they're available immediately
+import Dashboard from './pages/Dashboard';
+import ChargingProfile from './pages/UserSupport/ChargingProfile';
+import BalanceAndCDR from './pages/UserSupport/BalanceAndCDR';
+import DataBundle from './pages/UserSupport/DataBundle';
+import ServiceDesk from './pages/INSupport/ServiceDesk';
+import DSA from './pages/INSupport/DSA';
+import InOps from './pages/INSupport/InOps';
+
+// Auth page is fine to lazy-load — it doesn't need to stay mounted
 const Login = lazy(() => import('./pages/Login'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const ChargingProfile = lazy(() => import('./pages/UserSupport/ChargingProfile'));
-const BalanceAndCDR = lazy(() => import('./pages/UserSupport/BalanceAndCDR'));
-const DataBundle = lazy(() => import('./pages/UserSupport/DataBundle'));
-const ServiceDesk = lazy(() => import('./pages/INSupport/ServiceDesk'));
-const DSA = lazy(() => import('./pages/INSupport/DSA'));
-const InOps = lazy(() => import('./pages/INSupport/InOps'));
+
+// ─── Error Boundary ───────────────────────────────────────────────────────────
 
 interface ErrorBoundaryProps { children?: ReactNode }
 interface ErrorBoundaryState { hasError: boolean }
 
 class AppErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  public state: ErrorBoundaryState;
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false };
-  }
+  public state: ErrorBoundaryState = { hasError: false };
   static getDerivedStateFromError() { return { hasError: true }; }
   render() {
     if (this.state.hasError) {
@@ -43,6 +47,74 @@ class AppErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState>
   }
 }
 
+// ─── Keep-Alive Page Wrapper ──────────────────────────────────────────────────
+// Renders children but hides them when not on the matching path.
+// The component stays mounted so async operations continue running.
+
+function KeepAlive({ path, exact = false, children }: {
+  path: string;
+  exact?: boolean;
+  children: React.ReactNode;
+}) {
+  const location = useLocation();
+  const isActive = exact
+    ? location.pathname === path
+    : location.pathname === path || location.pathname.startsWith(path + '/');
+
+  return (
+    <div className={isActive ? '' : 'hidden'} aria-hidden={!isActive}>
+      {children}
+    </div>
+  );
+}
+
+// ─── Authenticated App Shell ──────────────────────────────────────────────────
+// All authenticated pages are rendered simultaneously and shown/hidden via CSS.
+// This means:
+//  • A fetch started on page A continues while you browse to page B
+//  • All state (loaded data, scroll position, active tab) is preserved
+//  • State is only cleared on a full page reload
+
+function AuthenticatedApp() {
+  const inSupport = isAuthenticated() && hasRole(ROLES.IN_SUPPORT);
+
+  return (
+    <>
+      <KeepAlive path="/" exact>
+        <Dashboard />
+      </KeepAlive>
+
+      <KeepAlive path="/user-support/charging-profile" exact>
+        <ChargingProfile />
+      </KeepAlive>
+
+      <KeepAlive path="/user-support/balance-cdr" exact>
+        <BalanceAndCDR />
+      </KeepAlive>
+
+      <KeepAlive path="/user-support/data-bundle" exact>
+        <DataBundle />
+      </KeepAlive>
+
+      {inSupport && (
+        <>
+          <KeepAlive path="/in-support/dsa" exact>
+            <DSA />
+          </KeepAlive>
+          <KeepAlive path="/in-support/service-desk" exact>
+            <ServiceDesk />
+          </KeepAlive>
+          <KeepAlive path="/in-support/ops" exact>
+            <InOps />
+          </KeepAlive>
+        </>
+      )}
+    </>
+  );
+}
+
+// ─── App ──────────────────────────────────────────────────────────────────────
+
 export default function App() {
   React.useEffect(() => {
     initializeDAMapping().catch(error => {
@@ -52,19 +124,25 @@ export default function App() {
 
   return (
     <AppErrorBoundary>
-      <Suspense fallback={<LoadingSpinner />}>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/user-support/charging-profile" element={<ProtectedRoute><ChargingProfile /></ProtectedRoute>} />
-          <Route path="/user-support/balance-cdr" element={<ProtectedRoute><BalanceAndCDR /></ProtectedRoute>} />
-          <Route path="/user-support/data-bundle" element={<ProtectedRoute><DataBundle /></ProtectedRoute>} />
-          <Route path="/in-support/dsa" element={<ProtectedRoute requiredRole={ROLES.IN_SUPPORT}><DSA /></ProtectedRoute>} />
-          <Route path="/in-support/service-desk" element={<ProtectedRoute requiredRole={ROLES.IN_SUPPORT}><ServiceDesk /></ProtectedRoute>} />
-          <Route path="/in-support/ops" element={<ProtectedRoute requiredRole={ROLES.IN_SUPPORT}><InOps /></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
+      <PageStoreProvider>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            {/* Public route */}
+            <Route path="/login" element={<Login />} />
+
+            {/* All authenticated pages live under one ProtectedRoute.
+                KeepAlive handles the path matching internally. */}
+            <Route
+              path="/*"
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedApp />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </Suspense>
+      </PageStoreProvider>
     </AppErrorBoundary>
   );
 }

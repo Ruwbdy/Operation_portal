@@ -100,13 +100,6 @@ function CISPanel({ trace }: { trace: FulfilmentTrace }) {
         {trace.cisFailureReason && (
           <DataPair label="Failure Reason" value={trace.cisFailureReason} err />
         )}
-        {trace.downstreamErrorCode && (
-          <DataPair
-            label="Response Code"
-            value={`${trace.downstreamErrorCode} — ambiguous AIR error`}
-            err
-          />
-        )}
       </dl>
     </div>
   );
@@ -413,7 +406,6 @@ export default function TraceCard({ trace }: TraceCardProps) {
           {trace.fulfilmentStatus === 'PENDING_CCN'    && <PendingCCNBanner trace={trace} />}
           {trace.fulfilmentStatus === 'PAM_ISSUE'      && <PAMIssueBanner />}
           {trace.fulfilmentStatus === 'LOAN_RECOVERY'  && <LoanRecoveryBanner trace={trace} />}
-          {/* {trace.fulfilmentStatus === 'DATA_GIFTING'   && <DataGiftingBanner trace={trace} />}  */}
 
           {/* Detail panels */}
           <div className={`grid gap-4 ${showCCNPanel ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>

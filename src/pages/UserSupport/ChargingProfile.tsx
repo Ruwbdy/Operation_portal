@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { PanelLeftClose, PanelLeftOpen, Search, Phone, Globe, Radio, Gift } from 'lucide-react';
 import Sidebar from '../../components/common/Sidebar';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -10,27 +10,22 @@ import OffersTab from '../../components/user-support/charging-profile/OffersTab'
 import DiagnosticsPanel from '../../components/user-support/charging-profile/DiagnosticsPanel';
 import { validateMSISDN } from '../../utils/validators';
 import { fetchChargingProfile } from '../../services/voice/voice.api';
-import type { VoiceProfile, BrowsingProfile, VoLTEProfile, Offer, Diagnostics } from '../../types';
+import { useChargingProfileStore } from '../../store/pageStore';
 
 type TabType = 'voice' | 'browsing' | 'volte' | 'offers';
 
 export default function ChargingProfile() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [msisdn, setMsisdn] = useState('');
-  const [normalizedMsisdn, setNormalizedMsisdn] = useState(''); // Store normalized MSISDN
-  const [activeTab, setActiveTab] = useState<TabType>('voice');
-  const [isLoading, setIsLoading] = useState(false);
-  
-  // Profile data states
-  const [voiceProfile, setVoiceProfile] = useState<VoiceProfile | null>(null);
-  const [browsingProfile, setBrowsingProfile] = useState<BrowsingProfile | null>(null);
-  const [volteProfile, setVolteProfile] = useState<VoLTEProfile | null>(null);
-  const [offers, setOffers] = useState<Offer[]>([]);
-  const [diagnostics, setDiagnostics] = useState<Diagnostics[]>([]); // Add this line
-  
-  // Toast states
-  const [successToast, setSuccessToast] = useState<string | null>(null);
-  const [errorToast, setErrorToast] = useState<string | null>(null);
+  // ── Global persisted state ─────────────────────────────────────────────────
+  const [state, setState] = useChargingProfileStore();
+  const {
+    msisdn, normalizedMsisdn, isLoading, activeTab,
+    voiceProfile, browsingProfile, volteProfile, offers, diagnostics,
+  } = state;
+
+  // ── Local ephemeral UI state (sidebar, toasts — don't need to persist) ─────
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  const [successToast, setSuccessToast] = React.useState<string | null>(null);
+  const [errorToast, setErrorToast] = React.useState<string | null>(null);
 
   const handleSearch = async () => {
     const validation = validateMSISDN(msisdn);
@@ -39,65 +34,55 @@ export default function ChargingProfile() {
       return;
     }
 
-    setIsLoading(true);
-    
+    setState({ isLoading: true });
+
     try {
-      // Use normalized MSISDN for API call
       const normalizedValue = validation.normalized || msisdn;
-      setNormalizedMsisdn(normalizedValue); // Store it in state
-      
-      // Call the consolidated API
+      setState({ normalizedMsisdn: normalizedValue });
+
       const response = await fetchChargingProfile(normalizedValue);
-      
+
       if (!response.success || !response.data) {
         throw new Error(response.error?.message || 'Failed to fetch charging profile');
       }
-      
-      // Update states with response data
-      setVoiceProfile(response.data.voice || null);
-      setBrowsingProfile(response.data.browsing || null);
-      setVolteProfile(response.data.volte || null);
-      setOffers(response.data.offers || []);
-      setDiagnostics(response.data.diagnostics || []);
-      
+
+      setState({
+        voiceProfile: response.data.voice || null,
+        browsingProfile: response.data.browsing || null,
+        volteProfile: response.data.volte || null,
+        offers: response.data.offers || [],
+        diagnostics: response.data.diagnostics || [],
+        isLoading: false,
+      });
+
       setSuccessToast('Profile data loaded successfully');
     } catch (error) {
+      setState({ isLoading: false });
       setErrorToast(error instanceof Error ? error.message : 'Failed to load profile data');
-      console.error('Profile fetch error:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
+    if (e.key === 'Enter') handleSearch();
   };
 
   const tabs = [
     { id: 'voice' as TabType, label: 'Voice Profile', icon: <Phone size={14} />, color: 'text-blue-600' },
     { id: 'browsing' as TabType, label: 'Browsing Profile', icon: <Globe size={14} />, color: 'text-green-600' },
     { id: 'volte' as TabType, label: 'VoLTE Profile', icon: <Radio size={14} />, color: 'text-purple-600' },
-    { id: 'offers' as TabType, label: 'Offers', icon: <Gift size={14} />, color: 'text-amber-600' }
+    { id: 'offers' as TabType, label: 'Offers', icon: <Gift size={14} />, color: 'text-amber-600' },
   ];
 
   const hasData = voiceProfile !== null;
 
   return (
     <div className="flex min-h-screen bg-[#F8F9FA] selection:bg-[#FFCC00] selection:text-black font-sans">
-      {/* Toast Notifications */}
       <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[300] flex flex-col items-center space-y-4 pointer-events-none">
-        {errorToast && (
-          <Toast type="error" message={errorToast} onClose={() => setErrorToast(null)} />
-        )}
-        {successToast && (
-          <Toast type="success" message={successToast} onClose={() => setSuccessToast(null)} />
-        )}
+        {errorToast && <Toast type="error" message={errorToast} onClose={() => setErrorToast(null)} />}
+        {successToast && <Toast type="success" message={successToast} onClose={() => setSuccessToast(null)} />}
       </div>
 
       {isLoading && <LoadingSpinner message="Loading Profile Data..." />}
-
       <Sidebar isOpen={isSidebarOpen} />
 
       {!isSidebarOpen && (
@@ -129,6 +114,13 @@ export default function ChargingProfile() {
                   <span className="bg-black text-[#FFCC00] text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest">
                     Active
                   </span>
+                  {/* Show live loading badge visible from other pages */}
+                  {isLoading && (
+                    <span className="flex items-center gap-1 text-[8px] font-black text-[#FFCC00] uppercase tracking-widest bg-black px-2 py-0.5 rounded-full">
+                      <span className="w-1.5 h-1.5 bg-[#FFCC00] rounded-full animate-pulse" />
+                      Loading…
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -148,7 +140,7 @@ export default function ChargingProfile() {
               <input
                 type="text"
                 value={msisdn}
-                onChange={(e) => setMsisdn(e.target.value)}
+                onChange={e => setState({ msisdn: e.target.value })}
                 onKeyPress={handleKeyPress}
                 placeholder="234XXXXXXXXXX, 09XXXXXXXXX, or 9XXXXXXXXX"
                 className="flex-1 px-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-black font-bold text-sm focus:outline-none focus:border-[#FFCC00] transition-colors placeholder:text-gray-300"
@@ -169,10 +161,10 @@ export default function ChargingProfile() {
         {hasData && (
           <div className="mb-8">
             <div className="flex space-x-3 bg-white p-3 rounded-[2rem] shadow-lg border border-gray-100 max-w-fit">
-              {tabs.map((tab) => (
+              {tabs.map(tab => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => setState({ activeTab: tab.id })}
                   className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${
                     activeTab === tab.id
                       ? 'bg-black text-[#FFCC00] shadow-lg'
@@ -189,46 +181,41 @@ export default function ChargingProfile() {
           </div>
         )}
 
-        {/* Diagnostics Panel - Add this section */}
         {hasData && <DiagnosticsPanel diagnostics={diagnostics} />}
 
-        {/* Tab Content */}
         {hasData && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             {activeTab === 'voice' && voiceProfile && (
-              <VoiceProfileTab 
+              <VoiceProfileTab
                 profile={voiceProfile}
                 msisdn={normalizedMsisdn}
-                onSuccess={(msg) => setSuccessToast(msg)}
-                onError={(msg) => setErrorToast(msg)}
+                onSuccess={msg => setSuccessToast(msg)}
+                onError={msg => setErrorToast(msg)}
                 onRefresh={handleSearch}
               />
             )}
             {activeTab === 'browsing' && browsingProfile && (
-              <BrowsingProfileTab 
+              <BrowsingProfileTab
                 profile={browsingProfile}
                 msisdn={normalizedMsisdn}
-                onSuccess={(msg) => setSuccessToast(msg)}
-                onError={(msg) => setErrorToast(msg)}
+                onSuccess={msg => setSuccessToast(msg)}
+                onError={msg => setErrorToast(msg)}
                 onRefresh={handleSearch}
               />
             )}
             {activeTab === 'volte' && (
-              <VoLTEProfileTab 
+              <VoLTEProfileTab
                 profile={volteProfile}
                 msisdn={normalizedMsisdn}
-                onSuccess={(msg) => setSuccessToast(msg)}
-                onError={(msg) => setErrorToast(msg)}
+                onSuccess={msg => setSuccessToast(msg)}
+                onError={msg => setErrorToast(msg)}
                 onRefresh={handleSearch}
               />
             )}
-            {activeTab === 'offers' && (
-              <OffersTab offers={offers} />
-            )}
+            {activeTab === 'offers' && <OffersTab offers={offers} />}
           </div>
         )}
 
-        {/* Empty State */}
         {!hasData && (
           <div className="max-w-2xl mx-auto">
             <div className="bg-white p-16 rounded-[2.5rem] shadow-xl border border-gray-100 text-center">
@@ -239,7 +226,8 @@ export default function ChargingProfile() {
                 Enter MSISDN to Begin
               </h2>
               <p className="text-gray-500 text-sm font-bold leading-relaxed">
-                Search for a subscriber to view their charging profile, voice settings, browsing configuration, VoLTE status, and active offers.
+                Search for a subscriber to view their charging profile, voice settings, browsing
+                configuration, VoLTE status, and active offers.
               </p>
             </div>
           </div>

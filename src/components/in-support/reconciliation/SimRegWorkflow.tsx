@@ -227,36 +227,109 @@ function ExecButton({
 async function postFormData(
   url: string,
   fields: { key: string; file: File }[]
-): Promise<{ ok: boolean; blob?: Blob; json?: any; error?: string; filename?: string }> {
+): Promise<{
+  ok: boolean;
+  blob?: Blob;
+  json?: any;
+  error?: string;
+  filename?: string;
+}> {
   const fd = new FormData();
   fields.forEach(({ key, file }) => fd.append(key, file));
 
   try {
     const res = await fetch(url, {
       method: 'POST',
-      headers: { Authorization: getAuthHeader() },
+      headers: {
+        Authorization: getAuthHeader(),
+      },
       body: fd,
     });
 
     if (!res.ok) {
-      const txt = await res.text().catch(() => `HTTP ${res.status}`);
-      return { ok: false, error: txt || `HTTP ${res.status}` };
+      const text = await res.text().catch(() => '');
+      return {
+        ok: false,
+        error: text || `HTTP ${res.status}`,
+      };
     }
 
-    const ct = res.headers.get('content-type') || '';
-    if (ct.includes('application/json')) {
+    const contentType = res.headers.get('content-type') || '';
+
+    // ─────────────────────────────────────────────
+    // 1. Handle JSON responses
+    // ─────────────────────────────────────────────
+    if (contentType.includes('application/json')) {
       const json = await res.json();
+
+      // ✅ Case: Base64 file inside JSON
+      if (json?.base64String && json?.fileName) {
+        try {
+          const byteCharacters = atob(json.base64String);
+          const byteNumbers = new Array(byteCharacters.length);
+
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+
+          const byteArray = new Uint8Array(byteNumbers);
+
+          // Detect file type (default zip)
+          const mimeType =
+            json.fileName.endsWith('.zip')
+              ? 'application/zip'
+              : 'application/octet-stream';
+
+          const blob = new Blob([byteArray], { type: mimeType });
+
+          return {
+            ok: true,
+            blob,
+            filename: json.fileName,
+          };
+        } catch (err: any) {
+          return {
+            ok: false,
+            error: 'Failed to decode file from server response',
+          };
+        }
+      }
+
+      // ✅ Normal JSON response
       return { ok: true, json };
     }
 
-    // File / zip response
+    // ─────────────────────────────────────────────
+    // 2. Handle Blob/file responses
+    // ─────────────────────────────────────────────
     const blob = await res.blob();
-    const cd = res.headers.get('content-disposition') || '';
-    const match = cd.match(/filename\*?=(?:UTF-8'')?["']?([^;"'\n]+)/i);
-    const filename = match?.[1]?.trim() || 'download.zip';
-    return { ok: true, blob, filename };
+
+    // Extract filename from headers
+    const contentDisposition = res.headers.get('content-disposition') || '';
+    let filename = 'download';
+
+    const match = contentDisposition.match(
+      /filename\*?=(?:UTF-8'')?["']?([^;"'\n]+)/i
+    );
+
+    if (match?.[1]) {
+      filename = decodeURIComponent(match[1].trim());
+    } else {
+      // fallback by content type
+      if (contentType.includes('zip')) filename = 'download.zip';
+      else if (contentType.includes('csv')) filename = 'download.csv';
+    }
+
+    return {
+      ok: true,
+      blob,
+      filename,
+    };
   } catch (err: any) {
-    return { ok: false, error: err.message || 'Request failed' };
+    return {
+      ok: false,
+      error: err?.message || 'Network error',
+    };
   }
 }
 

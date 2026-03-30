@@ -13,19 +13,12 @@ const log = createLogger('BundleLogic');
 
 // ─── Response Code Classification ────────────────────────────────────────────
 
-const AMBIGUOUS_RESPONSE_CODES = new Set(['-200','104', '126', '140', '191']);
-
 export function extractResponseCode(
   failureReason: string | undefined | null
 ): string | undefined {
   if (!failureReason) return undefined;
   const match = failureReason.match(/responseCode=(-?\d+)/);
   return match ? match[1] : undefined;
-}
-
-function isAmbiguousError(failureReason: string | undefined | null): boolean {
-  const code = extractResponseCode(failureReason);
-  return code ? AMBIGUOUS_RESPONSE_CODES.has(code) : false;
 }
 
 function isDataGifting(cis: CISRecord): boolean {
@@ -117,7 +110,6 @@ export function buildFulfilmentTrace(row: BundleFulfilmentRow): FulfilmentTrace 
   const ccnPresent = !!ccn;
   const loanRecovery = isLoanRecovery(cis);
   const dataGifting = isDataGifting(cis);
-  const ambiguous = !cisSuccess && isAmbiguousError(cis.failure_reason);
   const errorCode = extractResponseCode(cis.failure_reason);
 
   let fulfilmentStatus: FulfilmentStatus;
