@@ -34,15 +34,17 @@ function isLoanRecovery(cis: CISRecord): boolean {
 
 function pamHasRealAmounts(sdp: SDPRecord): boolean {
   if (!sdp.da_account_id) return false;
-  const daIds = sdp.da_account_id.split(':').filter(Boolean);
-  if (daIds.length === 0) return false;
-  if (!sdp.adj_amount) return false;
-  const amounts = sdp.adj_amount.split(':').filter(Boolean);
-  return amounts.some((a) => {
-    const n = parseFloat(a);
-    return !isNaN(n) && n !== 0;
-  });
+  else return true;
 }
+//   const daIds = sdp.da_account_id.split(':').filter(Boolean);
+//   if (daIds.length === 0) return false;
+//   //if (!sdp.adj_amount) return false;
+//   const amounts = sdp.adj_amount.split(':').filter(Boolean);
+//   return amounts.some((a) => {
+//     const n = parseFloat(a);
+//     return !isNaN(n) && n !== 0;
+//   });
+// }
 
 function ccnHasRealDebit(ccn: CCNRecord): boolean {
   const raw = ccn.totalcharge_money;

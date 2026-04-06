@@ -126,7 +126,9 @@ export function getAuthHeader(): string {
   const token = getToken();
   if (!token) {
     log.error('getAuthHeader — no valid token, user must re-authenticate');
-    throw new Error('Not authenticated. Please log in again.');
+    // Dispatch a global event so the app can redirect to login
+    window.dispatchEvent(new Event('mtn:auth-expired'));
+    throw new Error('Session expired. Please log in again.');
   }
   return `Bearer ${token}`;
 }

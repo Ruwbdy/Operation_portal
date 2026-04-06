@@ -64,13 +64,19 @@ export default function DataBundle() {
   const abortRef = useRef<(() => void) | null>(null);
 
   // Rebuild traces from current row state.
-  // Called after every merge — PENDING_CCN rows auto-resolve when CCN arrives.
-  const rebuildState = useCallback(() => {
+  const rebuildState = useCallback((markPendingAsFailed = false) => {
     const newMap = new Map(rowsRef.current);
     setRows(newMap);
     const newTraces = Array.from(newMap.values())
       .map(buildFulfilmentTrace)
       .filter((t): t is FulfilmentTrace => t !== null)
+      .map(t => {
+        // When stream is complete and CCN never arrived, PENDING_CCN → FAILED
+        if (markPendingAsFailed && t.fulfilmentStatus === 'PENDING_CCN') {
+          return { ...t, fulfilmentStatus: 'FAILED' as const, ccnStatus: 'missing' as const };
+        }
+        return t;
+      })
       .sort((a, b) => b.rawTimestamp - a.rawTimestamp);
     setTraces(newTraces);
   }, []);
@@ -134,8 +140,6 @@ export default function DataBundle() {
         rebuildState();
       },
       onCCN: (records) => {
-        // CCN merges in and triggers rebuildState —
-        // any PENDING_CCN traces will automatically flip to GHOST_DEBIT or FAILED
         records.forEach(r => mergeCCNIntoRows(rowsRef.current, r));
         setCcnCount(records.length);
         rebuildState();
@@ -147,7 +151,12 @@ export default function DataBundle() {
       },
       onPhaseChange: (phase) => setStreamPhase(phase),
       onError:    (msg)  => { setErrorToast(msg); setStreamPhase('error'); },
-      onComplete: ()     => { setStreamPhase('complete'); setSuccessToast('Stream complete'); },
+      onComplete: ()     => {
+        setStreamPhase('complete');
+        setSuccessToast('Stream complete');
+        // Stream is done — any trace still PENDING_CCN means CCN never arrived → FAILED
+        rebuildState(true);
+      },
     });
   };
 
@@ -209,7 +218,6 @@ export default function DataBundle() {
                 <div className="flex items-center space-x-2">
                   <span className="bg-black text-[#FFCC00] text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest">Active</span>
                   <StreamingBadge phase={streamPhase} />
-                  {/* Live indicator for pending CCN traces */}
                   {pendingCount > 0 && streamPhase === 'complete' && (
                     <span className="flex items-center gap-1 text-[8px] font-black text-yellow-600 uppercase tracking-widest bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded-full">
                       <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse" />

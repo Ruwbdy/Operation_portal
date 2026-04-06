@@ -1,5 +1,5 @@
 import React, { Component, ReactNode, lazy, Suspense } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { PageStoreProvider } from './store/pageStore';
@@ -8,7 +8,6 @@ import { ROLES } from './services/auth.service';
 import { isAuthenticated, hasRole } from './services/auth.service';
 
 // Pages that should stay mounted to preserve state & in-flight requests
-// are imported eagerly (not lazy) so they're available immediately
 import Dashboard from './pages/Dashboard';
 import ChargingProfile from './pages/UserSupport/ChargingProfile';
 import BalanceAndCDR from './pages/UserSupport/BalanceAndCDR';
@@ -17,7 +16,6 @@ import ServiceDesk from './pages/INSupport/ServiceDesk';
 import DSA from './pages/INSupport/DSA';
 import InOps from './pages/INSupport/InOps';
 
-// Auth page is fine to lazy-load — it doesn't need to stay mounted
 const Login = lazy(() => import('./pages/Login'));
 
 // ─── Error Boundary ───────────────────────────────────────────────────────────
@@ -47,9 +45,25 @@ class AppErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState>
   }
 }
 
+// ─── Auth Expired Watcher ─────────────────────────────────────────────────────
+// Listens for the 'mtn:auth-expired' event dispatched by getAuthHeader()
+// and redirects to login. Must be inside Router context to use useNavigate.
+
+function AuthExpiredWatcher() {
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const handler = () => {
+      navigate('/login', { replace: true });
+    };
+    window.addEventListener('mtn:auth-expired', handler);
+    return () => window.removeEventListener('mtn:auth-expired', handler);
+  }, [navigate]);
+
+  return null;
+}
+
 // ─── Keep-Alive Page Wrapper ──────────────────────────────────────────────────
-// Renders children but hides them when not on the matching path.
-// The component stays mounted so async operations continue running.
 
 function KeepAlive({ path, exact = false, children }: {
   path: string;
@@ -69,11 +83,6 @@ function KeepAlive({ path, exact = false, children }: {
 }
 
 // ─── Authenticated App Shell ──────────────────────────────────────────────────
-// All authenticated pages are rendered simultaneously and shown/hidden via CSS.
-// This means:
-//  • A fetch started on page A continues while you browse to page B
-//  • All state (loaded data, scroll position, active tab) is preserved
-//  • State is only cleared on a full page reload
 
 function AuthenticatedApp() {
   const inSupport = isAuthenticated() && hasRole(ROLES.IN_SUPPORT);
@@ -126,12 +135,12 @@ export default function App() {
     <AppErrorBoundary>
       <PageStoreProvider>
         <Suspense fallback={<LoadingSpinner />}>
+          {/* AuthExpiredWatcher must be inside Router (provided by main.tsx HashRouter) */}
+          <AuthExpiredWatcher />
           <Routes>
             {/* Public route */}
             <Route path="/login" element={<Login />} />
 
-            {/* All authenticated pages live under one ProtectedRoute.
-                KeepAlive handles the path matching internally. */}
             <Route
               path="/*"
               element={

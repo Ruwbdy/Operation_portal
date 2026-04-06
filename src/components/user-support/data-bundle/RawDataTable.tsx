@@ -12,7 +12,6 @@ type Section = 'cis' | 'ccn' | 'sdp';
 type SortDir = 'asc' | 'desc';
 interface SortState { section: Section; key: string; dir: SortDir }
 
-// SDP fields that contain colon-separated lists aligned with da_account_id
 const SDP_SPLIT_FIELDS = new Set([
   'da_account_id',
   'account_value_before',
@@ -99,6 +98,41 @@ const SDP_COLS: { key: keyof SDPRecord; label: string }[] = [
   { key: 'adj_offer_id',             label: 'adj_offer_id' },
   { key: 'parameter_value',          label: 'parameter_value' },
 ];
+
+// ─── Row source classification ────────────────────────────────────────────────
+
+function getRowSources(row: BundleFulfilmentRow): { hasCIS: boolean; hasCCN: boolean; hasSDP: boolean } {
+  return {
+    hasCIS: !!row.cis,
+    hasCCN: !!row.ccn,
+    hasSDP: !!(row.sdp || row.sdpExpiry),
+  };
+}
+
+// ─── Source badges for orphan rows ───────────────────────────────────────────
+
+function SourceBadges({ row }: { row: BundleFulfilmentRow }) {
+  const { hasCIS, hasCCN, hasSDP } = getRowSources(row);
+  // Only show badges when CIS is missing (i.e. orphan row)
+  if (hasCIS) return null;
+  return (
+    <div className="flex items-center gap-1 flex-wrap">
+      {hasCCN && (
+        <span className="inline-block px-1.5 py-0.5 rounded text-[8px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200">
+          CCN
+        </span>
+      )}
+      {hasSDP && (
+        <span className="inline-block px-1.5 py-0.5 rounded text-[8px] font-black bg-purple-100 text-purple-700 border border-purple-200">
+          PAM
+        </span>
+      )}
+      <span className="inline-block px-1.5 py-0.5 rounded text-[8px] font-black bg-gray-100 text-gray-400 border border-gray-200">
+        No CIS
+      </span>
+    </div>
+  );
+}
 
 // ─── Value pill badges ────────────────────────────────────────────────────────
 
@@ -235,6 +269,7 @@ interface RawDataTableProps {
 
 export default function RawDataTable({ rows }: RawDataTableProps) {
   const [sort, setSort] = useState<SortState | null>(null);
+  const [showOrphansOnly, setShowOrphansOnly] = useState(false);
 
   const handleSort = (section: Section, key: string) => {
     setSort(prev => {
@@ -245,9 +280,22 @@ export default function RawDataTable({ rows }: RawDataTableProps) {
     });
   };
 
+  // Separate CIS rows and orphan rows (no CIS)
+  const { cisRows, orphanRows } = useMemo(() => {
+    const cis: BundleFulfilmentRow[] = [];
+    const orphans: BundleFulfilmentRow[] = [];
+    rows.forEach(r => {
+      if (r.cis) cis.push(r);
+      else orphans.push(r);
+    });
+    return { cisRows: cis, orphanRows: orphans };
+  }, [rows]);
+
+  const displayRows = showOrphansOnly ? orphanRows : rows;
+
   const sortedRows = useMemo(() => {
-    if (!sort) return rows;
-    return [...rows].sort((a, b) => {
+    if (!sort) return displayRows;
+    return [...displayRows].sort((a, b) => {
       let av: any, bv: any;
       if (sort.section === 'cis') {
         av = a.cis ? (a.cis as any)[sort.key] : null;
@@ -267,7 +315,7 @@ export default function RawDataTable({ rows }: RawDataTableProps) {
       const cmp = (!isNaN(na) && !isNaN(nb)) ? na - nb : String(av).localeCompare(String(bv));
       return sort.dir === 'asc' ? cmp : -cmp;
     });
-  }, [rows, sort]);
+  }, [displayRows, sort]);
 
   const getSplitParts = (sdpRec: SDPRecord | null, key: string): string[] | undefined => {
     if (!sdpRec || !SDP_SPLIT_FIELDS.has(key)) return undefined;
@@ -279,11 +327,51 @@ export default function RawDataTable({ rows }: RawDataTableProps) {
 
   return (
     <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden">
-      <div className="overflow-x-auto" style={{ maxHeight: '75vh', overflowY: 'auto' }}>
+
+      {/* Toolbar */}
+      <div className="p-6 border-b border-gray-100 flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <p className="text-sm font-black text-black uppercase tracking-wide">Raw Data Table</p>
+          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">
+            {cisRows.length} CIS rows · {orphanRows.length} orphan rows (CCN/PAM only)
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          {orphanRows.length > 0 && (
+            <button
+              onClick={() => setShowOrphansOnly(v => !v)}
+              className={`px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all border-2 ${
+                showOrphansOnly
+                  ? 'bg-purple-600 text-white border-purple-600'
+                  : 'bg-purple-50 text-purple-700 border-purple-200 hover:border-purple-400'
+              }`}
+            >
+              {showOrphansOnly ? '← All Rows' : `Orphan Rows (${orphanRows.length})`}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Orphan notice */}
+      {orphanRows.length > 0 && !showOrphansOnly && (
+        <div className="mx-6 mt-4 flex items-center gap-3 p-3 bg-purple-50 border border-purple-200 rounded-xl">
+          <span className="text-purple-600 font-black text-sm">ℹ</span>
+          <p className="text-[10px] font-bold text-purple-700">
+            <span className="font-black">{orphanRows.length}</span> rows have CCN/PAM data but no matching CIS record.
+            They appear at the bottom of the table with a <span className="font-black">"No CIS"</span> badge, or use the button above to view them separately.
+          </p>
+        </div>
+      )}
+
+      <div className="overflow-x-auto mt-4" style={{ maxHeight: '75vh', overflowY: 'auto' }}>
         <table className="border-collapse text-left" style={{ minWidth: 'max-content' }}>
           <thead className="sticky top-0 z-10">
             {/* Section band */}
             <tr>
+              {/* Extra column for source badges */}
+              <th className="px-3 py-2 text-[8px] font-black uppercase tracking-[0.2em] text-center bg-gray-700 text-white border-r border-gray-600 whitespace-nowrap">
+                Sources
+              </th>
               <th colSpan={CIS_COLS.length} className="px-3 py-2 text-[8px] font-black uppercase tracking-[0.2em] text-center bg-blue-600 text-white border-r border-blue-500">
                 CIS CDR
               </th>
@@ -296,6 +384,9 @@ export default function RawDataTable({ rows }: RawDataTableProps) {
             </tr>
             {/* Column headers */}
             <tr className="bg-gray-50 border-b-2 border-gray-200">
+              <th className="px-3 py-2.5 text-[8px] font-black uppercase tracking-wider whitespace-nowrap border-r border-gray-200 text-gray-500">
+                —
+              </th>
               {CIS_COLS.map(c => (
                 <SortableTh key={`cis-h-${c.key}`} colKey={String(c.key)} label={c.label} section="cis"
                   sort={sort} onSort={handleSort} textCls="text-blue-700" borderCls="border-blue-100" />
@@ -314,13 +405,24 @@ export default function RawDataTable({ rows }: RawDataTableProps) {
           <tbody>
             {sortedRows.map((row, idx) => {
               const sdpRec = row.sdp ?? row.sdpExpiry;
+              const isOrphan = !row.cis;
               return (
                 <tr
                   key={row.correlationId}
                   className={`border-b border-gray-100 hover:bg-yellow-50/50 transition-colors ${
-                    idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'
+                    isOrphan
+                      ? 'bg-purple-50/30'
+                      : idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'
                   }`}
                 >
+                  {/* Source badge column */}
+                  <td className="px-3 py-2.5 border-r border-gray-100 whitespace-nowrap">
+                    {isOrphan ? (
+                      <SourceBadges row={row} />
+                    ) : (
+                      <span className="text-[8px] font-bold text-gray-300">✓</span>
+                    )}
+                  </td>
                   {CIS_COLS.map(c => (
                     <Cell key={`cis-${c.key}`} colKey={String(c.key)} section="cis"
                       value={row.cis ? row.cis[c.key] : undefined} />
@@ -339,12 +441,19 @@ export default function RawDataTable({ rows }: RawDataTableProps) {
             })}
           </tbody>
         </table>
+
+        {sortedRows.length === 0 && (
+          <div className="text-center py-16">
+            <p className="text-sm font-black text-gray-400 uppercase tracking-wider">No rows to display</p>
+          </div>
+        )}
       </div>
 
       {/* Footer */}
       <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
         <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
           {sortedRows.length} row{sortedRows.length !== 1 ? 's' : ''}
+          {showOrphansOnly && <span className="ml-2 text-purple-600">(orphans only)</span>}
           {sort && (
             <span className="ml-3 text-[#FFCC00] bg-black px-2 py-0.5 rounded">
               Sorted by {sort.section.toUpperCase()} · {sort.key} {sort.dir === 'asc' ? '↑' : '↓'}
@@ -352,7 +461,7 @@ export default function RawDataTable({ rows }: RawDataTableProps) {
           )}
         </span>
         <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">
-          {totalCols} columns
+          {totalCols + 1} columns
         </span>
       </div>
     </div>

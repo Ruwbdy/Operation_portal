@@ -10,7 +10,7 @@ interface ToastProps {
   duration?: number;
 }
 
-export default function Toast({ type, message, onClose, duration = 6000 }: ToastProps) {
+export default function Toast({ type, message, onClose, duration = 10000 }: ToastProps) {
   useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(onClose, duration);
